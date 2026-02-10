@@ -1,0 +1,123 @@
+{
+  "id": "script-explainer",
+  "name": "Script → Explainer",
+  "description": "Analyzes script, picks visual style, generates consistent explainer frames",
+  "version": "1.0",
+  "nodes": [
+    {
+      "id": "input-script",
+      "type": "input",
+      "label": "Script Input",
+      "config": {
+        "value": ""
+      },
+      "position": { "x": 100, "y": 200 }
+    },
+    {
+      "id": "text-splitter",
+      "type": "text-splitter",
+      "label": "Split into Scenes",
+      "config": {
+        "sentencesPerScene": 2,
+        "maxScenes": 10
+      },
+      "position": { "x": 300, "y": 200 }
+    },
+    {
+      "id": "style-detector",
+      "type": "style-detector",
+      "label": "Detect Visual Style",
+      "config": {
+        "defaultStyle": "modern-minimal",
+        "rules": {
+          "3d-tech": "software|app|platform|automation|ai|data|cloud|future|innovation|cutting-edge",
+          "professional-minimal": "money|invest|business|revenue|profit|growth",
+          "organic-warm": "health|wellness|fitness|body|mind|energy",
+          "friendly-cartoon": "learn|teach|education|student|course|skill",
+          "bold-dynamic": "create|design|art|music|video|content"
+        }
+      },
+      "position": { "x": 300, "y": 350 }
+    },
+    {
+      "id": "loop-scenes",
+      "type": "loop",
+      "label": "For Each Scene",
+      "config": {},
+      "children": [
+        {
+          "id": "prompt-builder",
+          "type": "prompt-builder",
+          "label": "Build Image Prompt",
+          "config": {
+            "foundation": "Explainer video frame.",
+            "styleTemplates": {
+              "modern-minimal": "Clean modern minimal design, soft gradients, geometric shapes, pastel colors, professional, simple composition",
+              "3d-tech": "Futuristic 3D tech aesthetic, glowing elements, holographic effects, neon accents, depth, cinematic lighting",
+              "professional-minimal": "Professional minimal design, charts and graphs, data visualization, corporate colors, clean typography",
+              "organic-warm": "Warm organic style, natural colors, flowing shapes, soft textures, friendly, approachable",
+              "friendly-cartoon": "Friendly cartoon style, bold colors, simple shapes, playful, rounded edges, character-focused",
+              "bold-dynamic": "Bold dynamic motion graphics, vibrant colors, energetic, abstract shapes, movement implied"
+            },
+            "openingContext": "Opening scene, introduction, establishing shot.",
+            "closingContext": "Final scene, conclusion, call to action.",
+            "technical": "16:9 aspect ratio, high quality illustration, professional explainer video style."
+          }
+        },
+        {
+          "id": "image-generator",
+          "type": "image-generator",
+          "label": "Generate Frame",
+          "config": {
+            "aspectRatio": "16:9"
+          }
+        }
+      ],
+      "position": { "x": 500, "y": 200 }
+    },
+    {
+      "id": "output",
+      "type": "output",
+      "label": "Final Results",
+      "config": {},
+      "position": { "x": 700, "y": 200 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "input-script",
+      "sourceHandle": "value",
+      "target": "text-splitter",
+      "targetHandle": "text"
+    },
+    {
+      "id": "e2",
+      "source": "input-script",
+      "sourceHandle": "value",
+      "target": "style-detector",
+      "targetHandle": "text"
+    },
+    {
+      "id": "e3",
+      "source": "text-splitter",
+      "sourceHandle": "scenes",
+      "target": "loop-scenes",
+      "targetHandle": "items"
+    },
+    {
+      "id": "e4",
+      "source": "style-detector",
+      "sourceHandle": "style",
+      "target": "loop-scenes",
+      "targetHandle": "style"
+    },
+    {
+      "id": "e5",
+      "source": "loop-scenes",
+      "sourceHandle": "results",
+      "target": "output",
+      "targetHandle": "frames"
+    }
+  ]
+}

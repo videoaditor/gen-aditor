@@ -1,0 +1,134 @@
+{
+  "wellness-demo": {
+    "id": "wellness-demo",
+    "name": "Aura Vitality",
+    "tagline": "Optimize your health, naturally.",
+    "identity": {
+      "personality": [
+        "Trustworthy",
+        "Sophisticated",
+        "Empowering",
+        "Sustainable",
+        "Science-driven"
+      ],
+      "tone": "Informative, positive, encouraging, expert-backed, empathetic",
+      "values": [
+        "Transparency",
+        "Quality",
+        "Efficacy",
+        "Sustainability",
+        "Community"
+      ]
+    },
+    "audience": {
+      "primary": "Health-conscious millennials seeking natural and effective ways to enhance their well-being and performance. They are informed and proactive about their health.",
+      "age_range": "25-40",
+      "psychographics": [
+        "Yoga",
+        "Mindfulness",
+        "Organic food",
+        "Sustainable living",
+        "Biohacking",
+        "Burnout",
+        "Lack of energy",
+        "Information overload"
+      ],
+      "aspiration": "To live a longer, healthier, more fulfilling life, optimized for peak performance and balanced well-being."
+    },
+    "visual": {
+      "aesthetic": "Clean, minimal, organic, modern, and sophisticated.",
+      "colors": {
+        "primary": "#E8E4D8 - Creamy off-white, clean and natural",
+        "secondary": "#A69381 - Earthy beige, grounding and reliable",
+        "accent": "#52796F - Forest green, represents nature and vitality",
+        "avoid": [
+          "Bright, neon colors",
+          "Overly saturated colors",
+          "Artificial-looking colors"
+        ]
+      },
+      "mood": [
+        "Calm",
+        "Balanced",
+        "Refined",
+        "Effective",
+        "Natural"
+      ],
+      "references": [
+        "Aesop",
+        "Ritual",
+        "Our Place",
+        "Kin Euphorics"
+      ]
+    },
+    "photography": {
+      "style": "Lifestyle and product-focused, with an emphasis on natural light and authentic moments.",
+      "lighting": "Soft, natural light with gentle shadows, occasionally utilizing soft studio lighting for product shots.",
+      "composition": "Clean, balanced compositions using the rule of thirds and negative space, close-ups highlighting texture and detail.",
+      "subjects": [
+        "Millennial individuals practicing wellness activities (yoga, meditation, cooking)",
+        "Close-ups of product ingredients",
+        "Product in use within a clean, modern environment",
+        "Sustainable packaging close-ups"
+      ],
+      "environments": [
+        "Minimalist apartments/homes",
+        "Yoga studios",
+        "Nature settings (forest, beach)",
+        "Bright, modern kitchens"
+      ],
+      "avoid": [
+        "Overly posed or staged scenes",
+        "Unrealistic body types",
+        "Wasteful or unsustainable practices depicted"
+      ]
+    },
+    "ugc_guidelines": {
+      "authenticity_level": "Balanced: Leans towards polished, but still feels genuine.",
+      "creator_types": [
+        "Health and wellness influencers",
+        "Everyday users with a focus on healthy living",
+        "Nutritionists and dietitians"
+      ],
+      "scenarios": [
+        "Morning routine with Aura Vitality supplement",
+        "Post-workout recovery",
+        "Adding supplement to smoothie or beverage",
+        "Showcasing sustainable packaging"
+      ],
+      "props": [
+        "Yoga mat",
+        "Smoothie ingredients",
+        "Water bottle",
+        "Notebook/journal",
+        "Healthy snacks",
+        "Minimalist home decor"
+      ],
+      "no_go": [
+        "Unhealthy eating habits depicted",
+        "Misleading health claims",
+        "Negative or complaining tone",
+        "Excessive branding or promotion beyond natural product placement"
+      ]
+    },
+    "product": {
+      "category": "Wellness Supplements",
+      "key_features": [
+        "Organic ingredients",
+        "Science-backed formulas",
+        "Sustainable packaging",
+        "Easy to incorporate into daily routine",
+        "Targeted health benefits (e.g., energy, focus, sleep)"
+      ],
+      "differentiators": [
+        "Emphasis on natural ingredients and sustainable practices",
+        "Transparent sourcing and manufacturing",
+        "Holistic approach to wellness",
+        "Clean formulations without unnecessary additives"
+      ],
+      "price_positioning": "Premium"
+    },
+    "createdAt": "2026-02-09T05:07:49.975Z",
+    "vision": "Premium wellness supplement brand targeting health-conscious millennials. Clean, minimal aesthetic with earth tones. Products are organic, science-backed. Customers aspire to optimize their health and performance. Think Ritual meets Athletic Greens."
+  }
+}

@@ -1,0 +1,41 @@
+services:
+  # ComfyUI GPU Worker
+  - type: web
+    name: aditor-comfyui
+    runtime: docker
+    plan: starter # Upgrade to GPU instance when ready
+    dockerfilePath: ./comfyui/Dockerfile
+    envVars:
+      - key: PORT
+        value: 8188
+    healthCheckPath: /
+
+  # API Backend
+  - type: web
+    name: aditor-image-gen-api
+    runtime: node
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: COMFYUI_URL
+        sync: false # Set manually to ComfyUI service URL
+    healthCheckPath: /health
+
+  # Frontend (optional - can use Vercel instead)
+  - type: web
+    name: aditor-image-gen-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/out
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false # Set manually to API URL
+
+# Database for job queue/history (optional for MVP)
+databases:
+  - name: aditor-image-gen-db
+    plan: starter
+    databaseName: aditor_image_gen

@@ -1,0 +1,144 @@
+{
+  "id": "vsl-ground-noise",
+  "name": "VSL Ground Noise Machine",
+  "description": "Generate 3D animated product shots + text overlays for VSLs",
+  "version": "1.0",
+  "nodes": [
+    {
+      "id": "input-script",
+      "type": "input",
+      "label": "VSL Script Input",
+      "config": {
+        "value": ""
+      },
+      "position": { "x": 100, "y": 200 }
+    },
+    {
+      "id": "input-product",
+      "type": "input",
+      "label": "Product Info (name, image URL)",
+      "config": {
+        "value": ""
+      },
+      "position": { "x": 100, "y": 350 }
+    },
+    {
+      "id": "hook-extractor",
+      "type": "text-splitter",
+      "label": "Extract Hooks & Claims",
+      "config": {
+        "sentencesPerScene": 1,
+        "maxScenes": 20,
+        "pattern": "hook|claim|benefit|feature|stat"
+      },
+      "position": { "x": 300, "y": 200 }
+    },
+    {
+      "id": "style-detector",
+      "type": "style-detector",
+      "label": "Detect Product Category",
+      "config": {
+        "defaultStyle": "modern-3d",
+        "rules": {
+          "skincare-3d": "skin|beauty|cosmetic|serum|cream|glow",
+          "tech-3d": "device|gadget|tech|electronic|app|software",
+          "supplement-3d": "supplement|vitamin|health|wellness|boost",
+          "fitness-3d": "fitness|workout|muscle|protein|gym",
+          "ecommerce-3d": "product|store|shop|buy|order"
+        }
+      },
+      "position": { "x": 300, "y": 350 }
+    },
+    {
+      "id": "loop-hooks",
+      "type": "loop",
+      "label": "For Each Hook/Claim",
+      "config": {},
+      "children": [
+        {
+          "id": "3d-prompt-builder",
+          "type": "prompt-builder",
+          "label": "Build 3D Scene Prompt",
+          "config": {
+            "foundation": "3D rendered product shot, cinematic lighting, professional studio setup.",
+            "styleTemplates": {
+              "skincare-3d": "Luxury skincare product, floating in ethereal light, water droplets, glass texture, soft glow, clean background, cosmetic advertising style, photorealistic 3D render",
+              "tech-3d": "Futuristic tech product, sleek metal, LED accents, dynamic angle, modern minimal background, tech commercial style, high-quality 3D visualization",
+              "supplement-3d": "Health supplement bottle, vibrant colors, energy particles, clean clinical background, professional medical advertising, 3D product render",
+              "fitness-3d": "Athletic product, dynamic movement, energy trails, gym environment, motivational aesthetic, sports commercial style, 3D visualization",
+              "ecommerce-3d": "E-commerce product showcase, clean studio lighting, multiple angles, premium presentation, catalog style, photorealistic 3D render",
+              "modern-3d": "Modern product visualization, studio lighting, clean background, professional presentation, commercial quality 3D render"
+            },
+            "textOverlay": true,
+            "overlayPrompt": "Add bold text overlay: '{text}', modern sans-serif font, high contrast, professional VSL style",
+            "technical": "16:9 aspect ratio, 4K quality, motion blur ready, alpha channel for compositing"
+          }
+        },
+        {
+          "id": "3d-image-generator",
+          "type": "image-generator",
+          "label": "Generate 3D Frame",
+          "config": {
+            "aspectRatio": "16:9",
+            "quality": "high"
+          }
+        }
+      ],
+      "position": { "x": 500, "y": 200 }
+    },
+    {
+      "id": "output",
+      "type": "output",
+      "label": "VSL Animation Frames",
+      "config": {
+        "format": "sequence",
+        "includeTextOverlays": true
+      },
+      "position": { "x": 700, "y": 200 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "input-script",
+      "sourceHandle": "value",
+      "target": "hook-extractor",
+      "targetHandle": "text"
+    },
+    {
+      "id": "e2",
+      "source": "input-product",
+      "sourceHandle": "value",
+      "target": "style-detector",
+      "targetHandle": "text"
+    },
+    {
+      "id": "e3",
+      "source": "hook-extractor",
+      "sourceHandle": "scenes",
+      "target": "loop-hooks",
+      "targetHandle": "items"
+    },
+    {
+      "id": "e4",
+      "source": "style-detector",
+      "sourceHandle": "style",
+      "target": "loop-hooks",
+      "targetHandle": "style"
+    },
+    {
+      "id": "e5",
+      "source": "input-product",
+      "sourceHandle": "value",
+      "target": "loop-hooks",
+      "targetHandle": "product"
+    },
+    {
+      "id": "e6",
+      "source": "loop-hooks",
+      "sourceHandle": "results",
+      "target": "output",
+      "targetHandle": "frames"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+node_modules/
+.env
+.env.local
+*.log
+.DS_Store
+uploads/
+outputs/
+tmp/
+*.mp4
+*.mov
+
+# Keep example images in frontend
+!frontend-simple/*.png
+
+# Sensitive files
+*service-account*.json
+*.db
+backend/data/*.db
+gcp-service-account-key.json

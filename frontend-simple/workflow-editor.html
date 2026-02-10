@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workflow Editor - gen.aditor.ai</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold">Workflow Editor</h1>
+        <p class="text-gray-400 mt-1">Edit node-based workflows</p>
+      </div>
+      <div class="flex space-x-3">
+        <button onclick="loadWorkflow()" class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+          Reload
+        </button>
+        <button onclick="saveWorkflow()" class="px-4 py-2 bg-primary-600 rounded-lg hover:bg-primary-700 font-medium">
+          Save Changes
+        </button>
+      </div>
+    </div>
+
+    <!-- Workflow Selection -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium mb-2">Workflow</label>
+      <select id="workflow-select" onchange="loadWorkflow()" class="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg">
+        <option value="script-explainer">Script → Explainer</option>
+        <option value="vsl-ground-noise">VSL Ground Noise Machine</option>
+        <option value="image-ads">Image Ads (coming soon)</option>
+        <option value="kickstarter">Kickstarter (coming soon)</option>
+      </select>
+    </div>
+
+    <!-- Flowchart View -->
+    <div class="bg-gray-800 rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Workflow Flowchart</h2>
+      <div id="flowchart" class="overflow-x-auto">
+        <!-- Flowchart will be rendered here -->
+      </div>
+    </div>
+
+    <!-- Node List & Editor -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Nodes</h2>
+        <div id="nodes-list" class="space-y-3">
+          <!-- Nodes will be listed here -->
+        </div>
+      </div>
+
+      <!-- Node Editor -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Edit Node</h2>
+        <div id="node-editor">
+          <p class="text-gray-500">Select a node to edit</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Workflow -->
+    <div class="mt-6 bg-gray-800 rounded-lg p-6">
+      <h2 class="text-xl font-bold mb-4">Test Workflow</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Test Input (Script)</label>
+          <textarea id="test-input" rows="4" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg" placeholder="Enter test script...">Our platform helps businesses automate their creative production.</textarea>
+        </div>
+        <button onclick="testWorkflow()" class="px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 font-medium">
+          Run Test
+        </button>
+        <div id="test-results" class="hidden">
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div id="test-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let currentWorkflow = null;
+    let selectedNode = null;
+
+    async function loadWorkflow() {
+      const workflowId = document.getElementById('workflow-select').value;
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/${workflowId}-v2/workflow`);
+        const workflow = await response.json();
+        currentWorkflow = workflow;
+        
+        renderFlowchart(workflow.nodes, workflow.edges);
+        renderNodesList(workflow.nodes);
+      } catch (error) {
+        console.error('Failed to load workflow:', error);
+        alert('Failed to load workflow: ' + error.message);
+      }
+    }
+
+    function renderFlowchart(nodes, edges) {
+      const container = document.getElementById('flowchart');
+      
+      // Build a simple left-to-right flowchart
+      const nodeColors = {
+        'input': 'bg-blue-600',
+        'text-splitter': 'bg-purple-600',
+        'style-detector': 'bg-pink-600',
+        'prompt-builder': 'bg-orange-600',
+        'image-generator': 'bg-green-600',
+        'loop': 'bg-yellow-600',
+        'output': 'bg-red-600'
+      };
+
+      let html = '<div class="flex items-center space-x-4 py-4">';
+      
+      // Sort nodes by position.x for left-to-right order
+      const sortedNodes = [...nodes].sort((a, b) => 
+        (a.position?.x || 0) - (b.position?.x || 0)
+      );
+
+      sortedNodes.forEach((node, index) => {
+        const color = nodeColors[node.type] || 'bg-gray-600';
+        
+        html += `
+          <div class="flex items-center">
+            <div 
+              onclick="selectNode('${node.id}')" 
+              class="${color} px-6 py-4 rounded-lg cursor-pointer hover:opacity-80 transition-opacity min-w-[180px]"
+            >
+              <div class="font-bold text-sm">${node.label || node.id}</div>
+              <div class="text-xs opacity-75 mt-1">${node.type}</div>
+              ${node.children ? `
+                <div class="mt-2 pt-2 border-t border-white/20">
+                  <div class="text-xs font-semibold mb-1">Loop contains:</div>
+                  ${node.children.map(child => `
+                    <div class="text-xs opacity-75">→ ${child.type}</div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+            ${index < sortedNodes.length - 1 ? `
+              <svg class="w-8 h-8 text-gray-400 mx-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      html += '</div>';
+
+      // Add legend
+      html += `
+        <div class="mt-6 pt-4 border-t border-gray-700">
+          <div class="text-sm text-gray-400 mb-2">Node Types:</div>
+          <div class="flex flex-wrap gap-3">
+            ${Object.entries(nodeColors).map(([type, color]) => `
+              <div class="flex items-center space-x-2">
+                <div class="${color} w-4 h-4 rounded"></div>
+                <span class="text-xs">${type}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function renderNodesList(nodes) {
+      const container = document.getElementById('nodes-list');
+      container.innerHTML = nodes.map((node, index) => `
+        <div onclick="selectNode('${node.id}')" class="p-4 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-medium">${node.label || node.id}</div>
+              <div class="text-sm text-gray-400">${node.type}</div>
+            </div>
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectNode(nodeId) {
+      const node = currentWorkflow.nodes.find(n => n.id === nodeId);
+      if (!node) return;
+      
+      selectedNode = node;
+      renderNodeEditor(node);
+    }
+
+    function renderNodeEditor(node) {
+      const container = document.getElementById('node-editor');
+      
+      const configHtml = Object.entries(node.config || {}).map(([key, value]) => {
+        if (typeof value === 'object') {
+          // JSON editor for complex objects
+          return `
+            <div class="mb-4">
+              <label class="block text-sm font-medium mb-2">${key}</label>
+              <textarea 
+                id="config-${key}" 
+                rows="8"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded font-mono text-sm"
+              >${JSON.stringify(value, null, 2)}</textarea>
+            </div>
+          `;
+        } else {
+          // Simple input for primitives
+          return `
+            <div class="mb-4">
+              <label class="block text-sm font-medium mb-2">${key}</label>
+              <input 
+                type="text" 
+                id="config-${key}" 
+                value="${value}"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded"
+              />
+            </div>
+          `;
+        }
+      }).join('');
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <h3 class="font-bold text-lg">${node.label || node.id}</h3>
+            <p class="text-sm text-gray-400">${node.type}</p>
+          </div>
+          ${configHtml}
+          <button onclick="updateNodeConfig()" class="w-full px-4 py-2 bg-primary-600 rounded-lg hover:bg-primary-700">
+            Update Config
+          </button>
+        </div>
+      `;
+    }
+
+    function updateNodeConfig() {
+      if (!selectedNode) return;
+
+      const newConfig = {};
+      for (const key in selectedNode.config) {
+        const input = document.getElementById(`config-${key}`);
+        if (input) {
+          try {
+            // Try to parse as JSON first
+            newConfig[key] = JSON.parse(input.value);
+          } catch {
+            // If not JSON, use as string
+            newConfig[key] = input.value;
+          }
+        }
+      }
+
+      selectedNode.config = newConfig;
+      alert('Config updated! Click "Save Changes" to persist.');
+    }
+
+    async function saveWorkflow() {
+      if (!currentWorkflow) return;
+
+      try {
+        const workflowId = document.getElementById('workflow-select').value;
+        const response = await fetch(`${API_BASE}/api/${workflowId}-v2/workflow`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nodes: currentWorkflow.nodes,
+            edges: currentWorkflow.edges
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('✅ Workflow saved!');
+        } else {
+          alert('❌ Failed to save workflow');
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        alert('Failed to save: ' + error.message);
+      }
+    }
+
+    async function testWorkflow() {
+      const workflowId = document.getElementById('workflow-select').value;
+      const testInput = document.getElementById('test-input').value;
+      
+      const resultsDiv = document.getElementById('test-results');
+      const statusDiv = document.getElementById('test-status');
+      
+      resultsDiv.classList.remove('hidden');
+      statusDiv.innerHTML = '<p class="text-gray-400">⏳ Running workflow...</p>';
+
+      try {
+        // Execute workflow
+        const response = await fetch(`${API_BASE}/api/${workflowId}-v2/execute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ script: testInput })
+        });
+
+        const { jobId } = await response.json();
+
+        // Poll for results
+        let attempts = 0;
+        while (attempts < 60) {
+          await new Promise(resolve => setTimeout(resolve, 3000));
+
+          const jobResponse = await fetch(`${API_BASE}/api/${workflowId}-v2/jobs/${jobId}`);
+          const job = await jobResponse.json();
+
+          if (job.status === 'completed') {
+            const successCount = job.results.frames.filter(f => f.success).length;
+            statusDiv.innerHTML = `
+              <p class="text-green-400 font-bold">✅ Workflow completed!</p>
+              <p class="text-sm mt-2">Frames: ${successCount} / ${job.results.frames.length}</p>
+              <p class="text-sm">Style: ${job.results.style}</p>
+              <p class="text-sm">Cost: $${job.results.totalCost.toFixed(2)}</p>
+            `;
+            break;
+          }
+
+          if (job.status === 'failed') {
+            statusDiv.innerHTML = `<p class="text-red-400">❌ Failed: ${job.error}</p>`;
+            break;
+          }
+
+          statusDiv.innerHTML = `<p class="text-gray-400">⏳ ${job.status}... ${job.progress || 0}%</p>`;
+          attempts++;
+        }
+
+      } catch (error) {
+        statusDiv.innerHTML = `<p class="text-red-400">❌ Error: ${error.message}</p>`;
+      }
+    }
+
+    // Load on page load
+    loadWorkflow();
+  </script>
+
+  <style>
+    .bg-primary-600 { background-color: #f97316; }
+    .bg-primary-700 { background-color: #ea580c; }
+    .hover\\:bg-primary-700:hover { background-color: #ea580c; }
+  </style>
+</body>
+</html>

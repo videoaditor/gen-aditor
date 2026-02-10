@@ -1,0 +1,74 @@
+[
+  {
+    "id": "kickstarter",
+    "name": "Kickstarter",
+    "description": "Product page → 9:16 brolls + offer badges for VSLs",
+    "type": "multi-step",
+    "thumbnail": "/thumbnails/kickstarter.jpg"
+  },
+  {
+    "id": "script-explainer",
+    "name": "Script → Explainer",
+    "description": "Analyze script, pick style, generate consistent explainer frames",
+    "type": "multi-step",
+    "thumbnail": "/thumbnails/explainer.jpg"
+  },
+  {
+    "id": "screenshot-broll",
+    "name": "Screenshot → Broll",
+    "description": "Extract frames from ad, recreate with your product/person",
+    "type": "multi-step",
+    "thumbnail": "/thumbnails/broll.jpg"
+  },
+  {
+    "id": "image-ads",
+    "name": "Image Ads",
+    "description": "Product page + 8 inspo ads → 8 new ads matching style",
+    "type": "multi-step",
+    "thumbnail": "/thumbnails/image-ads.jpg"
+  },
+  {
+    "id": "script-to-ugc",
+    "name": "Script → UGC Video",
+    "description": "Generate UGC video from script using AI avatar + ElevenLabs voice",
+    "type": "workflow",
+    "thumbnail": "/thumbnails/ugc-video.jpg",
+    "params": [
+      {
+        "name": "script",
+        "label": "Script",
+        "type": "textarea",
+        "placeholder": "Your script here (clean, no annotations)",
+        "required": true
+      },
+      {
+        "name": "voice",
+        "label": "Voice (ElevenLabs)",
+        "type": "voice",
+        "required": true
+      },
+      {
+        "name": "avatar",
+        "label": "Creator Avatar",
+        "type": "avatar",
+        "required": true
+      },
+      {
+        "name": "outputFolder",
+        "label": "Output Folder Name",
+        "type": "text",
+        "placeholder": "Auto-generated if empty",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "nanobanana",
+    "name": "Nanobanana Workspace",
+    "description": "Open image generation workspace",
+    "type": "link",
+    "action": "open-tab",
+    "target": "images",
+    "thumbnail": "/thumbnails/nanobanana.jpg"
+  }
+]

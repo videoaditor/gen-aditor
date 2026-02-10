@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gen.aditor.ai</title>
+  <meta name="description" content="AI creative production. 5 workflows. Ship faster.">
+  <link rel="icon" type="image/png" href="/assets/aditor-logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: { 900: '#0a0a0a', 800: '#111111', 700: '#1a1a1a' }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 0.8s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-dark-900 text-gray-100 min-h-screen">
+  
+  <!-- Nav -->
+  <nav class="fixed top-0 w-full z-50 bg-dark-900/80 backdrop-blur-sm border-b border-gray-800/50">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-sm font-semibold">A</div>
+        <span class="text-sm font-medium text-gray-400">gen.aditor.ai</span>
+      </div>
+      <div class="flex items-center space-x-6">
+        <a href="#workflows" class="text-sm text-gray-500 hover:text-gray-300 transition">workflows</a>
+        <a href="#pricing" class="text-sm text-gray-500 hover:text-gray-300 transition">pricing</a>
+        <a href="/login.html" class="text-sm text-gray-400 hover:text-white transition">login</a>
+        <a href="/signup.html" class="text-sm bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition">start</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="pt-32 pb-20 px-6">
+    <div class="max-w-3xl mx-auto text-center fade-in">
+      <p class="text-xs uppercase tracking-widest text-orange-500/80 mb-6">creative production</p>
+      <h1 class="text-4xl md:text-5xl font-semibold text-white mb-6 leading-tight">
+        30 hours of work.<br/>
+        <span class="text-gray-500">3 minutes of waiting.</span>
+      </h1>
+      <p class="text-lg text-gray-500 mb-10 max-w-xl mx-auto">
+        5 AI workflows that turn product pages into ads, scripts into videos, and screenshots into b-roll.
+      </p>
+      <div class="flex justify-center space-x-4">
+        <a href="/signup.html" class="bg-white text-black px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition">
+          try free
+        </a>
+        <a href="#workflows" class="text-gray-400 px-6 py-3 hover:text-white transition">
+          see workflows →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="py-12 border-t border-b border-gray-800/50">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="grid grid-cols-3 gap-8 text-center">
+        <div>
+          <div class="text-2xl font-semibold text-white">5</div>
+          <div class="text-xs text-gray-600 mt-1">workflows</div>
+        </div>
+        <div>
+          <div class="text-2xl font-semibold text-white">30-50h</div>
+          <div class="text-xs text-gray-600 mt-1">saved weekly</div>
+        </div>
+        <div>
+          <div class="text-2xl font-semibold text-white">95%</div>
+          <div class="text-xs text-gray-600 mt-1">faster</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workflows -->
+  <section id="workflows" class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-xs uppercase tracking-widest text-gray-600 mb-12 text-center">workflows</h2>
+      
+      <div class="space-y-6">
+        <!-- Workflow 1 -->
+        <div class="group bg-dark-800 border border-gray-800/50 rounded-xl p-6 hover:border-gray-700 transition">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-white font-medium mb-2">kickstarter</h3>
+              <p class="text-sm text-gray-500">product page → 9:16 b-roll + offer badges</p>
+            </div>
+            <span class="text-xs text-gray-600">~5h saved</span>
+          </div>
+        </div>
+
+        <!-- Workflow 2 -->
+        <div class="group bg-dark-800 border border-gray-800/50 rounded-xl p-6 hover:border-gray-700 transition">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-white font-medium mb-2">script → explainer</h3>
+              <p class="text-sm text-gray-500">paste script → get consistent explainer frames</p>
+            </div>
+            <span class="text-xs text-gray-600">~10h saved</span>
+          </div>
+        </div>
+
+        <!-- Workflow 3 -->
+        <div class="group bg-dark-800 border border-gray-800/50 rounded-xl p-6 hover:border-gray-700 transition">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-white font-medium mb-2">screenshot → b-roll</h3>
+              <p class="text-sm text-gray-500">recreate competitor shots with your product</p>
+            </div>
+            <span class="text-xs text-gray-600">~8h saved</span>
+          </div>
+        </div>
+
+        <!-- Workflow 4 -->
+        <div class="group bg-dark-800 border border-gray-800/50 rounded-xl p-6 hover:border-gray-700 transition">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-white font-medium mb-2">image ads</h3>
+              <p class="text-sm text-gray-500">8 inspo ads → 8 new ads with your product</p>
+            </div>
+            <span class="text-xs text-gray-600">~15h saved</span>
+          </div>
+        </div>
+
+        <!-- Workflow 5 -->
+        <div class="group bg-dark-800 border border-gray-800/50 rounded-xl p-6 hover:border-gray-700 transition">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-white font-medium mb-2">video queue</h3>
+              <p class="text-sm text-gray-500">generate images → select → convert to video</p>
+            </div>
+            <span class="text-xs text-gray-600">unlimited</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-20 px-6 bg-dark-800/30">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-xs uppercase tracking-widest text-gray-600 mb-12 text-center">pricing</h2>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Free -->
+        <div class="bg-dark-900 border border-gray-800/50 rounded-xl p-6">
+          <h3 class="text-sm text-gray-400 mb-1">starter</h3>
+          <div class="text-2xl font-semibold text-white mb-4">$0</div>
+          <ul class="text-sm text-gray-500 space-y-2 mb-6">
+            <li>10 renders/month</li>
+            <li>50 variations each</li>
+            <li>basic workflows</li>
+          </ul>
+          <a href="/signup.html?plan=starter" class="block text-center text-sm text-gray-400 border border-gray-700 rounded-lg py-2 hover:border-gray-600 transition">start free</a>
+        </div>
+
+        <!-- Pro -->
+        <div class="bg-dark-900 border border-orange-500/30 rounded-xl p-6 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-xs bg-orange-500 text-black px-3 py-1 rounded-full">beta</div>
+          <h3 class="text-sm text-gray-400 mb-1">pro</h3>
+          <div class="text-2xl font-semibold text-white mb-4">$29<span class="text-sm text-gray-600">/mo</span></div>
+          <ul class="text-sm text-gray-500 space-y-2 mb-6">
+            <li>100 renders/month</li>
+            <li>200 variations each</li>
+            <li>all workflows</li>
+            <li>speed variations</li>
+          </ul>
+          <a href="/signup.html?plan=pro" class="block text-center text-sm bg-white text-black rounded-lg py-2 hover:bg-gray-200 transition">start pro</a>
+        </div>
+
+        <!-- Agency -->
+        <div class="bg-dark-900 border border-gray-800/50 rounded-xl p-6">
+          <h3 class="text-sm text-gray-400 mb-1">agency</h3>
+          <div class="text-2xl font-semibold text-white mb-4">$99<span class="text-sm text-gray-600">/mo</span></div>
+          <ul class="text-sm text-gray-500 space-y-2 mb-6">
+            <li>unlimited renders</li>
+            <li>500 variations each</li>
+            <li>team seats</li>
+            <li>slack support</li>
+          </ul>
+          <a href="/signup.html?plan=agency" class="block text-center text-sm text-gray-400 border border-gray-700 rounded-lg py-2 hover:border-gray-600 transition">contact</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6">
+    <div class="max-w-xl mx-auto text-center">
+      <h2 class="text-2xl font-semibold text-white mb-4">stop cutting ads manually.</h2>
+      <p class="text-gray-500 mb-8">join 50+ dtc brands shipping faster.</p>
+      <a href="/signup.html" class="inline-block bg-white text-black px-8 py-3 rounded-lg font-medium hover:bg-gray-200 transition">
+        try free →
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-800/50 py-8 px-6">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="w-6 h-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded flex items-center justify-center text-xs font-semibold">A</div>
+        <span class="text-xs text-gray-600">gen.aditor.ai</span>
+      </div>
+      <div class="text-xs text-gray-600">
+        built by <a href="https://aditor.ai" class="hover:text-gray-400 transition">aditor</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

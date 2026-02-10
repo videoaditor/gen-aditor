@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>gen.aditor.ai</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      background: #000;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(255, 107, 107, 0.08) 0%, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(155, 81, 224, 0.06) 0%, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(66, 153, 225, 0.05) 0%, transparent 50%);
+      color: #fff;
+      min-height: 100vh;
+      letter-spacing: -0.01em;
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    
+    header {
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2rem;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.9) 0%, rgba(155, 81, 224, 0.9) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(255, 107, 107, 0.25);
+    }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+    }
+    
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    
+    .tab {
+      padding: 1rem 1.5rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    
+    .tab:hover {
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .tab.active {
+      color: #fff;
+      border-bottom-color: rgba(255, 107, 107, 0.8);
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 3rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .workflow-card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .workflow-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    
+    .workflow-card:hover {
+      border-color: rgba(255, 107, 107, 0.3);
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: 0 20px 60px rgba(255, 107, 107, 0.15);
+    }
+    
+    .workflow-card:hover::before {
+      opacity: 1;
+    }
+    
+    .workflow-card h3 {
+      font-size: 1.375rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .workflow-card p {
+      font-size: 0.9375rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+    }
+    
+    .image-gen-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    @media (min-width: 1024px) {
+      .image-gen-layout {
+        grid-template-columns: 420px 1fr;
+      }
+    }
+    
+    .sidebar {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 2.5rem;
+      height: fit-content;
+    }
+    
+    .sidebar h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+    
+    .sidebar-subtitle {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.9375rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+    }
+    
+    .form-group {
+      margin-bottom: 1.75rem;
+    }
+    
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      margin-bottom: 0.625rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    textarea, select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      color: #fff;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      resize: none;
+      transition: all 0.3s;
+    }
+    
+    textarea:focus, select:focus {
+      outline: none;
+      border-color: rgba(255, 107, 107, 0.5);
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+    }
+    
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .drop-zone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(255, 255, 255, 0.01);
+    }
+    
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: rgba(255, 107, 107, 0.5);
+      background: rgba(255, 107, 107, 0.05);
+    }
+    
+    .drop-zone-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 1rem;
+      opacity: 0.4;
+    }
+    
+    .drop-zone input[type="file"] {
+      display: none;
+    }
+    
+    .drop-zone-text {
+      font-size: 0.9375rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 0.5rem;
+    }
+    
+    .drop-zone-hint {
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    input[type="range"] {
+      flex: 1;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #9b51e0 100%);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
+    }
+    
+    .slider-value {
+      min-width: 3rem;
+      text-align: right;
+      font-weight: 600;
+      color: #ff6b6b;
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .generate-btn {
+      width: 100%;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.9) 0%, rgba(155, 81, 224, 0.9) 100%);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 2rem;
+      box-shadow: 0 10px 40px rgba(255, 107, 107, 0.25);
+      letter-spacing: 0.02em;
+    }
+    
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 60px rgba(255, 107, 107, 0.35);
+    }
+    
+    .generate-btn:active {
+      transform: translateY(0);
+    }
+    
+    .content-area {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 2.5rem;
+      min-height: 600px;
+    }
+    
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    .content-header h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+    }
+    
+    .output-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+    
+    .output-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    
+    .output-card:hover {
+      border-color: rgba(255, 107, 107, 0.4);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    
+    .output-card img, .output-card video {
+      width: 100%;
+      aspect-ratio: 9/16;
+      object-fit: cover;
+      background: #000;
+    }
+    
+    .output-info {
+      padding: 1rem;
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.4;
+    }
+    
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+      text-align: center;
+    }
+    
+    .empty-icon {
+      width: 96px;
+      height: 96px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    
+    .empty-state p {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1rem;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  
+  <header>
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">A</div>
+        <span>gen.aditor.ai</span>
+      </div>
+      <div class="status">
+        <div class="status-dot"></div>
+        <span>Online</span>
+      </div>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="workflows">Workflows</button>
+      <button class="tab" data-tab="images">Image Gen</button>
+      <button class="tab" data-tab="videos">Video Gen</button>
+    </div>
+  </header>
+  
+  <!-- Workflows Tab -->
+  <div class="tab-content active" id="workflows-tab">
+    <div class="workflow-grid">
+      <div class="workflow-card" data-workflow="kickstarter">
+        <h3>🚀 Kickstarter</h3>
+        <p>Upload product page → Get broll images (9:16) + offer badges for VSLs</p>
+      </div>
+      <div class="workflow-card" data-workflow="script-explainer">
+        <h3>📝 Script → Explainer</h3>
+        <p>Script analysis → AI picks style → Generate consistent explainer frames</p>
+      </div>
+      <div class="workflow-card" data-workflow="screenshot-broll">
+        <h3>📸 Screenshot → Broll</h3>
+        <p>Extract ad frames → Recreate with your product and person</p>
+      </div>
+      <div class="workflow-card" data-workflow="image-ads">
+        <h3>🎨 Image Ads</h3>
+        <p>Upload product page + inspo ads → Generate 8 new ads in same style</p>
+      </div>
+      <div class="workflow-card" data-workflow="nanobanana">
+        <h3>🖼️ Nanobanana Workspace</h3>
+        <p>Image generation grid with drag-drop prompts</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Image Gen Tab -->
+  <div class="tab-content" id="images-tab">
+    <div class="image-gen-layout">
+      <aside class="sidebar">
+        <h2>Image Generation</h2>
+        <p class="sidebar-subtitle">Create images with AI</p>
+        
+        <div class="form-group">
+          <label>Text Prompt</label>
+          <textarea id="image-prompt" rows="4" placeholder="Describe the image you want to create..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Image Upload (Optional)</label>
+          <div class="drop-zone" id="image-drop">
+            <input type="file" id="image-file" accept="image/*">
+            <svg class="drop-zone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <p class="drop-zone-text">Drop image here or click to upload</p>
+            <p class="drop-zone-hint">Supports drag & drop, paste (Ctrl+V)</p>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Workflow</label>
+          <select id="image-workflow">
+            <option>Nanobanana Pro</option>
+            <option>Product Shot</option>
+            <option>Style Transfer</option>
+          </select>
+        </div>
+        
+        <button class="generate-btn" id="generate-image">Generate Image</button>
+      </aside>
+      
+      <div class="content-area">
+        <div class="content-header">
+          <h2>Generated Images</h2>
+        </div>
+        <div id="image-grid" class="output-grid hidden"></div>
+        <div id="image-empty" class="empty-state">
+          <div class="empty-icon">
+            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3>No images yet</h3>
+          <p>Generate your first image to get started</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Video Gen Tab -->
+  <div class="tab-content" id="videos-tab">
+    <div class="image-gen-layout">
+      <aside class="sidebar">
+        <h2>Video Generation</h2>
+        <p class="sidebar-subtitle">Create AI videos from text or images</p>
+        
+        <div class="form-group">
+          <label>Text Prompt</label>
+          <textarea id="video-prompt" rows="4" placeholder="Describe the video you want to create..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Image Upload (Optional)</label>
+          <div class="drop-zone" id="video-drop">
+            <input type="file" id="video-file" accept="image/*">
+            <svg class="drop-zone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <p class="drop-zone-text">Drop image here or click to upload</p>
+            <p class="drop-zone-hint">Supports drag & drop, paste (Ctrl+V)</p>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Model</label>
+          <select id="video-model">
+            <option>Veo 3</option>
+            <option>Veo 3 Fast</option>
+            <option>Runway Gen-3</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Duration</label>
+          <div class="slider-container">
+            <input type="range" id="video-duration" min="3" max="10" value="5">
+            <span class="slider-value"><span id="video-duration-val">5</span>s</span>
+          </div>
+        </div>
+        
+        <button class="generate-btn" id="generate-video">Generate Video</button>
+      </aside>
+      
+      <div class="content-area">
+        <div class="content-header">
+          <h2>Generated Videos</h2>
+        </div>
+        <div id="video-grid" class="output-grid hidden"></div>
+        <div id="video-empty" class="empty-state">
+          <div class="empty-icon">
+            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3>No videos yet</h3>
+          <p>Generate your first video to get started</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Tab switching
+    function switchToTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById(tabName + '-tab').classList.add('active');
+    }
+    
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        switchToTab(tab.dataset.tab);
+      });
+    });
+    
+    // Workflow card clicks
+    document.querySelectorAll('.workflow-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const workflow = card.dataset.workflow;
+        if (workflow === 'nanobanana') {
+          switchToTab('images');
+        } else {
+          alert(`${card.querySelector('h3').textContent} workflow coming soon`);
+        }
+      });
+    });
+    
+    // Drag & drop + paste
+    function setupDropZone(dropZoneId, fileInputId) {
+      const dropZone = document.getElementById(dropZoneId);
+      const fileInput = document.getElementById(fileInputId);
+      
+      dropZone.addEventListener('click', () => fileInput.click());
+      
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          fileInput.files = files;
+          handleFileUpload(files[0], dropZoneId);
+        }
+      });
+      
+      document.addEventListener('paste', (e) => {
+        const items = e.clipboardData.items;
+        for (let item of items) {
+          if (item.type.indexOf('image') !== -1) {
+            const file = item.getAsFile();
+            handleFileUpload(file, dropZoneId);
+          }
+        }
+      });
+      
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          handleFileUpload(e.target.files[0], dropZoneId);
+        }
+      });
+    }
+    
+    function handleFileUpload(file, dropZoneId) {
+      const dropZone = document.getElementById(dropZoneId);
+      dropZone.innerHTML = `<p class="drop-zone-text">✓ ${file.name}</p>`;
+    }
+    
+    setupDropZone('image-drop', 'image-file');
+    setupDropZone('video-drop', 'video-file');
+    
+    // Video duration slider
+    const videoDuration = document.getElementById('video-duration');
+    const videoDurationVal = document.getElementById('video-duration-val');
+    videoDuration.addEventListener('input', (e) => {
+      videoDurationVal.textContent = e.target.value;
+    });
+    
+    // Generate image
+    document.getElementById('generate-image').addEventListener('click', () => {
+      const prompt = document.getElementById('image-prompt').value.trim();
+      if (!prompt) {
+        alert('Please enter a prompt');
+        return;
+      }
+      
+      document.getElementById('image-empty').classList.add('hidden');
+      document.getElementById('image-grid').classList.remove('hidden');
+      
+      const grid = document.getElementById('image-grid');
+      const card = document.createElement('div');
+      card.className = 'output-card';
+      card.innerHTML = `
+        <div style="aspect-ratio: 9/16; background: #000; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);">
+          Generating...
+        </div>
+        <div class="output-info">${prompt.substring(0, 50)}...</div>
+      `;
+      grid.insertBefore(card, grid.firstChild);
+    });
+    
+    // Generate video
+    document.getElementById('generate-video').addEventListener('click', async () => {
+      const prompt = document.getElementById('video-prompt').value.trim();
+      if (!prompt) {
+        alert('Please enter a prompt');
+        return;
+      }
+      
+      document.getElementById('video-empty').classList.add('hidden');
+      document.getElementById('video-grid').classList.remove('hidden');
+      
+      const model = document.getElementById('video-model').value.toLowerCase().replace(/\s+/g, '-');
+      const duration = parseInt(videoDuration.value);
+      const aspectRatio = '9:16';
+      
+      try {
+        const res = await fetch('/api/video/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, duration, aspectRatio, model })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        
+        const grid = document.getElementById('video-grid');
+        const card = document.createElement('div');
+        card.className = 'output-card';
+        card.id = 'video-' + data.jobId;
+        card.innerHTML = `
+          <div style="aspect-ratio: 9/16; background: #000; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.3);">
+            Processing...
+          </div>
+          <div class="output-info">${prompt.substring(0, 40)}...</div>
+        `;
+        grid.insertBefore(card, grid.firstChild);
+        
+        pollVideo(data.jobId, prompt);
+        
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+    
+    async function pollVideo(jobId, prompt) {
+      const res = await fetch(`/api/video/status/${jobId}`);
+      const data = await res.json();
+      
+      if (data.status === 'completed') {
+        const card = document.getElementById('video-' + jobId);
+        card.innerHTML = `
+          <video src="${data.videoUrl}" controls style="width: 100%; aspect-ratio: 9/16; object-fit: cover;"></video>
+          <div class="output-info">${prompt.substring(0, 40)}...</div>
+        `;
+      } else if (data.status === 'failed') {
+        const card = document.getElementById('video-' + jobId);
+        card.innerHTML = `
+          <div style="aspect-ratio: 9/16; background: #000; display: flex; align-items: center; justify-content: center; color: #ef4444;">
+            Failed
+          </div>
+          <div class="output-info">Error: ${data.error}</div>
+        `;
+      } else {
+        setTimeout(() => pollVideo(jobId, prompt), 2000);
+      }
+    }
+  </script>
+  
+</body>
+</html>

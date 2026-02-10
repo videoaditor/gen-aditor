@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "playwright": "^1.58.1"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.72.1",
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
+    "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "stripe": "^20.3.0"
+  }
+}

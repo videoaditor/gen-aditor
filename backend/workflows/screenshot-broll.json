@@ -1,0 +1,149 @@
+{
+  "id": "screenshot-broll",
+  "name": "Screenshot → Broll",
+  "description": "Upload competitor ad + your product/creator → recreate frames with your assets",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "input",
+      "type": "input",
+      "config": {
+        "fields": [
+          {
+            "key": "competitor_image",
+            "label": "Competitor Ad Screenshot",
+            "type": "image",
+            "required": true
+          },
+          {
+            "key": "product_image",
+            "label": "Your Product Image",
+            "type": "image",
+            "required": true
+          },
+          {
+            "key": "creator_image",
+            "label": "Your Creator/Person (optional)",
+            "type": "image",
+            "required": false
+          },
+          {
+            "key": "product_name",
+            "label": "Product Name",
+            "type": "text",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "analyzer",
+      "type": "prompt",
+      "config": {
+        "model": "anthropic/claude-sonnet-4-5",
+        "systemPrompt": "You are an expert at analyzing ad composition and visual style. Extract detailed information about layout, colors, style, text placement, and key visual elements.",
+        "userPrompt": "Analyze this competitor ad screenshot. Extract:\n\n1. **Composition:** Layout, rule of thirds, visual balance\n2. **Color palette:** Main colors, accents, mood\n3. **Style:** Photography style (product shot, lifestyle, flat lay, action, etc.)\n4. **Key elements:** Where is the product? Where is the person (if any)? Background type? Text placement?\n5. **Lighting:** Direction, mood, shadows\n6. **Camera angle:** Top-down, eye-level, low angle, etc.\n\nBe specific and detailed. This will be used to recreate the ad with different assets.\n\nImage: {competitor_image}",
+        "outputFormat": "json",
+        "schema": {
+          "composition": "string",
+          "colors": ["string"],
+          "style": "string",
+          "elements": {
+            "product_placement": "string",
+            "person_placement": "string",
+            "background": "string",
+            "text_overlay": "string"
+          },
+          "lighting": "string",
+          "camera_angle": "string"
+        }
+      }
+    },
+    {
+      "id": "prompt_builder",
+      "type": "prompt",
+      "config": {
+        "model": "anthropic/claude-sonnet-4-5",
+        "systemPrompt": "You are an expert at generating detailed image prompts for AI image generation. Create prompts that recreate the exact composition and style of the original ad, but with different product/person assets.",
+        "userPrompt": "Create a detailed image generation prompt that recreates this ad composition with the client's product.\n\nOriginal Ad Analysis:\n{analysis}\n\nClient Product: {product_name}\nClient Product Image: {product_image}\nClient Creator: {creator_image}\n\nGenerate a detailed prompt that:\n1. Maintains the exact composition and layout\n2. Uses the same color palette and lighting\n3. Recreates the same camera angle and style\n4. Places the client's product where the original product was\n5. Places the client's creator where the original person was (if applicable)\n\nThe prompt should be highly detailed and specific to ensure the recreation matches the original style.\n\nOutput format: A single detailed prompt ready for Flux image generation.",
+        "outputFormat": "text"
+      }
+    },
+    {
+      "id": "image_generator",
+      "type": "image_gen",
+      "config": {
+        "model": "fal-ai/flux-lora",
+        "width": 1080,
+        "height": 1920,
+        "steps": 28,
+        "guidance": 3.5,
+        "promptSource": "prompt_builder.output"
+      }
+    },
+    {
+      "id": "output",
+      "type": "output",
+      "config": {
+        "fields": [
+          "analysis",
+          "prompt",
+          "image_url"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "input",
+      "to": "analyzer",
+      "mapping": {
+        "competitor_image": "competitor_image"
+      }
+    },
+    {
+      "from": "analyzer",
+      "to": "prompt_builder",
+      "mapping": {
+        "output": "analysis"
+      }
+    },
+    {
+      "from": "input",
+      "to": "prompt_builder",
+      "mapping": {
+        "product_image": "product_image",
+        "creator_image": "creator_image",
+        "product_name": "product_name"
+      }
+    },
+    {
+      "from": "prompt_builder",
+      "to": "image_generator",
+      "mapping": {
+        "output": "prompt"
+      }
+    },
+    {
+      "from": "analyzer",
+      "to": "output",
+      "mapping": {
+        "output": "analysis"
+      }
+    },
+    {
+      "from": "prompt_builder",
+      "to": "output",
+      "mapping": {
+        "output": "prompt"
+      }
+    },
+    {
+      "from": "image_generator",
+      "to": "output",
+      "mapping": {
+        "image_url": "image_url"
+      }
+    }
+  ]
+}

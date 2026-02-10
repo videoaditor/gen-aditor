@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - gen.aditor.ai</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: #ffffff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #444;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #ff6b35;
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      color: #999;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ff6b35;
+    }
+
+    .stat-change {
+      font-size: 0.85rem;
+      margin-top: 5px;
+      color: #4ade80;
+    }
+
+    .stat-change.negative {
+      color: #f87171;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .refresh-btn {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-trial {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+
+    .badge-active {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .badge-cancelled {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .badge-starter {
+      background: rgba(168, 85, 247, 0.2);
+      color: #a78bfa;
+    }
+
+    .badge-pro {
+      background: rgba(255, 107, 53, 0.2);
+      color: #ff6b35;
+    }
+
+    .badge-business {
+      background: rgba(234, 179, 8, 0.2);
+      color: #fbbf24;
+    }
+
+    .chart-container {
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    .chart-bar {
+      flex: 1;
+      background: linear-gradient(180deg, #ff6b35 0%, #f7931e 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: all 0.3s ease;
+      min-height: 10px;
+    }
+
+    .chart-bar:hover {
+      opacity: 0.8;
+    }
+
+    .chart-label {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .last-updated {
+      text-align: center;
+      color: #666;
+      font-size: 0.85rem;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎨 Admin Dashboard</h1>
+      <p class="subtitle">gen.aditor.ai • Platform Analytics</p>
+    </header>
+
+    <div id="error-container"></div>
+
+    <!-- Key Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value" id="total-users">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Trial Users</div>
+        <div class="stat-value" id="trial-users">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Subs</div>
+        <div class="stat-value" id="active-users">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Cancelled</div>
+        <div class="stat-value" id="cancelled-users">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Usage</div>
+        <div class="stat-value" id="total-usage">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Last 24h</div>
+        <div class="stat-value" id="usage-24h">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">MRR</div>
+        <div class="stat-value" id="mrr">$0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">ARR</div>
+        <div class="stat-value" id="arr">$0</div>
+      </div>
+    </div>
+
+    <!-- Usage Trend -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">📊 Daily Usage Trend (7 Days)</h2>
+        <button class="refresh-btn" onclick="loadStats()">Refresh</button>
+      </div>
+      <div class="chart-container" id="usage-trend">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">👥 Recent Users</h2>
+      </div>
+      <table id="recent-users">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Usage</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Top Users -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">🔥 Top Users (Usage)</h2>
+      </div>
+      <table id="top-users">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Plan</th>
+            <th>Usage This Period</th>
+            <th>% of Limit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="5" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="last-updated" id="last-updated"></div>
+  </div>
+
+  <script>
+    let lastRefresh = null;
+
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/admin/stats');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        // Update key stats
+        document.getElementById('total-users').textContent = data.stats.total_users || 0;
+        document.getElementById('trial-users').textContent = data.stats.trial_users || 0;
+        document.getElementById('active-users').textContent = data.stats.active_users || 0;
+        document.getElementById('cancelled-users').textContent = data.stats.cancelled_users || 0;
+        document.getElementById('total-usage').textContent = (data.stats.total_usage || 0).toLocaleString();
+        document.getElementById('usage-24h').textContent = data.stats.usage_last_24h || 0;
+        
+        // Update revenue
+        if (data.revenueEstimate) {
+          document.getElementById('mrr').textContent = `$${data.revenueEstimate.mrr.toLocaleString()}`;
+          document.getElementById('arr').textContent = `$${data.revenueEstimate.arr.toLocaleString()}`;
+        }
+
+        // Render usage trend chart
+        renderUsageTrend(data.usageTrend);
+
+        // Render recent users table
+        renderRecentUsers(data.recentUsers);
+
+        // Render top users table
+        renderTopUsers(data.topUsers);
+
+        // Update timestamp
+        lastRefresh = new Date();
+        document.getElementById('last-updated').textContent = 
+          `Last updated: ${lastRefresh.toLocaleTimeString()}`;
+
+        // Clear errors
+        document.getElementById('error-container').innerHTML = '';
+
+      } catch (err) {
+        console.error('Failed to load stats:', err);
+        document.getElementById('error-container').innerHTML = 
+          `<div class="error">⚠️ Failed to load stats: ${err.message}</div>`;
+      }
+    }
+
+    function renderUsageTrend(trend) {
+      const container = document.getElementById('usage-trend');
+      
+      if (!trend || trend.length === 0) {
+        container.innerHTML = '<div class="loading">No data yet</div>';
+        return;
+      }
+
+      const maxRequests = Math.max(...trend.map(d => d.requests));
+      
+      container.innerHTML = trend.reverse().map(day => {
+        const height = maxRequests > 0 ? (day.requests / maxRequests) * 100 : 10;
+        const date = new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        return `
+          <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+            <div class="chart-bar" style="height: ${height}%;" title="${day.requests} requests, ${day.unique_users} users"></div>
+            <div class="chart-label">${date}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRecentUsers(users) {
+      const tbody = document.querySelector('#recent-users tbody');
+      
+      if (!users || users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="loading">No users yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(user => {
+        const joinedDate = new Date(user.created_at * 1000).toLocaleDateString();
+        const statusBadge = `<span class="badge badge-${user.status}">${user.status}</span>`;
+        const planBadge = user.plan ? `<span class="badge badge-${user.plan}">${user.plan}</span>` : '-';
+        
+        return `
+          <tr>
+            <td>${user.email}</td>
+            <td>${user.name || '-'}</td>
+            <td>${planBadge}</td>
+            <td>${statusBadge}</td>
+            <td>${user.usage_current_period || 0} / ${user.usage_limit || '∞'}</td>
+            <td>${joinedDate}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderTopUsers(users) {
+      const tbody = document.querySelector('#top-users tbody');
+      
+      if (!users || users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="loading">No usage data yet</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(user => {
+        const planBadge = user.plan ? `<span class="badge badge-${user.plan}">${user.plan}</span>` : '-';
+        const percentage = user.usage_limit ? Math.round((user.usage_current_period / user.usage_limit) * 100) : 0;
+        
+        return `
+          <tr>
+            <td>${user.email}</td>
+            <td>${user.name || '-'}</td>
+            <td>${planBadge}</td>
+            <td>${user.usage_current_period || 0}</td>
+            <td>${percentage}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Load stats on page load
+    loadStats();
+
+    // Auto-refresh every 60 seconds
+    setInterval(loadStats, 60000);
+  </script>
+</body>
+</html>
