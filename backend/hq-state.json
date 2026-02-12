@@ -1,0 +1,118 @@
+{
+  "player": {
+    "status": "working",
+    "currentRoom": "kitchen",
+    "currentTask": "39cb22d8-7e07-4d80-8776-437ef9492ef9",
+    "position": {
+      "x": 5,
+      "y": 3
+    }
+  },
+  "taskQueue": [
+    {
+      "id": "138e2048-945d-4bcc-9c05-51f8eff2cc9c",
+      "prompt": "create automated hr recruiting sequence",
+      "room": "postoffice",
+      "priority": 3,
+      "status": "queued",
+      "createdAt": "2026-02-10T23:26:55.760Z"
+    },
+    {
+      "id": "39cb22d8-7e07-4d80-8776-437ef9492ef9",
+      "prompt": "Fix gen.aditor.ai thumbnail bug",
+      "room": "kitchen",
+      "priority": 2,
+      "status": "active",
+      "createdAt": "2026-02-10T18:20:04.633Z",
+      "startedAt": "2026-02-10T23:33:46.012Z"
+    },
+    {
+      "id": "d12d32ed-bede-4f16-8b3c-04514de68879",
+      "prompt": "Write VED-008 script for Veda Naturals",
+      "room": "greenhouse",
+      "priority": 1,
+      "status": "queued",
+      "createdAt": "2026-02-10T18:20:04.599Z",
+      "startedAt": "2026-02-10T23:21:34.455Z"
+    }
+  ],
+  "shibas": [],
+  "rooms": {
+    "greenhouse": {
+      "unlocked": true,
+      "level": 1,
+      "name": "Client Farm",
+      "plants": [
+        {
+          "client": "Veda Naturals",
+          "health": 80,
+          "stage": "flowering"
+        },
+        {
+          "client": "Get A Drip",
+          "health": 60,
+          "stage": "growing"
+        },
+        {
+          "client": "Clubwell",
+          "health": 70,
+          "stage": "growing"
+        },
+        {
+          "client": "Gracen",
+          "health": 50,
+          "stage": "seedling"
+        }
+      ]
+    },
+    "kitchen": {
+      "unlocked": true,
+      "level": 1,
+      "name": "Creative Kitchen"
+    },
+    "bedroom": {
+      "unlocked": true,
+      "level": 1,
+      "name": "Planning Den"
+    },
+    "workshop": {
+      "unlocked": true,
+      "level": 1,
+      "name": "Code Workshop"
+    },
+    "postOffice": {
+      "unlocked": true,
+      "level": 1,
+      "name": "Comms Hub"
+    }
+  },
+  "metrics": {
+    "mrr": 0,
+    "ltv": 0,
+    "activeClients": 4,
+    "tasksCompletedToday": 0,
+    "streak": 0,
+    "lastUpdated": null
+  },
+  "upgrades": {
+    "available": [
+      {
+        "id": "greenhouse-irrigation",
+        "room": "greenhouse",
+        "name": "Auto-Irrigation",
+        "description": "Auto-check clients every 4 hours",
+        "cost": "Answer: What's our highest-LTV client?",
+        "unlocked": false
+      },
+      {
+        "id": "kitchen-turbo-oven",
+        "room": "kitchen",
+        "name": "Turbo Oven",
+        "description": "Parallel image generation",
+        "cost": "Answer: What's our best-performing ad format?",
+        "unlocked": false
+      }
+    ],
+    "completed": []
+  }
+}

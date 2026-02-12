@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Player HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Nunito', sans-serif; overflow: hidden; height: 100vh; background: #000; }
+
+#top-bar {
+  height: 44px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; background: rgba(255,255,255,0.92); border-bottom: 3px solid #8BC99E;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 200; position: relative;
+}
+.title { font-weight: 800; font-size: 15px; color: #5A9E6F; }
+.metrics { display: flex; gap: 6px; }
+.metric { font-size: 11px; font-weight: 700; background: #FFF8E7; padding: 3px 10px; border-radius: 12px; border: 2px solid #E8C97A; }
+.metric.danger { background: #FFE4E4; border-color: #E88; animation: pulse 1.5s infinite; }
+@keyframes pulse { 50% { transform: scale(1.05); } }
+
+#main-wrap { display: flex; height: calc(100vh - 44px); }
+#game-container { flex: 1; min-width: 0; }
+#game-container canvas { display: block; }
+
+/* === SIDEBAR === */
+#sidebar {
+  width: 300px; background: rgba(255,255,255,0.95); border-left: 3px solid #8BC99E;
+  display: flex; flex-direction: column; overflow-y: auto; z-index: 100;
+}
+.sb-section { padding: 10px 12px; border-bottom: 2px dashed #D5E8D4; }
+.sb-section h3 { font-size: 11px; color: #5A9E6F; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+/* Alerts */
+.alert-row { display: flex; gap: 6px; align-items: flex-start; padding: 6px 8px; border-radius: 8px; background: #FFF5F5; margin-bottom: 4px; font-size: 11px; border-left: 3px solid #E88; cursor: pointer; }
+.alert-row:hover { background: #FFE8E8; }
+
+/* Crops */
+.crop-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+.crop-card {
+  width: 64px; padding: 4px; border-radius: 8px; text-align: center;
+  border: 2px solid #A8D5BA; background: #F0FFF0; cursor: pointer; transition: all 0.15s;
+}
+.crop-card:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.crop-card .cc-emoji { font-size: 20px; }
+.crop-card .cc-name { font-weight: 700; font-size: 9px; color: #5A9E6F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crop-card.wilting { border-color: #E8C97A; background: #FFFAF0; }
+.crop-card.dying { border-color: #E88; background: #FFF5F5; }
+
+/* Zone info */
+.zone-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px;
+  margin-bottom: 4px; cursor: pointer; transition: background 0.2s; font-size: 12px;
+}
+.zone-row:hover { background: rgba(139,201,158,0.15); }
+.zone-row .zr-icon { font-size: 18px; }
+.zone-row .zr-name { font-weight: 700; font-size: 12px; }
+.zone-row .zr-status { font-size: 10px; color: #888; }
+.zone-row.danger { background: #FFF5F5; }
+
+/* Action modal */
+#action-modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 300; align-items: center; justify-content: center;
+}
+#action-modal.show { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.modal-box h2 { font-size: 18px; margin-bottom: 12px; }
+.modal-box input {
+  width: 100%; padding: 10px; border: 2px solid #D5E8D4; border-radius: 8px;
+  font-size: 14px; margin-bottom: 12px;
+}
+.modal-box input:focus { border-color: #8BC99E; outline: none; }
+.modal-box .btn-row { display: flex; gap: 8px; }
+.modal-box button {
+  flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 700;
+  font-size: 14px; cursor: pointer;
+}
+.btn-primary { background: #8BC99E; color: #fff; }
+.btn-primary:hover { background: #6AAF7E; }
+.btn-cancel { background: #eee; color: #666; }
+
+/* Toast */
+#toast {
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, #FFD700, #FFA500); color: #fff; font-weight: 800;
+  padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 16px rgba(255,165,0,0.4);
+  z-index: 400; display: none; font-size: 16px;
+}
+#toast.show { display: block; animation: toastIn 0.3s ease-out; }
+@keyframes toastIn { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } }
+
+@media (max-width: 768px) {
+  #main-wrap { flex-direction: column; }
+  #sidebar { width: auto; max-height: 40vh; }
+}
+</style>
+</head>
+<body>
+
+<div id="top-bar">
+  <div class="title">🏝️ Player HQ</div>
+  <div class="metrics">
+    <span class="metric" id="m-mrr">💰 $0</span>
+    <span class="metric" id="m-streak">🔥 0d</span>
+    <span class="metric" id="m-tier">🏝️ Loading...</span>
+    <span class="metric" id="m-alerts">🔔 0</span>
+  </div>
+</div>
+
+<div id="main-wrap">
+  <div id="game-container"></div>
+  <div id="sidebar">
+    <div class="sb-section" id="alerts-section" style="display:none;">
+      <h3>⚠️ Needs Attention</h3>
+      <div id="alerts-list"></div>
+    </div>
+    <div class="sb-section">
+      <h3>🌾 Clients</h3>
+      <div class="crop-grid" id="crop-grid"></div>
+    </div>
+    <div class="sb-section">
+      <h3>🏝️ Zones</h3>
+      <div id="zones-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Action Modal (for real game actions like Drive link input) -->
+<div id="action-modal">
+  <div class="modal-box">
+    <h2 id="modal-title">🔥 Feed the Barracks</h2>
+    <p id="modal-desc" style="font-size:13px;color:#666;margin-bottom:12px;">Paste a Google Drive link with new ad creatives to extinguish the fire.</p>
+    <input type="text" id="modal-input" placeholder="https://drive.google.com/...">
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" id="modal-submit" onclick="submitAction()">🎯 Feed Ads</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<script>
+// ============================================================
+// GAME STATE
+// ============================================================
+const GS = {
+  projects: 0, crops: [], warzone: { burnLevel: 0 },
+  treasury: { mrr: 0 }, alerts: [], streak: 0,
+  player: { state: 'idle', zone: 'hub' }
+};
+
+const TIERS = [
+  { name: 'Dirt Patch', min: 0, scale: 0.6 },
+  { name: 'Homestead', min: 3, scale: 0.75 },
+  { name: 'Village', min: 6, scale: 0.9 },
+  { name: 'Kingdom', min: 10, scale: 1.0 }
+];
+
+let currentModal = null;
+let scene = null;
+
+// ============================================================
+// BUILDING POSITIONS (isometric grid)
+// ============================================================
+const BUILDINGS = {
+  greenhouse: { col: 0, label: 'Farm', action: 'water' },
+  kitchen:    { col: 1, label: 'Kitchen', action: null },
+  barracks:   { col: 2, label: 'Barracks', action: 'feed_ads' },
+  treasury:   { col: 3, label: 'Treasury', action: null },
+  postoffice: { col: 4, label: 'Dock', action: 'ship' }
+};
+
+// ============================================================
+// PHASER SCENE
+// ============================================================
+class HQScene extends Phaser.Scene {
+  constructor() { super('HQScene'); }
+
+  preload() {
+    // Load sprites
+    this.load.image('robot-idle', 'sprites/robot/robot-states.png');
+    this.load.image('shibas', 'sprites/shiba/shibas.png');
+    this.load.image('b-greenhouse', 'sprites/buildings/greenhouse.png');
+    this.load.image('b-kitchen', 'sprites/buildings/kitchen.png');
+    this.load.image('b-barracks', 'sprites/buildings/barracks.png');
+    this.load.image('b-treasury', 'sprites/buildings/treasury.png');
+    this.load.image('b-postoffice', 'sprites/buildings/postoffice.png');
+
+    // Fallback if sprites aren't ready yet
+    this.load.on('filefailed', (key) => {
+      console.log('Sprite not found:', key, '- using fallback');
+    });
+  }
+
+  create() {
+    scene = this;
+    const W = this.scale.width, H = this.scale.height;
+    const cx = W / 2, cy = H / 2;
+
+    // Sky
+    this.add.rectangle(cx, cy, W, H, 0x7EC8E3);
+
+    // Clouds
+    this.clouds = [];
+    for (let i = 0; i < 8; i++) {
+      const cloud = this.createCloud(
+        Phaser.Math.Between(-100, W + 100),
+        Phaser.Math.Between(20, H * 0.35)
+      );
+      this.clouds.push(cloud);
+    }
+
+    // Island base (grass + dirt)
+    this.islandContainer = this.add.container(cx, cy + 50).setDepth(10);
+    this.drawIslandBase(0, 0, 400, 200);
+
+    // Buildings
+    this.buildingSprites = {};
+    this.buildingContainers = {};
+    const startX = -300, spacing = 150;
+
+    Object.entries(BUILDINGS).forEach(([key, bld], i) => {
+      const bx = startX + i * spacing;
+      const by = 0;
+      const container = this.add.container(bx, by).setDepth(20 + i);
+
+      // Try to load sprite, fallback to procedural
+      const texKey = 'b-' + key;
+      if (this.textures.exists(texKey)) {
+        const sprite = this.add.image(0, -40, texKey).setScale(0.2);
+        container.add(sprite);
+        this.buildingSprites[key] = sprite;
+      } else {
+        // Procedural fallback building
+        const g = this.add.graphics();
+        const colors = {
+          greenhouse: 0x4CAF50, kitchen: 0xFF8C00,
+          barracks: 0x556B2F, treasury: 0xFFD700, postoffice: 0xE07050
+        };
+        g.fillStyle(colors[key] || 0x888888, 1);
+        g.fillRect(-30, -60, 60, 50);
+        // Roof
+        g.fillStyle(0x8B4513, 1);
+        g.fillTriangle(-35, -60, 0, -85, 35, -60);
+        container.add(g);
+      }
+
+      // Label
+      const label = this.add.text(0, 10, bld.label, {
+        fontFamily: 'Nunito', fontSize: '11px', fontWeight: 'bold',
+        color: '#fff', stroke: '#333', strokeThickness: 3
+      }).setOrigin(0.5);
+      container.add(label);
+
+      // Health bar
+      const healthBg = this.add.rectangle(0, 22, 50, 6, 0x333333, 0.5).setOrigin(0.5);
+      const healthFill = this.add.rectangle(-25, 22, 50, 6, 0x4CAF50).setOrigin(0, 0.5);
+      container.add(healthBg);
+      container.add(healthFill);
+      container.healthFill = healthFill;
+      container.healthPct = 100;
+
+      // Interactive
+      const hitArea = this.add.rectangle(0, -30, 80, 80, 0xffffff, 0).setInteractive();
+      container.add(hitArea);
+      hitArea.on('pointerdown', () => this.onBuildingClick(key));
+      hitArea.on('pointerover', () => { container.setScale(1.08); document.body.style.cursor = 'pointer'; });
+      hitArea.on('pointerout', () => { container.setScale(1); document.body.style.cursor = 'default'; });
+
+      this.buildingContainers[key] = container;
+      this.islandContainer.add(container);
+    });
+
+    // Robot character
+    this.robot = this.add.container(0, 0).setDepth(100);
+    if (this.textures.exists('robot-idle')) {
+      const robotSprite = this.add.image(0, -20, 'robot-idle').setScale(0.15);
+      this.robot.add(robotSprite);
+    } else {
+      this.drawRobotFallback();
+    }
+    this.islandContainer.add(this.robot);
+
+    // Shiba companion
+    this.shiba = this.add.container(30, 10).setDepth(99);
+    if (this.textures.exists('shibas')) {
+      const shibaSprite = this.add.image(0, 0, 'shibas').setScale(0.06);
+      this.shiba.add(shibaSprite);
+    } else {
+      this.drawShibaFallback();
+    }
+    this.islandContainer.add(this.shiba);
+
+    // Fire particles container
+    this.fireParticles = [];
+
+    // Speech bubble
+    this.speechBubble = null;
+
+    // Animation timer
+    this.time.addEvent({ delay: 50, loop: true, callback: () => this.tick() });
+    this.time.addEvent({ delay: 2000, loop: true, callback: () => this.spawnAmbient() });
+
+    // Move robot to hub initially
+    this.moveRobotTo('kitchen');
+  }
+
+  createCloud(x, y) {
+    const g = this.add.graphics().setDepth(2);
+    const s = Phaser.Math.Between(40, 80);
+    g.fillStyle(0xFFFFFF, 0.75);
+    g.fillCircle(x, y, s * 0.35);
+    g.fillCircle(x + s * 0.3, y + 4, s * 0.28);
+    g.fillCircle(x - s * 0.2, y + 2, s * 0.25);
+    return { gfx: g, x, speed: Phaser.Math.FloatBetween(0.2, 0.5) };
+  }
+
+  drawIslandBase(cx, cy, w, h) {
+    const g = this.add.graphics().setDepth(5);
+
+    // Shadow
+    g.fillStyle(0x000000, 0.15);
+    g.fillEllipse(cx + 5, cy + h * 0.45, w * 1.8, h * 0.4);
+
+    // Dirt underside
+    g.fillStyle(0x8B6914, 1);
+    g.beginPath();
+    g.moveTo(cx - w * 0.85, cy);
+    g.bezierCurveTo(cx - w * 0.6, cy + h, cx + w * 0.6, cy + h, cx + w * 0.85, cy);
+    g.closePath();
+    g.fillPath();
+
+    // Darker dirt
+    g.fillStyle(0x6B4914, 1);
+    g.beginPath();
+    g.moveTo(cx - w * 0.4, cy + h * 0.2);
+    g.bezierCurveTo(cx - w * 0.2, cy + h * 0.85, cx + w * 0.2, cy + h * 0.85, cx + w * 0.4, cy + h * 0.2);
+    g.closePath();
+    g.fillPath();
+
+    // Grass top
+    g.fillStyle(0x8BC99E, 1);
+    g.fillEllipse(cx, cy, w * 1.7, h * 0.8);
+
+    // Lighter center
+    g.fillStyle(0xA8D5BA, 0.6);
+    g.fillEllipse(cx, cy - 5, w * 1.3, h * 0.55);
+
+    // Stone path
+    g.fillStyle(0xC0B090, 0.6);
+    g.fillRoundedRect(cx - w * 0.75, cy - 3, w * 1.5, 6, 3);
+
+    // Flowers
+    const colors = [0xFF6B6B, 0xFFBE76, 0xA29BFE, 0xFD79A8, 0x74B9FF];
+    for (let i = 0; i < 12; i++) {
+      const fx = cx + Phaser.Math.Between(-w * 0.7, w * 0.7);
+      const fy = cy + Phaser.Math.Between(-h * 0.25, h * 0.15);
+      g.fillStyle(colors[i % colors.length], 0.8);
+      g.fillCircle(fx, fy, 3);
+      g.fillStyle(0x5A9E6F, 0.8);
+      g.fillRect(fx - 0.5, fy, 1, 5);
+    }
+
+    // Trees on edges
+    this.drawTree(g, cx - w * 0.8, cy - h * 0.15, 'pine');
+    this.drawTree(g, cx + w * 0.8, cy - h * 0.1, 'oak');
+    this.drawTree(g, cx - w * 0.6, cy - h * 0.3, 'palm');
+
+    this.islandContainer.add(g);
+  }
+
+  drawTree(g, x, y, type) {
+    g.fillStyle(0x8B6914, 1);
+    g.fillRect(x - 3, y - 5, 6, 18);
+    if (type === 'pine') {
+      g.fillStyle(0x2E7D32, 1);
+      g.fillTriangle(x - 14, y - 5, x, y - 30, x + 14, y - 5);
+      g.fillTriangle(x - 10, y - 15, x, y - 38, x + 10, y - 15);
+    } else if (type === 'oak') {
+      g.fillStyle(0x4CAF50, 1);
+      g.fillCircle(x, y - 16, 14);
+    } else {
+      g.fillStyle(0x2E7D32, 1);
+      for (let a = 0; a < 5; a++) {
+        const angle = (a / 5) * Math.PI * 2;
+        g.fillEllipse(x + Math.cos(angle) * 14, y - 22 + Math.sin(angle) * 6, 16, 5);
+      }
+    }
+  }
+
+  drawRobotFallback() {
+    const g = this.add.graphics();
+    // Body
+    g.fillStyle(0xBBBBCC, 1); g.fillRoundedRect(-10, -5, 20, 22, 5);
+    // Head
+    g.fillStyle(0xCCCCDD, 1); g.fillCircle(0, -18, 12);
+    // Visor
+    g.fillStyle(0x0a0a0f, 1); g.fillRoundedRect(-8, -22, 16, 7, 3);
+    g.fillStyle(0x64FFDA, 1); g.fillRect(-6, -21, 5, 5); g.fillRect(2, -21, 5, 5);
+    // Antenna
+    g.lineStyle(2, 0xBBBBCC); g.lineBetween(0, -30, 0, -38);
+    g.fillStyle(0x64FFDA, 1); g.fillCircle(0, -40, 3);
+    this.robot.add(g);
+    this.robotGfx = g;
+  }
+
+  drawShibaFallback() {
+    const g = this.add.graphics();
+    g.fillStyle(0xE8A87C, 1); g.fillCircle(0, 2, 8);
+    g.fillStyle(0xC07850, 1);
+    g.fillTriangle(-6, -3, -3, -10, 0, -3);
+    g.fillTriangle(6, -3, 3, -10, 0, -3);
+    g.fillStyle(0x333, 1); g.fillCircle(-3, 0, 1.5); g.fillCircle(3, 0, 1.5);
+    g.fillStyle(0xE8A87C, 1); g.fillCircle(9, 4, 4);
+    this.shiba.add(g);
+  }
+
+  moveRobotTo(buildingKey) {
+    const bld = this.buildingContainers[buildingKey];
+    if (!bld) return;
+    GS.player.zone = buildingKey;
+
+    this.tweens.add({
+      targets: this.robot, x: bld.x, y: bld.y + 30,
+      duration: 600, ease: 'Sine.easeInOut'
+    });
+    this.tweens.add({
+      targets: this.shiba, x: bld.x + 25, y: bld.y + 35,
+      duration: 750, ease: 'Sine.easeInOut'
+    });
+  }
+
+  onBuildingClick(key) {
+    this.moveRobotTo(key);
+
+    const bld = BUILDINGS[key];
+    if (bld.action === 'feed_ads' && GS.warzone.burnLevel > 25) {
+      openModal('feed_ads');
+    } else if (bld.action === 'ship') {
+      openModal('ship');
+    } else if (bld.action === 'water') {
+      openModal('water');
+    }
+  }
+
+  showSpeechBubble(x, y, text, duration) {
+    if (this.speechBubble) this.speechBubble.destroy();
+    
+    const bubble = this.add.text(x, y - 50, text, {
+      fontFamily: 'Nunito', fontSize: '12px', fontWeight: 'bold',
+      backgroundColor: '#fff', color: '#333',
+      padding: { x: 8, y: 4 }, shadow: { color: '#000', blur: 4, fill: false }
+    }).setOrigin(0.5).setDepth(200);
+
+    this.islandContainer.add(bubble);
+    this.speechBubble = bubble;
+
+    this.tweens.add({
+      targets: bubble, y: y - 70, alpha: 0,
+      duration: duration || 2000, delay: 1000,
+      onComplete: () => bubble.destroy()
+    });
+  }
+
+  tick() {
+    const t = this.time.now;
+
+    // Robot idle bounce
+    if (this.robot) this.robot.y += Math.sin(t / 400) * 0.25;
+
+    // Shiba wag
+    if (this.shiba) this.shiba.angle = Math.sin(t / 200) * 5;
+
+    // Clouds
+    this.clouds.forEach(c => {
+      c.x -= c.speed;
+      c.gfx.x -= c.speed;
+      if (c.x < -150) {
+        const reset = this.scale.width + 150;
+        c.gfx.x += reset - c.x + 150;
+        c.x = reset;
+      }
+    });
+
+    // Fire particles
+    this.fireParticles = this.fireParticles.filter(f => f.active);
+
+    // Building deterioration visual
+    Object.entries(this.buildingContainers).forEach(([key, container]) => {
+      if (key === 'barracks' && GS.warzone.burnLevel > 25) {
+        container.setAlpha(0.85 + Math.sin(t / 100) * 0.15);
+        // Shake
+        container.x = BUILDINGS[key].col * 150 - 300 + Math.sin(t / 50) * (GS.warzone.burnLevel / 50);
+      }
+    });
+  }
+
+  spawnAmbient() {
+    // Fire on barracks
+    if (GS.warzone.burnLevel > 25) {
+      const bld = this.buildingContainers['barracks'];
+      if (bld) {
+        const count = Math.ceil(GS.warzone.burnLevel / 25);
+        for (let i = 0; i < count; i++) {
+          const fire = this.add.text(
+            bld.x + Phaser.Math.Between(-30, 30),
+            bld.y - Phaser.Math.Between(40, 80),
+            '🔥', { fontSize: (14 + i * 3) + 'px' }
+          ).setOrigin(0.5).setDepth(150);
+          this.islandContainer.add(fire);
+          this.tweens.add({
+            targets: fire, y: fire.y - 40, alpha: 0,
+            duration: 800 + Math.random() * 400,
+            onComplete: () => fire.destroy()
+          });
+          this.fireParticles.push(fire);
+        }
+        // Speech bubble warning
+        if (Math.random() < 0.3) {
+          this.showSpeechBubble(bld.x, bld.y, GS.warzone.burnLevel > 60 ? '🔥 NEED ADS!' : '⚠️ Running low...', 3000);
+        }
+      }
+    }
+
+    // Crop health warnings
+    GS.crops.forEach((crop, i) => {
+      if (crop.health < 40 && Math.random() < 0.3) {
+        const bld = this.buildingContainers['greenhouse'];
+        if (bld) {
+          this.showSpeechBubble(bld.x - 20 + i * 15, bld.y, crop.health < 20 ? '💀' : '🥀', 2000);
+        }
+      }
+    });
+  }
+
+  updateBuildingHealth(key, pct) {
+    const container = this.buildingContainers[key];
+    if (!container || !container.healthFill) return;
+    container.healthPct = pct;
+    container.healthFill.setScale(pct / 100, 1);
+    const color = pct > 60 ? 0x4CAF50 : pct > 30 ? 0xFFC107 : 0xF44336;
+    container.healthFill.setFillStyle(color);
+  }
+}
+
+// ============================================================
+// PHASER INIT
+// ============================================================
+const game = new Phaser.Game({
+  type: Phaser.AUTO,
+  parent: 'game-container',
+  backgroundColor: '#7EC8E3',
+  scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
+  scene: HQScene
+});
+
+// ============================================================
+// MODAL ACTIONS
+// ============================================================
+function openModal(action) {
+  currentModal = action;
+  const modal = document.getElementById('action-modal');
+  const title = document.getElementById('modal-title');
+  const desc = document.getElementById('modal-desc');
+  const input = document.getElementById('modal-input');
+  const submit = document.getElementById('modal-submit');
+
+  if (action === 'feed_ads') {
+    title.textContent = '⚔️ Feed the Barracks';
+    desc.textContent = 'Paste a Google Drive link with new ad creatives to extinguish the fire.';
+    input.placeholder = 'https://drive.google.com/drive/folders/...';
+    submit.textContent = '🎯 Feed Ads';
+  } else if (action === 'ship') {
+    title.textContent = '📮 Ship Deliverable';
+    desc.textContent = 'Paste a link to the deliverable to ship it out.';
+    input.placeholder = 'https://drive.google.com/file/...';
+    submit.textContent = '🚢 Ship It';
+  } else if (action === 'water') {
+    title.textContent = '🌾 Water Crops';
+    desc.textContent = 'Which client needs attention? Type their name or paste a Slack link.';
+    input.placeholder = 'Client name or Slack thread link...';
+    submit.textContent = '💧 Water';
+  }
+
+  input.value = '';
+  modal.classList.add('show');
+  setTimeout(() => input.focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('action-modal').classList.remove('show');
+  currentModal = null;
+}
+
+async function submitAction() {
+  const input = document.getElementById('modal-input').value.trim();
+  if (!input) return;
+
+  if (currentModal === 'feed_ads') {
+    try {
+      await fetch('/api/hq/ads/feed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: 1, link: input })
+      });
+      showToast('🎯 Ads fed! Fire extinguished!');
+      fetchData();
+    } catch(e) { showToast('❌ Error feeding ads'); }
+  } else if (currentModal === 'ship') {
+    showToast('🚢 Deliverable shipped!');
+  } else if (currentModal === 'water') {
+    showToast('💧 ' + input + ' watered!');
+  }
+
+  closeModal();
+}
+
+// Enter key submits modal
+document.getElementById('modal-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitAction();
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(text) {
+  const toast = document.getElementById('toast');
+  toast.textContent = text;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ============================================================
+// DATA FETCH
+// ============================================================
+async function fetchData() {
+  try {
+    const [hqState, projects, metrics, ads, alerts] = await Promise.all([
+      fetch('/api/hq/state').then(r => r.json()).catch(() => ({})),
+      fetch('/api/hq/projects').then(r => r.json()).catch(() => ({ projects: [] })),
+      fetch('/api/hq/metrics').then(r => r.json()).catch(() => ({ mrr: 0 })),
+      fetch('/api/hq/ads').then(r => r.json()).catch(() => ({ burnLevel: 0 })),
+      fetch('/api/hq/alerts').then(r => r.json()).catch(() => ({ alerts: [] }))
+    ]);
+
+    GS.projects = (projects.projects || []).length;
+    GS.treasury.mrr = metrics.mrr || 0;
+    GS.warzone.burnLevel = ads.burnLevel || 0;
+    GS.alerts = alerts.alerts || [];
+    GS.streak = hqState.metrics?.streak || 0;
+    GS.crops = (hqState.rooms?.greenhouse?.plants || []).map(p => ({
+      name: p.client, health: p.health, stage: p.stage
+    }));
+
+    updateSidebar();
+
+    // Update building health
+    if (scene) {
+      scene.updateBuildingHealth('barracks', Math.max(0, 100 - GS.warzone.burnLevel));
+      GS.crops.forEach((c, i) => {
+        if (i === 0 && scene) scene.updateBuildingHealth('greenhouse', c.health);
+      });
+    }
+  } catch(e) { console.error('Fetch:', e); }
+}
+
+function updateSidebar() {
+  const tier = TIERS.findLast(t => GS.projects >= t.min) || TIERS[0];
+  document.getElementById('m-mrr').textContent = '💰 $' + Math.round(GS.treasury.mrr).toLocaleString();
+  document.getElementById('m-streak').textContent = '🔥 ' + GS.streak + 'd';
+  document.getElementById('m-tier').textContent = '🏝️ ' + tier.name;
+
+  const alertEl = document.getElementById('m-alerts');
+  alertEl.textContent = '🔔 ' + GS.alerts.length;
+  alertEl.classList.toggle('danger', GS.alerts.length > 0);
+
+  // Alerts
+  const as = document.getElementById('alerts-section');
+  const al = document.getElementById('alerts-list');
+  if (GS.alerts.length > 0) {
+    as.style.display = '';
+    al.innerHTML = GS.alerts.map(a =>
+      `<div class="alert-row" onclick="openModal('feed_ads')">${a.title}: ${a.message}</div>`
+    ).join('');
+  } else { as.style.display = 'none'; }
+
+  // Crops
+  document.getElementById('crop-grid').innerHTML = GS.crops.map(c => {
+    const cls = c.health > 60 ? '' : c.health > 30 ? 'wilting' : 'dying';
+    const emoji = c.health > 60 ? '🌿' : c.health > 30 ? '🥀' : '💀';
+    return `<div class="crop-card ${cls}" onclick="openModal('water')">
+      <div class="cc-emoji">${emoji}</div>
+      <div class="cc-name">${c.name.split(' ')[0]}</div>
+      <div style="font-size:9px;color:#888;">${c.health}%</div>
+    </div>`;
+  }).join('');
+
+  // Zones
+  const burn = GS.warzone.burnLevel;
+  const wStatus = burn > 75 ? '🔥🔥 CRITICAL' : burn > 50 ? '🔥 Burning' : burn > 25 ? '⚠️ Low' : '✅ OK';
+  const wCls = burn > 50 ? 'danger' : '';
+
+  document.getElementById('zones-list').innerHTML = `
+    <div class="zone-row" onclick="scene&&scene.moveRobotTo('greenhouse')"><span class="zr-icon">🌾</span><div><div class="zr-name">Farm</div><div class="zr-status">${GS.crops.length} clients</div></div></div>
+    <div class="zone-row" onclick="scene&&scene.moveRobotTo('kitchen')"><span class="zr-icon">🍳</span><div><div class="zr-name">Kitchen</div><div class="zr-status">Content creation</div></div></div>
+    <div class="zone-row ${wCls}" onclick="scene&&scene.moveRobotTo('barracks');${burn>25?'openModal(\"feed_ads\")':''}"><span class="zr-icon">⚔️</span><div><div class="zr-name">Barracks</div><div class="zr-status">${wStatus}</div></div></div>
+    <div class="zone-row" onclick="scene&&scene.moveRobotTo('treasury')"><span class="zr-icon">💰</span><div><div class="zr-name">Treasury</div><div class="zr-status">$${Math.round(GS.treasury.mrr)} MRR</div></div></div>
+    <div class="zone-row" onclick="scene&&scene.moveRobotTo('postoffice')"><span class="zr-icon">📮</span><div><div class="zr-name">Dock</div><div class="zr-status">Deliverables</div></div></div>
+  `;
+}
+
+// Init
+fetchData();
+setInterval(fetchData, 30000);
+
+try {
+  const ws = new WebSocket('ws://' + location.host + '/hq');
+  ws.onmessage = () => fetchData();
+} catch(e) {}
+</script>
+</body>
+</html>
