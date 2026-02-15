@@ -1,5 +1,9 @@
 /**
- * fal.ai Video Generation Service
+ * fal.ai Video & Image Generation Service
+ * 
+ * Image Models:
+ * - Seedream 4: fal-ai/bytedance/seedream/v4/text-to-image
+ * - Flux Dev: fal-ai/flux/dev
  * Uses fal.ai API for video generation (Veo 3.1, Grok, LTX-2, Kling)
  */
 

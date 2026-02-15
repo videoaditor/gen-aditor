@@ -199,10 +199,27 @@ for (let fr = 0; fr < FARM_ROWS; fr++) {
 
 // Client-to-plant mapping — each client gets a unique custom plant
 const CLIENT_PLANTS = {
+  // Custom sprites
   'Veda Naturals': 'plants/plant-veda-naturals.png',
+  'Veda':          'plants/plant-veda-naturals.png',
   'Get A Drip':    'plants/plant-get-a-drip.png',
   'Clubwell':      'plants/plant-clubwell.png',
   'Gracen':        'plants/plant-gracen.png',
+  // Use seedling for others (will add custom sprites later)
+  'Bawldy':        'plants/plant-seedling.png',
+  'Buchmann':      'plants/plant-seedling.png',
+  'Cuppings':      'plants/plant-seedling.png',
+  'Dr Franks':     'plants/plant-seedling.png',
+  'EcomPro':       'plants/plant-seedling.png',
+  'Glow25':        'plants/plant-seedling.png',
+  'K&O':           'plants/plant-seedling.png',
+  'Levide':        'plants/plant-seedling.png',
+  'Lift':          'plants/plant-seedling.png',
+  'Lior':          'plants/plant-seedling.png',
+  'LOTUS':         'plants/plant-seedling.png',
+  'mammaly':       'plants/plant-seedling.png',
+  'Olivia':        'plants/plant-seedling.png',
+  'Proof Brother': 'plants/plant-seedling.png',
 };
 
 // ============================================================
@@ -711,11 +728,21 @@ function showToast(t) {
 // ============================================================
 async function fetchData() {
   try {
-    const [state, metrics, ads] = await Promise.all([
+    const [state, metrics, ads, backends] = await Promise.all([
       fetch('/api/hq/state').then(r => r.json()).catch(() => ({})),
       fetch('/api/hq/metrics').then(r => r.json()).catch(() => ({})),
       fetch('/api/hq/ads').then(r => r.json()).catch(() => ({})),
+      fetch('/api/hq/backends').then(r => r.json()).catch(() => ({})),
     ]);
+    
+    // Update backend status
+    if (backends) {
+      GS.backends = {
+        gen: backends.gen?.status || false,
+        mixer: backends.mixer?.status || false,
+        hooks: backends.hooks?.status || false,
+      };
+    }
 
     GS.mrr = metrics.mrr || 0;
     GS.treasury = metrics;
@@ -789,8 +816,14 @@ ctx.fillText('🏝️ Loading Player HQ...', canvas.width / 2, canvas.height / 2
 loadAllSprites(() => {
   console.log(`Loaded ${Object.keys(sprites).length}/${totalAssets} sprites`);
   render();
-  fetchData();
-  setInterval(fetchData, 30000);
+  // Sync from Trello on load, then fetch data
+  fetch('/api/hq/sync', { method: 'POST' })
+    .then(() => console.log('Synced from Trello'))
+    .catch(() => console.log('Sync skipped'))
+    .finally(() => {
+      fetchData();
+      setInterval(fetchData, 30000);
+    });
 });
 </script>
 </body>

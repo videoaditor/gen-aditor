@@ -44,24 +44,112 @@
       "name": "Client Farm",
       "plants": [
         {
-          "client": "Veda Naturals",
-          "health": 80,
-          "stage": "flowering"
+          "client": "Lior",
+          "health": 20,
+          "stage": "wilting",
+          "lastActivity": "2026-02-09T13:04:16.648Z"
+        },
+        {
+          "client": "Buchmann",
+          "health": 56,
+          "stage": "seedling",
+          "lastActivity": "2026-02-11T12:53:47.002Z"
+        },
+        {
+          "client": "K&O",
+          "health": 58,
+          "stage": "seedling",
+          "lastActivity": "2026-02-11T15:12:05.085Z"
+        },
+        {
+          "client": "Dr Franks",
+          "health": 60,
+          "stage": "growing",
+          "lastActivity": "2026-02-11T17:30:37.449Z"
+        },
+        {
+          "client": "LOTUS",
+          "health": 78,
+          "stage": "growing",
+          "lastActivity": "2026-02-12T14:26:06.406Z"
+        },
+        {
+          "client": "EcomPro",
+          "health": 82,
+          "stage": "flowering",
+          "lastActivity": "2026-02-12T19:49:54.912Z"
         },
         {
           "client": "Get A Drip",
-          "health": 60,
-          "stage": "growing"
+          "health": 95,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T11:09:42.864Z"
+        },
+        {
+          "client": "Glow25",
+          "health": 95,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T11:03:10.809Z"
+        },
+        {
+          "client": "Levide",
+          "health": 95,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T10:44:08.629Z"
+        },
+        {
+          "client": "Lift",
+          "health": 95,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T10:57:32.733Z"
         },
         {
           "client": "Clubwell",
-          "health": 70,
-          "stage": "growing"
+          "health": 96,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T12:49:36.774Z"
+        },
+        {
+          "client": "Bawldy",
+          "health": 97,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T13:54:59.437Z"
+        },
+        {
+          "client": "Veda",
+          "health": 98,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T14:48:13.234Z"
+        },
+        {
+          "client": "Cuppings",
+          "health": 99,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T16:08:54.287Z"
         },
         {
           "client": "Gracen",
-          "health": 50,
-          "stage": "seedling"
+          "health": 99,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T16:08:43.630Z"
+        },
+        {
+          "client": "mammaly",
+          "health": 99,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T16:27:52.947Z"
+        },
+        {
+          "client": "Olivia",
+          "health": 100,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T16:48:19.700Z"
+        },
+        {
+          "client": "Proof Brother",
+          "health": 100,
+          "stage": "flowering",
+          "lastActivity": "2026-02-13T16:58:15.572Z"
         }
       ]
     },
@@ -89,10 +177,10 @@
   "metrics": {
     "mrr": 0,
     "ltv": 0,
-    "activeClients": 4,
+    "activeClients": 18,
     "tasksCompletedToday": 0,
     "streak": 0,
-    "lastUpdated": null
+    "lastUpdated": "2026-02-13T17:07:30.554Z"
   },
   "upgrades": {
     "available": [

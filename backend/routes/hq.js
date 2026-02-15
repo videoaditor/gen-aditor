@@ -465,4 +465,77 @@ router.get('/alerts', (req, res) => {
   }
 });
 
+
+// --- Sync from Trello ---
+const CLIENT_BOARD_MAP = {
+  'Bawldy': 'Bawldy', 'Buchmann': 'Buchmann', 'Clubwell': 'Clubwell',
+  'Cuppings': 'Cuppings', 'Dr Franks': 'Dr Franks', 'EcomPro': 'EcomPro GmbH',
+  'Get A Drip': 'Get A Drip', 'Glow25': 'Glow25 / DailyRituals', 
+  'Gracen': 'Gracen App', 'K&O': 'K&O Solutions Limited', 'Levide': 'Levide',
+  'Lift': 'Lift', 'Lior': 'Lior', 'LOTUS': 'LOTUS',
+  'mammaly': 'mammaly (Peturo GmbH)', 'Olivia': 'Olivia Morasch',
+  'Proof Brother': 'Proof Brother', 'Veda': 'Veda Naturals',
+};
+
+router.post('/sync', async (req, res) => {
+  try {
+    const key = process.env.TRELLO_API_KEY || process.env.TRELLO_KEY;
+    const token = process.env.TRELLO_TOKEN;
+    if (!key || !token) return res.status(500).json({ error: 'Trello not configured' });
+
+    const axios = require('axios');
+    const boardsRes = await axios.get(
+      `https://api.trello.com/1/members/me/boards?key=${key}&token=${token}&fields=name,dateLastActivity`
+    );
+
+    const boardActivity = {};
+    for (const b of boardsRes.data) boardActivity[b.name] = b.dateLastActivity;
+
+    const state = readState();
+    const plants = [];
+    const now = Date.now();
+
+    for (const [client, boardName] of Object.entries(CLIENT_BOARD_MAP)) {
+      const lastAct = boardActivity[boardName];
+      if (lastAct) {
+        const hoursSince = (now - new Date(lastAct).getTime()) / (1000*60*60);
+        const health = Math.max(20, Math.round(100 - (hoursSince/12)*10));
+        const stage = health >= 80 ? 'flowering' : health >= 60 ? 'growing' : health >= 40 ? 'seedling' : 'wilting';
+        plants.push({ client, health, stage, lastActivity: lastAct });
+      }
+    }
+
+    plants.sort((a,b) => a.health - b.health);
+    state.rooms.greenhouse.plants = plants;
+    state.metrics.activeClients = plants.length;
+    state.metrics.lastUpdated = new Date().toISOString();
+    writeState(state);
+
+    const unhealthy = plants.filter(p => p.health < 60);
+    res.json({ synced: plants.length, unhealthy: unhealthy.length, plants: unhealthy });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// --- Backend Health Check ---
+router.get('/backends', async (req, res) => {
+  const backends = {
+    gen: { url: 'http://localhost:3001/health', status: false },
+    mixer: { url: 'http://localhost:3003/health', status: false },
+    hooks: { url: 'http://localhost:3010/health', status: false },
+  };
+
+  const axios = require('axios');
+  await Promise.all(Object.entries(backends).map(async ([name, cfg]) => {
+    try {
+      const r = await axios.get(cfg.url, { timeout: 3000 });
+      backends[name].status = r.data?.status === 'ok' || r.status === 200;
+    } catch { backends[name].status = false; }
+  }));
+
+  res.json(backends);
+});
+
 module.exports = router;

@@ -360,6 +360,22 @@
       padding: 16px;
     }
 
+    .grid-item-cancel {
+      background: rgba(255, 60, 60, 0.2);
+      border: 1px solid rgba(255, 60, 60, 0.4);
+      color: #ff6b6b;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .grid-item-cancel:hover {
+      background: rgba(255, 60, 60, 0.4);
+      color: #fff;
+    }
+
     .grid-item-spinner {
       width: 32px;
       height: 32px;
@@ -2660,6 +2676,13 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           images = JSON.parse(saved);
+          // Clean up any stuck loading placeholders from previous sessions
+          const beforeCount = images.length;
+          images = images.filter(img => !img.loading);
+          if (images.length < beforeCount) {
+            console.log(`Cleaned ${beforeCount - images.length} stuck loading items`);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
+          }
           console.log(`Loaded ${images.length} images from storage`);
         }
       } catch (e) {
@@ -3199,6 +3222,7 @@ Return ONLY the JSON, no explanation.`;
               <div class="grid-item-loading-inner">
                 <div class="grid-item-spinner"></div>
                 <span class="grid-item-loading-text">${img.prompt ? img.prompt.slice(0, 30) + '...' : 'Generating...'}</span>
+                <button class="grid-item-cancel" onclick="event.stopPropagation(); cancelGeneration(${i})" title="Cancel generation">✕ Cancel</button>
               </div>
             </div>
           `;
@@ -3728,6 +3752,30 @@ Return ONLY the JSON, no explanation.`;
 
     // Track active generations for concurrent requests
     let activeGenerations = 0;
+    const activeAbortControllers = new Map(); // placeholderId → AbortController
+
+    function cancelGeneration(index) {
+      const img = images[index];
+      if (img && img.loading && img.id) {
+        // Abort the fetch if still in flight
+        const controller = activeAbortControllers.get(img.id);
+        if (controller) {
+          controller.abort();
+          activeAbortControllers.delete(img.id);
+        }
+        // Remove from images array
+        images.splice(index, 1);
+        activeGenerations = Math.max(0, activeGenerations - 1);
+        updateGeneratingText();
+        if (activeGenerations === 0) {
+          generating.classList.remove('active');
+        }
+        saveImages();
+        renderGrid();
+      }
+    }
+    // Expose globally for onclick
+    window.cancelGeneration = cancelGeneration;
     
     async function generate() {
       const rawPrompt = promptInput.value.trim();
@@ -3781,6 +3829,8 @@ Return ONLY the JSON, no explanation.`;
 
       // Generate all images concurrently
       const generateOne = async (placeholderId, index) => {
+        const abortController = new AbortController();
+        activeAbortControllers.set(placeholderId, abortController);
         try {
           let finalPrompt = basePrompt;
           
@@ -3797,7 +3847,8 @@ Return ONLY the JSON, no explanation.`;
               body: JSON.stringify({ 
                 prompt: `${savedPrompt}. ${modeHint}`,
                 mode: genMode
-              })
+              }),
+              signal: abortController.signal
             });
             
             if (expandRes.ok) {
@@ -3818,7 +3869,8 @@ Return ONLY the JSON, no explanation.`;
               references: savedReferences,
               ratio: savedRatio,
               model: savedModel
-            })
+            }),
+            signal: abortController.signal
           });
 
           const data = await response.json();
@@ -3853,6 +3905,7 @@ Return ONLY the JSON, no explanation.`;
             renderGrid();
           }
         } finally {
+          activeAbortControllers.delete(placeholderId);
           activeGenerations--;
           updateGeneratingText();
           if (activeGenerations === 0) {

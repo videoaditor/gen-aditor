@@ -84,6 +84,7 @@ const klingRoutes = require('./routes/kling');
 const promptExpandRoutes = require('./routes/prompt-expand');
 const variationsRoutes = require('./routes/variations');
 const contextProfileRoutes = require('./routes/context-profile');
+const hqRoutes = require('./routes/hq');
 
 // Import auth middleware
 const { authenticateToken, checkUsageLimit, incrementUsage } = require('./middleware/auth');
@@ -121,6 +122,7 @@ app.use('/api/kling', klingRoutes);
 app.use('/api/prompt', promptExpandRoutes);
 app.use('/api/variations', variationsRoutes);
 app.use('/api/context', contextProfileRoutes);
+app.use('/api/hq', hqRoutes);
 
 // Health check (both paths for convenience)
 app.get('/health', healthHandler);
@@ -557,9 +559,44 @@ function extractImageUrls(outputs) {
   return urls;
 }
 
+// Serve known HTML pages by name (hq, admin, dashboard)
+app.get('/hq', (req, res) => res.sendFile(path.join(frontendPath, 'hq.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(frontendPath, 'admin.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(frontendPath, 'dashboard.html')));
+
+// SPA fallback — serve index.html for any non-API route
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api/') && !req.path.startsWith('/outputs/') && !req.path.startsWith('/uploads/')) {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  } else {
+    res.status(404).json({ error: 'Not found' });
+  }
+});
+
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Aditor Image Gen API running on port ${PORT}`);
   console.log(`📡 ComfyUI: ${COMFYUI_URL}`);
   console.log(`📋 Loaded ${workflows.length} workflows`);
 });
+
+// HQ WebSocket for live updates
+try {
+  const WebSocket = require('ws');
+  const wss = new WebSocket.Server({ server, path: '/hq' });
+  wss.on('connection', (ws) => {
+    console.log('[HQ] Client connected');
+    const sendState = () => {
+      try {
+        const state = JSON.parse(fs.readFileSync(path.join(__dirname, 'hq-state.json'), 'utf8'));
+        ws.send(JSON.stringify({ type: 'stateUpdate', data: state }));
+      } catch(e) {}
+    };
+    sendState();
+    const interval = setInterval(sendState, 5000);
+    ws.on('close', () => clearInterval(interval));
+  });
+  console.log('[HQ] WebSocket ready on /hq');
+} catch(e) {
+  console.log('[HQ] WebSocket not available:', e.message);
+}

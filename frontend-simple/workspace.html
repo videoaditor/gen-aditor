@@ -2098,7 +2098,7 @@
             </div>
           </div>
 
-          <div class="workflow-item coming-soon" data-workflow="motion-transfer">
+          <div class="workflow-item" data-workflow="motion-transfer">
             <div class="workflow-item-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
@@ -2108,6 +2108,19 @@
             <div class="workflow-item-text">
               <div class="workflow-item-name">Motion Transfer</div>
               <div class="workflow-item-desc">Image + video → animate</div>
+            </div>
+          </div>
+
+          <div class="workflow-item" data-workflow="camera-motion">
+            <div class="workflow-item-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                <circle cx="10" cy="12" r="3" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="workflow-item-text">
+              <div class="workflow-item-name">Camera → Motion</div>
+              <div class="workflow-item-desc">Webcam + character → animate</div>
             </div>
           </div>
         </div>
@@ -2313,6 +2326,13 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           images = JSON.parse(saved);
+          // Remove stuck loading/failed images on page load
+          const before = images.length;
+          images = images.filter(img => !img.loading);
+          if (before !== images.length) {
+            console.log(`Cleaned ${before - images.length} stuck generations`);
+            saveImages();
+          }
           console.log(`Loaded ${images.length} images from storage`);
         }
       } catch (e) {
@@ -2834,6 +2854,21 @@ Return ONLY the JSON, no explanation.`;
 
     // ===== IMAGE GRID =====
     function renderGrid() {
+      // Auto-clean stuck loading images older than 2 minutes
+      const now = Date.now();
+      const before = images.length;
+      images = images.filter(img => {
+        if (img.loading && img.createdAt) {
+          const age = now - new Date(img.createdAt).getTime();
+          return age < 120000; // 2 min
+        }
+        return true;
+      });
+      if (images.length !== before) {
+        console.log(`Auto-cleaned ${before - images.length} stuck generations`);
+        saveImages();
+      }
+
       if (images.length === 0) {
         imageGrid.innerHTML = '';
         emptyState.style.display = 'block';
@@ -3462,6 +3497,10 @@ Return ONLY the JSON, no explanation.`;
             }
           }
           
+          // 90 second timeout for image generation
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 90000);
+          
           const response = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3471,8 +3510,11 @@ Return ONLY the JSON, no explanation.`;
               references: savedReferences,
               ratio: savedRatio,
               model: savedModel
-            })
+            }),
+            signal: controller.signal
           });
+          
+          clearTimeout(timeoutId);
 
           const data = await response.json();
           console.log(`Image ${index + 1} response:`, data);
@@ -3498,12 +3540,17 @@ Return ONLY the JSON, no explanation.`;
             renderGrid();
           }
         } catch (err) {
-          console.error(`Generation ${index + 1} failed:`, err);
+          const isTimeout = err.name === 'AbortError';
+          console.error(`Generation ${index + 1} ${isTimeout ? 'timed out' : 'failed'}:`, err);
           // Remove failed placeholder
           const placeholderIndex = images.findIndex(img => img.id === placeholderId);
           if (placeholderIndex >= 0) {
             images.splice(placeholderIndex, 1);
             renderGrid();
+          }
+          // Show toast for timeout
+          if (isTimeout) {
+            alert('Generation timed out after 90s. The server may be overloaded - try again.');
           }
         } finally {
           activeGenerations--;
@@ -3602,6 +3649,16 @@ Return ONLY the JSON, no explanation.`;
         uploadHint: 'Upload image + driving video',
         endpoint: '/api/runcomfy/generate',
         model: 'kling-motion-pro'
+      },
+      'camera-motion': {
+        title: 'Camera → Motion',
+        desc: 'Record yourself with webcam, upload a character image → the character mimics your movements.',
+        showUrl: false,
+        showUpload: true,
+        showScript: false,
+        uploadHint: 'Upload character image + webcam video',
+        endpoint: '/api/runcomfy/generate',
+        model: 'kling-motion-pro'
       }
     };
 
@@ -3637,17 +3694,22 @@ Return ONLY the JSON, no explanation.`;
       const uploadZone = document.getElementById('workflow-upload-zone');
       const promptBar = document.querySelector('.prompt-container');
 
+      // Check if we're on the Shortcuts tab
+      const isOnShortcutsTab = document.querySelector('.nav-tab[data-tab="shortcuts"]')?.classList.contains('active');
+      
       if (config.customLayout === 'ugc-video') {
-        // Show UGC layout, hide generic form and prompt bar
+        // Show UGC layout, hide generic form
         ugcLayout.style.display = 'grid';
         genericForm.style.display = 'none';
         uploadZone.style.display = 'none';
-        if (promptBar) promptBar.style.display = 'none';
+        // Only hide prompt bar if we're on Shortcuts tab
+        if (promptBar && isOnShortcutsTab) promptBar.style.display = 'none';
       } else {
         // Show generic form, hide UGC layout
         ugcLayout.style.display = 'none';
         genericForm.style.display = 'block';
-        if (promptBar) promptBar.style.display = 'block';
+        // Only show prompt bar if we're on Shortcuts tab (Images/Videos tabs handle their own)
+        if (promptBar && isOnShortcutsTab) promptBar.style.display = 'block';
         
         // Show/hide form fields
         document.getElementById('url-field').style.display = config.showUrl ? 'flex' : 'none';
@@ -4246,6 +4308,10 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
     
     // Initialize workflow (UGC video is default, needs custom layout)
     selectWorkflow('script-to-video');
+    
+    // Ensure prompt bar is visible on Images tab (default tab on load)
+    const initPromptBar = document.querySelector('.prompt-container');
+    if (initPromptBar) initPromptBar.style.display = 'block';
   </script>
 
 </body>
