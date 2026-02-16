@@ -5745,6 +5745,14 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
     async function handleBulkFiles(files) {
       if (!files.length) return;
       
+      // Clear old items if not currently generating (new upload session)
+      const hasActiveGeneration = bulkItems.some(it => it.status === 'generating' || it.status === 'uploading' || it.status === 'analyzing');
+      if (!hasActiveGeneration && bulkItems.length > 0) {
+        console.log('[Bulk I2V] New upload session - clearing previous items');
+        bulkItems = [];
+        bulkBatchId = null;
+      }
+      
       const formData = new FormData();
       for (const f of files) {
         formData.append('images', f);
