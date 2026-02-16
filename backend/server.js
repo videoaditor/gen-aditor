@@ -128,6 +128,35 @@ app.use('/api/hq', hqRoutes);
 app.get('/health', healthHandler);
 app.get('/api/health', healthHandler);
 
+// Video proxy for CORS-free downloads (theapi.app doesn't set CORS headers)
+app.get('/api/proxy/video', async (req, res) => {
+  const { url, filename } = req.query;
+  if (!url) {
+    return res.status(400).json({ error: 'Missing url parameter' });
+  }
+  
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: url,
+      responseType: 'stream',
+      timeout: 120000 // 2 min timeout for large videos
+    });
+    
+    // Set headers for download
+    res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename || 'video.mp4'}"`);
+    if (response.headers['content-length']) {
+      res.setHeader('Content-Length', response.headers['content-length']);
+    }
+    
+    response.data.pipe(res);
+  } catch (err) {
+    console.error('[Proxy] Failed to fetch video:', err.message);
+    res.status(500).json({ error: 'Failed to fetch video' });
+  }
+});
+
 function healthHandler(req, res) {
   res.json({ 
     status: 'ok', 
