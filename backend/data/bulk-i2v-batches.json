@@ -1,0 +1,114 @@
+{
+  "7bfadc94-9b21-44f7-9796-143337399672": {
+    "id": "7bfadc94-9b21-44f7-9796-143337399672",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-16T14:54:14.582Z",
+    "jobs": [
+      {
+        "id": "db5559c7-7168-4ed5-8f5c-12cffb3b29ba",
+        "imageUrl": "/uploads/bulk-i2v/515363dc-2a3f-4692-a6fe-f1426ff8659d.png",
+        "prompt": "test motion",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303225224318065.mp4",
+        "error": null
+      }
+    ]
+  },
+  "dac23cdf-f45b-4939-93a2-f075fd2cf8a2": {
+    "id": "dac23cdf-f45b-4939-93a2-f075fd2cf8a2",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-16T14:54:26.716Z",
+    "jobs": [
+      {
+        "id": "d9687599-8379-4a7e-b830-a1a45021b7ea",
+        "imageUrl": "/uploads/bulk-i2v/b4d15d21-d8c2-4376-8ce1-fff96bb185a8.png",
+        "prompt": "The hand gently stirs the bone broth with the wooden spoon, creating subtle swirls in the liquid, as faint steam rises from the warm drink. The camera, likely propped or held, has a very slight, natural wobble with an occasional soft focus adjustment. Rain streaks continue to gently run down the window in the background.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303225432505235.mp4",
+        "error": null
+      },
+      {
+        "id": "deb8eaa1-bd27-4c5d-93c3-1524aa3f3060",
+        "imageUrl": "/uploads/bulk-i2v/f2a7191e-55f0-42d5-bcea-07aca9e44c47.png",
+        "prompt": "The viscous bone broth slowly stretches and drips from the spoon back into the jar, its sticky consistency evident. The camera exhibits a natural, subtle handheld drift and micro-wobble, capturing the intimate, unposed kitchen moment amidst the scattered food prep scraps.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303225466532446.mp4",
+        "error": null
+      },
+      {
+        "id": "a98ae423-8b9f-4578-9a4a-ef78e8da0685",
+        "imageUrl": "/uploads/bulk-i2v/56a9f6cd-4d55-473a-bee8-bf5294209f55.png",
+        "prompt": "The viscous bone broth concentrate slowly drips from the spoon into the jar, with subtle ripples forming in the liquid below. A natural, handheld micro-wobble and slight drift keep the focus on the pour, adding to the authentic, unpolished feel of the shot.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303225444302675.mp4",
+        "error": null
+      }
+    ]
+  },
+  "f71a7288-5f4a-4250-96b7-a149e2325528": {
+    "id": "f71a7288-5f4a-4250-96b7-a149e2325528",
+    "status": "completed_with_errors",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-16T15:25:31.936Z",
+    "jobs": [
+      {
+        "id": "60ca895e-418f-4ecb-b9bb-c2c8fa1a5f42",
+        "imageUrl": "/uploads/bulk-i2v/f2cb415c-31cc-4a6c-8533-6bf6462569dc.png",
+        "prompt": "The person's hands subtly twist open the 'mammaly' can, then gently tilt it causing a few more heart-shaped treats to fall onto their lap, stirring up existing crumbs. The camera maintains a natural, slightly shaky handheld perspective with a minor, gentle drift, as sunlight subtly shimmers through the trees outside the car window.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303227103314388.mp4",
+        "error": null
+      },
+      {
+        "id": "66bf8259-ba96-4a0d-a75d-9f3cda9b689a",
+        "imageUrl": "/uploads/bulk-i2v/14abba58-3aaf-467f-9dd0-c8c02f1fe36b.png",
+        "prompt": "A hand drops a few more heart-shaped treats into the bowl, which bounce subtly among the kibble. The camera exhibits a gentle, handheld sway with minimal drift, while the dog's paw twitches slightly in anticipation as sunlight dapples the wooden floor.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303227373507697.mp4",
+        "error": null
+      },
+      {
+        "id": "19db3887-006c-49e1-98f0-6a468e112080",
+        "imageUrl": "/uploads/bulk-i2v/50cfc523-1834-46f2-b59c-3cea7402925d.png",
+        "prompt": "The dog's nose twitches and its tongue subtly licks its lips, eagerly sniffing the treats in the Mammaly can held steady. The camera maintains a natural handheld wobble, with a slight, almost imperceptible drift as the person holding the phone breathes.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303227218314574.mp4",
+        "error": null
+      },
+      {
+        "id": "cf830f16-3353-4556-b496-1cd4c9fb553b",
+        "imageUrl": "/uploads/bulk-i2v/cda63e38-51ad-4781-aaff-79e2c97240da.png",
+        "prompt": "The hand holding the tin makes a slight adjustment as fingers reach in to retrieve a treat, causing a gentle, natural handheld micro-shake in the camera. In the background, the dog wags its tail slightly with anticipation as the person holding the leash subtly shifts their weight.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "task failed"
+      }
+    ]
+  },
+  "f780daa6-c7a5-4416-acd8-663ba8a0ceb8": {
+    "id": "f780daa6-c7a5-4416-acd8-663ba8a0ceb8",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-16T15:35:27.499Z",
+    "jobs": [
+      {
+        "id": "2c02d7ac-2304-4c54-8c46-69e9bb498a47",
+        "imageUrl": "/uploads/bulk-i2v/cda63e38-51ad-4781-aaff-79e2c97240da.png",
+        "prompt": "The hand holding the tin makes a slight adjustment as fingers reach in to retrieve a treat, causing a gentle, natural handheld micro-shake in the camera. In the background, the dog wags its tail slightly with anticipation as the person holding the leash subtly shifts their weight.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303227672316717.mp4",
+        "error": null
+      }
+    ]
+  }
+}

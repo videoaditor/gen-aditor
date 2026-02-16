@@ -32,6 +32,13 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve frontend at root (current) and /studio (for Framer transition)
 const frontendPath = path.join(__dirname, '../frontend-simple');
+// Serve index.html with no-cache to prevent Cloudflare from caching stale versions
+app.get(['/', '/studio', '/studio/'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Cloudflare-CDN-Cache-Control', 'no-store');
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 app.use(express.static(frontendPath));
 app.use('/studio', express.static(frontendPath));
 
@@ -85,6 +92,7 @@ const promptExpandRoutes = require('./routes/prompt-expand');
 const variationsRoutes = require('./routes/variations');
 const contextProfileRoutes = require('./routes/context-profile');
 const hqRoutes = require('./routes/hq');
+const bulkI2vRoutes = require('./routes/bulk-i2v');
 
 // Import auth middleware
 const { authenticateToken, checkUsageLimit, incrementUsage } = require('./middleware/auth');
@@ -123,6 +131,7 @@ app.use('/api/prompt', promptExpandRoutes);
 app.use('/api/variations', variationsRoutes);
 app.use('/api/context', contextProfileRoutes);
 app.use('/api/hq', hqRoutes);
+app.use('/api/bulk-i2v', bulkI2vRoutes);
 
 // Health check (both paths for convenience)
 app.get('/health', healthHandler);
@@ -131,30 +140,44 @@ app.get('/api/health', healthHandler);
 // Video proxy for CORS-free downloads (theapi.app doesn't set CORS headers)
 app.get('/api/proxy/video', async (req, res) => {
   const { url, filename } = req.query;
-  if (!url) {
-    return res.status(400).json({ error: 'Missing url parameter' });
-  }
-  
+  if (!url) return res.status(400).json({ error: 'Missing url parameter' });
   try {
-    const response = await axios({
-      method: 'GET',
-      url: url,
-      responseType: 'stream',
-      timeout: 120000 // 2 min timeout for large videos
-    });
-    
-    // Set headers for download
+    const response = await axios({ method: 'GET', url, responseType: 'stream', timeout: 120000 });
     res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
     res.setHeader('Content-Disposition', `attachment; filename="${filename || 'video.mp4'}"`);
-    if (response.headers['content-length']) {
-      res.setHeader('Content-Length', response.headers['content-length']);
-    }
-    
+    if (response.headers['content-length']) res.setHeader('Content-Length', response.headers['content-length']);
     response.data.pipe(res);
   } catch (err) {
     console.error('[Proxy] Failed to fetch video:', err.message);
     res.status(500).json({ error: 'Failed to fetch video' });
   }
+});
+
+// ZIP multiple videos into one download
+app.post('/api/proxy/zip-videos', async (req, res) => {
+  const { urls, batchId } = req.body;
+  if (!urls || !Array.isArray(urls) || urls.length === 0) {
+    return res.status(400).json({ error: 'Missing urls array' });
+  }
+  
+  const archiver = require('archiver');
+  const archive = archiver('zip', { zlib: { level: 1 } }); // Fast compression for video
+  
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename="batch-${(batchId || 'download').slice(-6)}.zip"`);
+  
+  archive.pipe(res);
+  
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      const response = await axios({ method: 'GET', url: urls[i], responseType: 'stream', timeout: 120000 });
+      archive.append(response.data, { name: `broll-${i + 1}.mp4` });
+    } catch (err) {
+      console.error(`[Zip] Failed to fetch video ${i + 1}:`, err.message);
+    }
+  }
+  
+  archive.finalize();
 });
 
 function healthHandler(req, res) {
