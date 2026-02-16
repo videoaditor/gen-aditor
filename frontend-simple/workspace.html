@@ -2231,7 +2231,7 @@
       </div>
       
       <div class="prompt-options">
-        <button class="prompt-option active" id="gen-mode-btn" title="Click to switch mode">🎬 B-roll</button>
+        <button class="prompt-option" id="gen-mode-btn" title="Raw mode — no AI enhancement">📝 Raw</button>
         <select class="prompt-select" id="aspect-ratio">
           <option value="9:16" selected>9:16 vertical</option>
           <option value="1:1">1:1 square</option>
@@ -2315,7 +2315,7 @@
     let currentImage = null;
     let selectedRatio = '9:16';
     let selectedModel = 'nano-banana-pro';
-    let genMode = 'broll'; // 'broll' | 'talking' | 'raw'
+    let genMode = 'raw'; // 'raw' only — broll/talking enhancement removed (looked AI-generated)
     let videoQueue = []; // {id, image, prompt, status: 'pending'|'generating'|'complete'|'error', videoUrl}
 
     // ===== PERSISTENCE =====
@@ -2446,19 +2446,17 @@
 
     // Generation mode toggle (click to cycle)
     const genModeBtn = document.getElementById('gen-mode-btn');
-    const genModes = ['broll', 'talking', 'raw'];
+    const genModes = ['raw'];
     const genModeLabels = {
-      'broll': '🎬 B-roll',
-      'talking': '🗣️ Talking Head', 
       'raw': '📝 Raw'
     };
     
+    // B-roll/talking head modes removed — produced AI-looking results
     genModeBtn.addEventListener('click', () => {
-      const currentIndex = genModes.indexOf(genMode);
-      const nextIndex = (currentIndex + 1) % genModes.length;
-      genMode = genModes[nextIndex];
+      // No cycling — raw only
+      genMode = 'raw';
       genModeBtn.textContent = genModeLabels[genMode];
-      genModeBtn.classList.toggle('active', genMode !== 'raw');
+      genModeBtn.classList.toggle('active', false);
     });
 
     // Default video model for starred images
