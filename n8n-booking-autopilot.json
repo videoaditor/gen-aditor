@@ -1,0 +1,63 @@
+{
+  "name": "Booking Autopilot — Calendar → Product Photoshoot → Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "booking-autopilot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook (Calendly/Zapier)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gen.aditor.ai/api/booking-autopilot/trigger",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "name", "value": "={{ $json.body.name || $json.body.payload?.name || $json.body.invitee?.name || '' }}" },
+            { "name": "email", "value": "={{ $json.body.email || $json.body.payload?.email || $json.body.invitee?.email || '' }}" },
+            { "name": "website", "value": "={{ $json.body.website || $json.body.payload?.questions_and_answers?.[0]?.answer || $json.body.questions?.website || '' }}" },
+            { "name": "note", "value": "={{ $json.body.note || $json.body.payload?.questions_and_answers?.[1]?.answer || '' }}" },
+            { "name": "callDate", "value": "={{ $json.body.callDate || $json.body.payload?.event?.start_time || $json.body.scheduled_event?.start_time || '' }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "trigger-autopilot",
+      "name": "Trigger Photoshoot Pipeline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', jobId: $json.jobId, message: $json.message }) }}"
+      },
+      "id": "respond",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [750, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (Calendly/Zapier)": {
+      "main": [[{ "node": "Trigger Photoshoot Pipeline", "type": "main", "index": 0 }]]
+    },
+    "Trigger Photoshoot Pipeline": {
+      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [{ "name": "booking-autopilot" }]
+}
