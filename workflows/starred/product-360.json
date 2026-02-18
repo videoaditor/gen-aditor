@@ -1,0 +1,85 @@
+{
+  "id": "product-360",
+  "name": "360° Product Spin",
+  "description": "Produktfoto → 360° Rotation Video",
+  "starred": true,
+  "category": "video",
+  "icon": "🔄",
+  "inputs": [
+    {
+      "id": "product_image",
+      "type": "image",
+      "label": "Produktfoto",
+      "required": true,
+      "hint": "Frontansicht, freigestellt oder einfacher Hintergrund"
+    },
+    {
+      "id": "rotation",
+      "type": "select",
+      "label": "Rotation",
+      "options": [
+        { "value": "full", "label": "360° (volle Drehung)" },
+        { "value": "half", "label": "180° (halbe Drehung)" },
+        { "value": "quarter", "label": "90° (Viertel)" }
+      ],
+      "default": "full"
+    },
+    {
+      "id": "speed",
+      "type": "select",
+      "label": "Speed",
+      "options": [
+        { "value": "slow", "label": "Langsam (premium feel)" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "fast", "label": "Schnell (dynamic)" }
+      ],
+      "default": "medium"
+    },
+    {
+      "id": "background",
+      "type": "select",
+      "label": "Background",
+      "options": [
+        { "value": "transparent", "label": "Transparent (für Overlay)" },
+        { "value": "white", "label": "Weiß (clean)" },
+        { "value": "gradient", "label": "Gradient (modern)" },
+        { "value": "studio", "label": "Studio (3D look)" }
+      ],
+      "default": "white"
+    },
+    {
+      "id": "loop",
+      "type": "checkbox",
+      "label": "Seamless Loop",
+      "default": true
+    }
+  ],
+  "pipeline": [
+    {
+      "step": "segment",
+      "provider": "local",
+      "model": "sam",
+      "input": "product_image",
+      "output": "mask"
+    },
+    {
+      "step": "generate_360",
+      "provider": "runcomfy",
+      "model": "wan-ai/wan-2-1/image-to-video",
+      "input": ["product_image", "rotation_prompt"],
+      "params": {
+        "prompt_template": "product rotating ${rotation} degrees, ${speed} rotation, ${background} background, seamless loop, professional product photography",
+        "frames": 81
+      },
+      "output": "video"
+    }
+  ],
+  "output": {
+    "type": "video",
+    "format": "mp4",
+    "resolution": "1080p",
+    "loop": true
+  },
+  "cost_estimate": "$0.15-0.25 per spin",
+  "time_estimate": "90-120 sec"
+}

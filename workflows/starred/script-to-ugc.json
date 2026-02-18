@@ -1,0 +1,75 @@
+{
+  "id": "script-to-ugc",
+  "name": "Script → UGC Video",
+  "description": "Script + Portrait → fertiges UGC Talking Head Video",
+  "starred": true,
+  "category": "video",
+  "icon": "🗣️",
+  "inputs": [
+    {
+      "id": "script",
+      "type": "textarea",
+      "label": "Script",
+      "placeholder": "Hey, ich muss dir unbedingt von diesem Produkt erzählen...",
+      "required": true
+    },
+    {
+      "id": "portrait",
+      "type": "image",
+      "label": "Portrait (optional)",
+      "required": false,
+      "hint": "Oder wir generieren einen UGC Creator"
+    },
+    {
+      "id": "voice",
+      "type": "select",
+      "label": "Stimme",
+      "options": [
+        { "value": "sarah", "label": "Sarah (DE, weiblich)" },
+        { "value": "adam", "label": "Adam (DE, männlich)" },
+        { "value": "rachel", "label": "Rachel (EN, weiblich)" },
+        { "value": "josh", "label": "Josh (EN, männlich)" }
+      ],
+      "default": "sarah"
+    },
+    {
+      "id": "style",
+      "type": "select",
+      "label": "UGC Style",
+      "options": [
+        { "value": "testimonial", "label": "Testimonial (direkt in Kamera)" },
+        { "value": "storytime", "label": "Storytime (casual erzählen)" },
+        { "value": "review", "label": "Product Review" }
+      ],
+      "default": "testimonial"
+    }
+  ],
+  "pipeline": [
+    {
+      "step": "tts",
+      "provider": "elevenlabs",
+      "input": "script",
+      "output": "audio"
+    },
+    {
+      "step": "generate_portrait",
+      "provider": "nano-banana",
+      "condition": "!portrait",
+      "output": "portrait"
+    },
+    {
+      "step": "lipsync",
+      "provider": "runcomfy",
+      "model": "sync/sync/lipsync/v2/pro",
+      "input": ["portrait", "audio"],
+      "output": "video"
+    }
+  ],
+  "output": {
+    "type": "video",
+    "format": "mp4",
+    "resolution": "1080p"
+  },
+  "cost_estimate": "$1-2 per video",
+  "time_estimate": "2-3 min"
+}

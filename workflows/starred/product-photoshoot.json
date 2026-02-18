@@ -1,0 +1,89 @@
+{
+  "id": "product-photoshoot",
+  "name": "Product Photoshoot",
+  "description": "Produktfoto → professionelles Fotoshooting in jedem Setting",
+  "starred": true,
+  "category": "image",
+  "icon": "📸",
+  "inputs": [
+    {
+      "id": "product_image",
+      "type": "image",
+      "label": "Produktfoto",
+      "required": true,
+      "hint": "Am besten freigestellt oder weißer Hintergrund"
+    },
+    {
+      "id": "scene",
+      "type": "select",
+      "label": "Scene",
+      "options": [
+        { "value": "studio", "label": "Studio (clean, professional)" },
+        { "value": "lifestyle", "label": "Lifestyle (in-use, ambient)" },
+        { "value": "outdoor", "label": "Outdoor (nature, daylight)" },
+        { "value": "minimal", "label": "Minimal (geometric, modern)" },
+        { "value": "luxury", "label": "Luxury (marble, gold accents)" },
+        { "value": "kitchen", "label": "Kitchen (food/wellness products)" },
+        { "value": "bathroom", "label": "Bathroom (skincare, wellness)" }
+      ],
+      "default": "studio"
+    },
+    {
+      "id": "lighting",
+      "type": "select",
+      "label": "Lighting",
+      "options": [
+        { "value": "soft", "label": "Soft (diffused, flattering)" },
+        { "value": "dramatic", "label": "Dramatic (hard shadows)" },
+        { "value": "natural", "label": "Natural (window light)" },
+        { "value": "studio", "label": "Studio (3-point)" }
+      ],
+      "default": "soft"
+    },
+    {
+      "id": "custom_prompt",
+      "type": "text",
+      "label": "Custom Details (optional)",
+      "placeholder": "marble surface, tropical plants, morning light..."
+    },
+    {
+      "id": "count",
+      "type": "number",
+      "label": "Anzahl Varianten",
+      "min": 1,
+      "max": 8,
+      "default": 4
+    }
+  ],
+  "pipeline": [
+    {
+      "step": "segment",
+      "provider": "local",
+      "model": "sam",
+      "input": "product_image",
+      "output": "mask"
+    },
+    {
+      "step": "generate_scene",
+      "provider": "runcomfy",
+      "model": "bytedance/seedream-4-5/edit",
+      "input": ["product_image", "mask", "scene_prompt"],
+      "output": "composite"
+    },
+    {
+      "step": "relight",
+      "provider": "runcomfy",
+      "model": "iclight",
+      "condition": "lighting != 'natural'",
+      "input": ["composite", "lighting"],
+      "output": "final"
+    }
+  ],
+  "output": {
+    "type": "image",
+    "format": "png",
+    "resolution": "2K"
+  },
+  "cost_estimate": "$0.05-0.15 per image",
+  "time_estimate": "30-60 sec"
+}

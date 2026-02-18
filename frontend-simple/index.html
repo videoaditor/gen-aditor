@@ -1706,6 +1706,147 @@
       margin-bottom: 12px;
     }
 
+    /* ===== DYNAMIC WORKFLOW FORMS ===== */
+    .workflow-loading {
+      color: var(--text-dim);
+      padding: 16px 12px;
+      font-size: 13px;
+    }
+    .dynamic-wf-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 4px 0;
+    }
+    .dynamic-wf-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .dynamic-wf-field label {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .dynamic-wf-field label .wf-required {
+      color: var(--accent);
+      margin-left: 2px;
+    }
+    .dynamic-wf-field input[type="text"],
+    .dynamic-wf-field input[type="number"],
+    .dynamic-wf-field textarea,
+    .dynamic-wf-field select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .dynamic-wf-field input:focus,
+    .dynamic-wf-field textarea:focus,
+    .dynamic-wf-field select:focus {
+      border-color: var(--accent);
+    }
+    .dynamic-wf-field textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .dynamic-wf-field .wf-hint {
+      font-size: 11px;
+      color: var(--text-dim);
+      opacity: 0.7;
+    }
+    .dynamic-wf-field .wf-image-upload {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      color: var(--text-dim);
+    }
+    .dynamic-wf-field .wf-image-upload:hover {
+      border-color: var(--accent);
+      background: rgba(255,255,255,0.02);
+    }
+    .dynamic-wf-field .wf-image-upload.has-image {
+      border-style: solid;
+      border-color: var(--accent);
+      padding: 8px;
+    }
+    .dynamic-wf-field .wf-image-upload img {
+      max-height: 180px;
+      border-radius: 8px;
+    }
+    .dynamic-wf-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .dynamic-wf-run-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .dynamic-wf-run-btn:hover { opacity: 0.85; }
+    .dynamic-wf-run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .dynamic-wf-cost {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .dynamic-wf-status {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .dynamic-wf-status.running {
+      background: rgba(99,102,241,0.1);
+      color: #818cf8;
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+    .dynamic-wf-status.done {
+      background: rgba(34,197,94,0.1);
+      color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.2);
+    }
+    .dynamic-wf-status.error {
+      background: rgba(239,68,68,0.1);
+      color: #f87171;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .dynamic-wf-output {
+      margin-top: 16px;
+    }
+    .dynamic-wf-output img,
+    .dynamic-wf-output video {
+      max-width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    /* Starred workflow sidebar items */
+    .workflow-item .workflow-star {
+      margin-left: auto;
+      font-size: 14px;
+      opacity: 0.5;
+      cursor: pointer;
+    }
+    .workflow-item .workflow-star:hover { opacity: 1; }
+    .workflow-item .workflow-star.active { opacity: 1; color: #fbbf24; }
+
     /* Legacy shortcut styles (hidden, kept for compatibility) */
     .shortcuts-grid {
       display: none;
@@ -2785,11 +2926,15 @@
     <!-- Workflow Studio (Shortcuts Section) -->
     <section id="shortcuts-section" class="section">
       <div class="workflow-studio">
-        <!-- Left Sidebar - Workflow List -->
+        <!-- Left Sidebar - Workflow List (dynamically loaded from /api/workflows) -->
         <div class="workflow-sidebar">
-          <div class="workflow-sidebar-title">Workflows</div>
-          
-          <div class="workflow-item active" data-workflow="script-to-video">
+          <div class="workflow-sidebar-title">⭐ Workflows</div>
+          <div id="workflow-sidebar-list">
+            <!-- Populated dynamically from starred workflows -->
+            <div class="workflow-loading">Loading workflows...</div>
+          </div>
+          <div class="workflow-divider">Legacy</div>
+          <div class="workflow-item" data-workflow="script-to-video">
             <div class="workflow-item-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -2800,7 +2945,6 @@
               <div class="workflow-item-desc">Script + avatar → full video</div>
             </div>
           </div>
-
           <div class="workflow-item" data-workflow="product-easy-wins">
             <div class="workflow-item-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2812,47 +2956,7 @@
               <div class="workflow-item-desc">1 image → 9 lifestyle shots</div>
             </div>
           </div>
-
-          <div class="workflow-divider">Coming Soon</div>
-
-          <div class="workflow-item coming-soon" data-workflow="kickstarter">
-            <div class="workflow-item-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </div>
-            <div class="workflow-item-text">
-              <div class="workflow-item-name">Kickstarter</div>
-              <div class="workflow-item-desc">URL → B-roll images</div>
-            </div>
-          </div>
-
-          <div class="workflow-item coming-soon" data-workflow="image-ads">
-            <div class="workflow-item-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-            </div>
-            <div class="workflow-item-text">
-              <div class="workflow-item-name">Image Ads</div>
-              <div class="workflow-item-desc">Product + inspo → ads</div>
-            </div>
-          </div>
-
-          <div class="workflow-item coming-soon" data-workflow="screenshot-broll">
-            <div class="workflow-item-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-            </div>
-            <div class="workflow-item-text">
-              <div class="workflow-item-name">Screenshot → B-roll</div>
-              <div class="workflow-item-desc">Recreate creator frames</div>
-            </div>
-          </div>
-
-          <div class="workflow-item coming-soon" data-workflow="motion-transfer">
+          <div class="workflow-item" data-workflow="motion-transfer">
             <div class="workflow-item-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
@@ -2871,6 +2975,20 @@
           <div class="workflow-header">
             <h2 id="workflow-title">Script → UGC Video</h2>
             <p id="workflow-description">Upload avatar, paste script, select voice → get UGC video</p>
+          </div>
+
+          <!-- Dynamic Workflow Form (loaded from starred workflows JSON) -->
+          <div id="dynamic-workflow-layout" style="display: none;">
+            <div id="dynamic-workflow-form" class="dynamic-wf-form"></div>
+            <div class="dynamic-wf-actions">
+              <button type="button" class="dynamic-wf-run-btn" id="dynamic-wf-run-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+                Generate
+              </button>
+              <span class="dynamic-wf-cost" id="dynamic-wf-cost"></span>
+            </div>
+            <div id="dynamic-wf-status" class="dynamic-wf-status" style="display:none;"></div>
+            <div id="dynamic-wf-output" class="dynamic-wf-output"></div>
           </div>
 
           <!-- UGC Video Layout (default for script-to-video) -->
@@ -4645,7 +4763,227 @@ Return ONLY the JSON, no explanation.`;
       }
     });
 
-    // ===== WORKFLOW STUDIO =====
+    // ===== DYNAMIC WORKFLOWS (from /api/workflows) =====
+    let dynamicWorkflows = [];
+    let activeDynamicWorkflow = null;
+
+    async function loadDynamicWorkflows() {
+      const container = document.getElementById('workflow-sidebar-list');
+      try {
+        const resp = await fetch('/api/workflows?starred=true');
+        const data = await resp.json();
+        dynamicWorkflows = data.workflows || [];
+
+        if (dynamicWorkflows.length === 0) {
+          container.innerHTML = '<div class="workflow-loading">No starred workflows yet</div>';
+          return;
+        }
+
+        container.innerHTML = dynamicWorkflows.map((wf, i) => `
+          <div class="workflow-item ${i === 0 ? 'active' : ''}" data-dynamic-workflow="${wf.id}">
+            <div class="workflow-item-icon">
+              <span style="font-size:20px">${wf.icon || '⚡'}</span>
+            </div>
+            <div class="workflow-item-text">
+              <div class="workflow-item-name">${wf.name}</div>
+              <div class="workflow-item-desc">${wf.description}</div>
+            </div>
+          </div>
+        `).join('');
+
+        // Click handlers for dynamic workflows
+        container.querySelectorAll('[data-dynamic-workflow]').forEach(item => {
+          item.addEventListener('click', () => {
+            const wfId = item.dataset.dynamicWorkflow;
+            selectDynamicWorkflow(wfId);
+
+            // Update active states (clear legacy + dynamic)
+            document.querySelectorAll('.workflow-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+          });
+        });
+
+        // Auto-select first
+        if (dynamicWorkflows.length > 0) {
+          selectDynamicWorkflow(dynamicWorkflows[0].id);
+        }
+      } catch (e) {
+        container.innerHTML = '<div class="workflow-loading">Failed to load workflows</div>';
+        console.error('[Workflows]', e);
+      }
+    }
+
+    function selectDynamicWorkflow(wfId) {
+      const wf = dynamicWorkflows.find(w => w.id === wfId);
+      if (!wf) return;
+      activeDynamicWorkflow = wf;
+
+      // Update header
+      document.getElementById('workflow-title').textContent = wf.name;
+      document.getElementById('workflow-description').textContent = wf.description;
+
+      // Hide all custom layouts, show dynamic
+      document.getElementById('ugc-video-layout').style.display = 'none';
+      document.getElementById('motion-transfer-layout').style.display = 'none';
+      const genericForm = document.getElementById('workflow-form');
+      if (genericForm) genericForm.style.display = 'none';
+      const uploadZone = document.getElementById('workflow-upload-zone');
+      if (uploadZone) uploadZone.style.display = 'none';
+      const promptBar = document.querySelector('.prompt-container');
+      if (promptBar) promptBar.style.display = 'none';
+
+      document.getElementById('dynamic-workflow-layout').style.display = 'block';
+
+      // Render form fields
+      renderDynamicForm(wf);
+    }
+
+    function renderDynamicForm(wf) {
+      const form = document.getElementById('dynamic-workflow-form');
+      const costEl = document.getElementById('dynamic-wf-cost');
+      const outputEl = document.getElementById('dynamic-wf-output');
+      const statusEl = document.getElementById('dynamic-wf-status');
+
+      costEl.textContent = wf.cost_estimate ? `Est. ${wf.cost_estimate}` : '';
+      outputEl.innerHTML = '';
+      statusEl.style.display = 'none';
+
+      form.innerHTML = (wf.inputs || []).map(input => {
+        const required = input.required ? '<span class="wf-required">*</span>' : '';
+        const hint = input.hint ? `<div class="wf-hint">${input.hint}</div>` : '';
+        let field = '';
+
+        switch (input.type) {
+          case 'image':
+            field = `
+              <div class="wf-image-upload" id="wf-upload-${input.id}" onclick="document.getElementById('wf-file-${input.id}').click()">
+                📷 Drop or click to upload
+              </div>
+              <input type="file" id="wf-file-${input.id}" data-wf-input="${input.id}" accept="image/*" hidden>
+            `;
+            break;
+          case 'textarea':
+            field = `<textarea data-wf-input="${input.id}" placeholder="${input.placeholder || ''}" ${input.required ? 'required' : ''}></textarea>`;
+            break;
+          case 'text':
+            field = `<input type="text" data-wf-input="${input.id}" placeholder="${input.placeholder || ''}">`;
+            break;
+          case 'number':
+            field = `<input type="number" data-wf-input="${input.id}" min="${input.min || 1}" max="${input.max || 100}" value="${input.default || 1}">`;
+            break;
+          case 'select':
+            const options = (input.options || []).map(opt => {
+              const val = typeof opt === 'string' ? opt : opt.value;
+              const label = typeof opt === 'string' ? opt : opt.label;
+              const selected = val === input.default ? 'selected' : '';
+              return `<option value="${val}" ${selected}>${label}</option>`;
+            }).join('');
+            field = `<select data-wf-input="${input.id}">${options}</select>`;
+            break;
+          case 'checkbox':
+            field = `<label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" data-wf-input="${input.id}" ${input.default ? 'checked' : ''}>
+              <span>${input.label}</span>
+            </label>`;
+            return `<div class="dynamic-wf-field">${field}</div>`;
+          default:
+            field = `<input type="text" data-wf-input="${input.id}" placeholder="${input.placeholder || ''}">`;
+        }
+
+        return `<div class="dynamic-wf-field"><label>${input.label} ${required}</label>${field}${hint}</div>`;
+      }).join('');
+
+      // Wire up image upload previews
+      form.querySelectorAll('input[type="file"]').forEach(fileInput => {
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const inputId = fileInput.dataset.wfInput;
+          const uploadDiv = document.getElementById(`wf-upload-${inputId}`);
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            uploadDiv.classList.add('has-image');
+            uploadDiv.innerHTML = `<img src="${ev.target.result}" alt="uploaded">`;
+            uploadDiv.dataset.base64 = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    }
+
+    // Run dynamic workflow
+    document.getElementById('dynamic-wf-run-btn').addEventListener('click', async () => {
+      if (!activeDynamicWorkflow) return;
+
+      const btn = document.getElementById('dynamic-wf-run-btn');
+      const statusEl = document.getElementById('dynamic-wf-status');
+      const outputEl = document.getElementById('dynamic-wf-output');
+
+      // Gather inputs
+      const inputs = {};
+      document.querySelectorAll('[data-wf-input]').forEach(el => {
+        const key = el.dataset.wfInput;
+        if (el.type === 'file') {
+          const uploadDiv = document.getElementById(`wf-upload-${key}`);
+          if (uploadDiv && uploadDiv.dataset.base64) {
+            inputs[key] = uploadDiv.dataset.base64;
+          }
+        } else if (el.type === 'checkbox') {
+          inputs[key] = el.checked;
+        } else {
+          inputs[key] = el.value;
+        }
+      });
+
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Running...';
+      statusEl.style.display = 'block';
+      statusEl.className = 'dynamic-wf-status running';
+      statusEl.textContent = `Running ${activeDynamicWorkflow.name}...`;
+      outputEl.innerHTML = '';
+
+      try {
+        const resp = await fetch(`/api/workflows/${activeDynamicWorkflow.id}/run`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inputs)
+        });
+        const data = await resp.json();
+
+        if (data.error) throw new Error(data.error);
+
+        statusEl.className = 'dynamic-wf-status done';
+        statusEl.textContent = '✓ Complete';
+
+        // Render output
+        if (data.output) {
+          const url = typeof data.output === 'string' ? data.output : data.output.url || data.output;
+          const outputType = activeDynamicWorkflow.output?.type || 'image';
+          if (outputType === 'video') {
+            outputEl.innerHTML = `<video src="${url}" controls autoplay style="max-width:100%;border-radius:12px"></video>`;
+          } else {
+            outputEl.innerHTML = `<img src="${url}" style="max-width:100%;border-radius:12px">`;
+          }
+        }
+      } catch (e) {
+        statusEl.className = 'dynamic-wf-status error';
+        statusEl.textContent = `Error: ${e.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> Generate';
+      }
+    });
+
+    // Load workflows on page init
+    loadDynamicWorkflows();
+
+    // When switching to legacy workflow, hide dynamic layout
+    function hideDynamicLayout() {
+      document.getElementById('dynamic-workflow-layout').style.display = 'none';
+      activeDynamicWorkflow = null;
+    }
+
+    // ===== WORKFLOW STUDIO (LEGACY) =====
     const workflowConfigs = {
       'script-to-video': {
         title: 'Script → UGC Video',
@@ -4720,6 +5058,11 @@ Return ONLY the JSON, no explanation.`;
     });
 
     function selectWorkflow(workflow) {
+      // Hide dynamic workflow layout when switching to legacy
+      hideDynamicLayout();
+      // Clear dynamic sidebar active states
+      document.querySelectorAll('[data-dynamic-workflow]').forEach(el => el.classList.remove('active'));
+
       // Handle special modal workflows
       if (workflow === 'product-easy-wins') {
         openProductEasyWinsModal();

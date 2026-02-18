@@ -94,6 +94,7 @@ const variationsRoutes = require('./routes/variations');
 const contextProfileRoutes = require('./routes/context-profile');
 const hqRoutes = require('./routes/hq');
 const bulkI2vRoutes = require('./routes/bulk-i2v');
+const workflowRoutes = require('./routes/workflows');
 
 // Import auth middleware
 const { authenticateToken, checkUsageLimit, incrementUsage } = require('./middleware/auth');
@@ -134,6 +135,7 @@ app.use('/api/variations', variationsRoutes);
 app.use('/api/context', contextProfileRoutes);
 app.use('/api/hq', hqRoutes);
 app.use('/api/bulk-i2v', bulkI2vRoutes);
+app.use('/api/workflows', workflowRoutes);
 
 // Health check (both paths for convenience)
 app.get('/health', healthHandler);

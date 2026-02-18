@@ -1,0 +1,78 @@
+{
+  "id": "product-broll",
+  "name": "Product B-Roll",
+  "description": "Produktfoto → cinematic B-Roll Clip",
+  "starred": true,
+  "category": "video",
+  "icon": "🎬",
+  "inputs": [
+    {
+      "id": "product_image",
+      "type": "image",
+      "label": "Produktfoto",
+      "required": true
+    },
+    {
+      "id": "motion_type",
+      "type": "select",
+      "label": "Motion Type",
+      "options": [
+        { "value": "reveal", "label": "Product Reveal (zoom in, dramatic)" },
+        { "value": "showcase", "label": "Showcase (slow pan, details)" },
+        { "value": "unboxing", "label": "Unboxing Feel (opening, excitement)" },
+        { "value": "lifestyle", "label": "Lifestyle (in-use, ambient)" },
+        { "value": "floating", "label": "Floating (levitation, premium)" },
+        { "value": "pour", "label": "Pour/Apply (liquids, skincare)" }
+      ],
+      "default": "showcase"
+    },
+    {
+      "id": "duration",
+      "type": "select",
+      "label": "Dauer",
+      "options": [
+        { "value": "5", "label": "5 Sekunden" },
+        { "value": "10", "label": "10 Sekunden" }
+      ],
+      "default": "5"
+    },
+    {
+      "id": "style",
+      "type": "select",
+      "label": "Visual Style",
+      "options": [
+        { "value": "cinematic", "label": "Cinematic (film look)" },
+        { "value": "commercial", "label": "Commercial (clean, bright)" },
+        { "value": "ugc", "label": "UGC-Style (authentic, handheld)" },
+        { "value": "luxury", "label": "Luxury (slow-mo, premium)" }
+      ],
+      "default": "commercial"
+    },
+    {
+      "id": "custom_prompt",
+      "type": "text",
+      "label": "Additional Details",
+      "placeholder": "morning sunlight, steam rising, hands reaching..."
+    }
+  ],
+  "pipeline": [
+    {
+      "step": "generate_video",
+      "provider": "runcomfy",
+      "model": "kling/kling-2-6/pro/image-to-video",
+      "input": ["product_image", "motion_prompt"],
+      "params": {
+        "duration": "${duration}",
+        "cfg_scale": 0.5
+      },
+      "output": "video"
+    }
+  ],
+  "output": {
+    "type": "video",
+    "format": "mp4",
+    "resolution": "1080p"
+  },
+  "cost_estimate": "$0.10-0.20 per clip",
+  "time_estimate": "60-90 sec"
+}
