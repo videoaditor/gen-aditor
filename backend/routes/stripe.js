@@ -99,6 +99,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         const customerId = session.customer;
         const subscriptionId = session.subscription;
         const email = session.customer_email || session.customer_details?.email;
+        const customerName = session.customer_details?.name || email?.split('@')[0] || 'client';
         const plan = session.metadata?.plan || 'starter';
 
         console.log(`[Stripe] ✅ Checkout completed: ${email} → ${plan}`);
@@ -109,6 +110,67 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             `UPDATE users SET plan = ?, stripe_customer_id = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE email = ?`,
             [plan, customerId, subscriptionId, email]
           );
+        }
+
+        // Create Slack channel for 90 Day Buildout customers
+        const productId = session.line_items?.data?.[0]?.price?.product;
+        const isBuildout = productId === 'prod_TzmTo6iWW65MOI' || 
+                           session.subscription_data?.metadata?.max_payments === '2' ||
+                           session.amount_total >= 240000; // €2400+
+        
+        if (isBuildout && email) {
+          try {
+            const SLACK_TOKEN = process.env.SLACK_USER_TOKEN;
+            const ALAN_SLACK_ID = 'U04NRHWBSMT';
+            
+            if (SLACK_TOKEN) {
+              // Create channel name from customer name
+              const channelName = `buildout-${customerName.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 20)}-${Date.now().toString().slice(-4)}`;
+              
+              // Create private channel
+              const createRes = await fetch('https://slack.com/api/conversations.create', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${SLACK_TOKEN}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: channelName, is_private: true })
+              });
+              const createData = await createRes.json();
+              
+              if (createData.ok && createData.channel?.id) {
+                const channelId = createData.channel.id;
+                console.log(`[Stripe] 📢 Created Slack channel: #${channelName} (${channelId})`);
+                
+                // Invite Alan
+                await fetch('https://slack.com/api/conversations.invite', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${SLACK_TOKEN}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ channel: channelId, users: ALAN_SLACK_ID })
+                });
+                
+                // Post welcome message
+                await fetch('https://slack.com/api/chat.postMessage', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${SLACK_TOKEN}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    channel: channelId,
+                    text: `🎉 *New Buildout Client: ${customerName}*\n\nEmail: ${email}\nPlan: 90 Day Creative Inhouse Buildout\n\n_Invite the client to this channel via Slack Connect or email them the channel link._`
+                  })
+                });
+                
+                console.log(`[Stripe] ✅ Slack channel ready, Alan invited`);
+              }
+            }
+          } catch (slackErr) {
+            console.error('[Stripe] Slack channel creation error:', slackErr.message);
+          }
         }
         break;
       }
@@ -152,6 +214,39 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         console.log(`[Stripe] ⚠️ Payment failed: ${invoice.customer_email}`);
+        break;
+      }
+
+      case 'invoice.paid': {
+        // Handle installment plan auto-cancellation
+        const invoice = event.data.object;
+        const subscriptionId = invoice.subscription;
+        
+        if (subscriptionId) {
+          try {
+            const subscription = await s.subscriptions.retrieve(subscriptionId);
+            const maxPayments = subscription.metadata?.max_payments;
+            
+            if (maxPayments) {
+              // Count paid invoices for this subscription
+              const invoices = await s.invoices.list({
+                subscription: subscriptionId,
+                status: 'paid',
+                limit: 10
+              });
+              
+              const paidCount = invoices.data.length;
+              console.log(`[Stripe] 💳 Installment payment ${paidCount}/${maxPayments} for ${subscriptionId}`);
+              
+              if (paidCount >= parseInt(maxPayments)) {
+                console.log(`[Stripe] ✅ Auto-canceling subscription ${subscriptionId} - completed ${maxPayments} payments`);
+                await s.subscriptions.cancel(subscriptionId);
+              }
+            }
+          } catch (err) {
+            console.error(`[Stripe] Error handling installment:`, err.message);
+          }
+        }
         break;
       }
 

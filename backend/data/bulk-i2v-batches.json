@@ -1,22 +1,4 @@
 {
-  "7bfadc94-9b21-44f7-9796-143337399672": {
-    "id": "7bfadc94-9b21-44f7-9796-143337399672",
-    "status": "done",
-    "duration": 5,
-    "mode": "std",
-    "aspectRatio": "9:16",
-    "createdAt": "2026-02-16T14:54:14.582Z",
-    "jobs": [
-      {
-        "id": "db5559c7-7168-4ed5-8f5c-12cffb3b29ba",
-        "imageUrl": "/uploads/bulk-i2v/515363dc-2a3f-4692-a6fe-f1426ff8659d.png",
-        "prompt": "test motion",
-        "status": "done",
-        "videoUrl": "https://storage.theapi.app/videos/303225224318065.mp4",
-        "error": null
-      }
-    ]
-  },
   "dac23cdf-f45b-4939-93a2-f075fd2cf8a2": {
     "id": "dac23cdf-f45b-4939-93a2-f075fd2cf8a2",
     "status": "done",
@@ -53,7 +35,7 @@
   },
   "f71a7288-5f4a-4250-96b7-a149e2325528": {
     "id": "f71a7288-5f4a-4250-96b7-a149e2325528",
-    "status": "completed_with_errors",
+    "status": "partial",
     "duration": 5,
     "mode": "std",
     "aspectRatio": "9:16",
@@ -107,6 +89,516 @@
         "prompt": "The hand holding the tin makes a slight adjustment as fingers reach in to retrieve a treat, causing a gentle, natural handheld micro-shake in the camera. In the background, the dog wags its tail slightly with anticipation as the person holding the leash subtly shifts their weight.",
         "status": "done",
         "videoUrl": "https://storage.theapi.app/videos/303227672316717.mp4",
+        "error": null
+      }
+    ]
+  },
+  "33bb7deb-fb45-452c-bcef-6215cb8bd8aa": {
+    "id": "33bb7deb-fb45-452c-bcef-6215cb8bd8aa",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-16T18:37:38.508Z",
+    "jobs": [
+      {
+        "id": "3686a9d4-d6e6-41f2-ba0d-98467b141ddf",
+        "imageUrl": "/uploads/bulk-i2v/ed45e31f-a6bb-4e91-9475-5c06b62c7b61.png",
+        "prompt": "The hand holding the spoon slowly lifts the thick bone broth from the jar, causing the viscous concentrate to stretch and gently drip. The camera exhibits a subtle, natural handheld sway with an occasional, minor refocus as the shot is held steady.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303238675305830.mp4",
+        "error": null
+      },
+      {
+        "id": "9c6be84c-e19a-4a54-9d01-3203dd125f21",
+        "imageUrl": "/uploads/bulk-i2v/5acb1118-233c-4617-9582-cd5d0c84d68f.png",
+        "prompt": "Steam billows and swirls dramatically as hot water is poured over the spoon, dissolving the bone broth concentrate into the mug below. The camera, likely propped, maintains a steady shot with a very subtle, natural wobble, capturing the small adjustments of the hand holding the spoon.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303238696534607.mp4",
+        "error": null
+      },
+      {
+        "id": "9732dee6-d1b1-44aa-91bc-dfe35fe31ae9",
+        "imageUrl": "/uploads/bulk-i2v/519a041b-551e-421f-b5bf-2c91b7fedcf7.png",
+        "prompt": "The hand holding the jar continues to slowly pour the thick bone broth into the bubbling pot, while the other hand begins to gently stir the contents with the wooden spoon. The camera features a subtle handheld drift, slightly adjusting its focus as dense steam steadily rises from the hot liquid.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303238810534111.mp4",
+        "error": null
+      },
+      {
+        "id": "8b2eefe4-b931-4e61-a647-f4b44b23270b",
+        "imageUrl": "/uploads/bulk-i2v/ec44c077-8955-4a7f-8341-ad6eca952743.png",
+        "prompt": "The hand firmly grasps the jar and gently lifts it off the shelf, subtly rotating it forward to reveal the label. The camera maintains a natural handheld perspective, drifting slightly upwards and left with organic micro-shakes as the product is picked up.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303238753314701.mp4",
+        "error": null
+      }
+    ]
+  },
+  "ddefd29e-5e59-4e09-a488-90707a24dd2d": {
+    "id": "ddefd29e-5e59-4e09-a488-90707a24dd2d",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-16T18:55:57.730Z",
+    "jobs": [
+      {
+        "id": "5e1bdcf5-97b7-4ffd-bb04-6bc088742db7",
+        "imageUrl": "/uploads/bulk-i2v/aede86e8-4f37-4ea5-8c62-4628bf71ba43.jpg",
+        "prompt": "The hands subtly shift, rotating the jar slightly to emphasize the label's details. The camera maintains a natural, handheld perspective with soft, minor drifts and a momentary, gentle auto-focus adjustment as the product moves slightly.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303239664537891.mp4",
+        "error": null
+      },
+      {
+        "id": "f267d26c-d966-48bb-a3ec-f574c4ea469b",
+        "imageUrl": "/uploads/bulk-i2v/7f6c45be-2aa3-4ee0-8e9a-7aaf3139e3be.jpg",
+        "prompt": "Continue the pour as the concentrated liquid steadily flows from the spoon into the mug, generating light steam that visibly rises from the surface. The phone maintains a soft, natural handheld sway, with a subtle, almost imperceptible drift around the central action, suggesting it's casually held by the other hand.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303239685536258.mp4",
+        "error": null
+      },
+      {
+        "id": "48d5fb27-d38f-43ad-b2c6-48f227e9677b",
+        "imageUrl": "/uploads/bulk-i2v/9fc252c4-ce43-46ab-95a2-43d3d43e5d16.jpg",
+        "prompt": "The person maintains their warm smile, subtly nodding their head while gently bringing the mug closer to sip. The handheld camera exhibits a natural, very slight drift and micro-shake, with a soft auto-focus adjustment across the scene.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303239689300450.mp4",
+        "error": null
+      }
+    ]
+  },
+  "fe9ab002-b424-4b45-bffd-df6441655c95": {
+    "id": "fe9ab002-b424-4b45-bffd-df6441655c95",
+    "status": "partial",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T08:00:15.796Z",
+    "jobs": [
+      {
+        "id": "f6fee18e-9ea6-4ac0-b8b6-53285d21a429",
+        "imageUrl": "/uploads/bulk-i2v/39863696-3b2e-402a-aac9-66bf93a91c6c.jpeg",
+        "prompt": "The man gives a subtle, genuine nod while maintaining his smile, reflecting in his sunglasses. The handheld camera exhibits a natural, slight sway and drift, as background buses and taxis continue to move and pedestrians walk past with varying speeds.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303286735508949.mp4",
+        "error": null
+      },
+      {
+        "id": "0cdd118f-8ccb-42ce-9e68-067b26a3d98c",
+        "imageUrl": "/uploads/bulk-i2v/af43d883-268c-458e-849b-b91258e2742c.webp",
+        "prompt": "The woman subtly shifts her weight and slightly tilts her head as her smile softens, while her hair gently sways in a light breeze. The handheld camera has a natural, subtle shake and a slight, organic drift, as if being held casually by a friend or herself.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "task failed"
+      }
+    ]
+  },
+  "5f8a0a12-6066-4970-a5f9-ac702b35a4de": {
+    "id": "5f8a0a12-6066-4970-a5f9-ac702b35a4de",
+    "status": "partial",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T08:00:33.680Z",
+    "jobs": [
+      {
+        "id": "f39c2f86-003a-44b9-b84e-1f5dd04cb3f4",
+        "imageUrl": "/uploads/bulk-i2v/af43d883-268c-458e-849b-b91258e2742c.webp",
+        "prompt": "The woman subtly shifts her weight and slightly tilts her head as her smile softens, while her hair gently sways in a light breeze. The handheld camera has a natural, subtle shake and a slight, organic drift, as if being held casually by a friend or herself.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "task failed"
+      }
+    ]
+  },
+  "281adfe9-5716-433a-9bd8-da642e674f26": {
+    "id": "281adfe9-5716-433a-9bd8-da642e674f26",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T09:18:39.486Z",
+    "jobs": [
+      {
+        "id": "c0c2ed8a-f318-4bb2-8d23-c5b12bdbcbdf",
+        "imageUrl": "/uploads/bulk-i2v/3aa6113c-bfe4-4c22-aa00-68a08d0848c7.jpg",
+        "prompt": "The hand subtly shifts its grip on the fitness tracker, causing the glowing \"823\" display to gently rotate a few degrees as if being examined. The camera exhibits a natural handheld drift and slight vertical bob, with a momentary, soft auto-focus adjustment on the illuminated numbers.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291417302200.mp4",
+        "error": null
+      },
+      {
+        "id": "94a037cf-1625-4d36-aa23-d3ba30a1f511",
+        "imageUrl": "/uploads/bulk-i2v/58ebeebe-2e50-423b-b27d-a94ea457a474.jpg",
+        "prompt": "The hand slightly rotates the wrist to subtly shift the angle of the fitness tracker, making the \"1301\" display briefly catch the light differently. The handheld camera drifts slightly and shows a subtle, organic shake, with a quick auto-focus adjustment on the bright screen.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291416503744.mp4",
+        "error": null
+      }
+    ]
+  },
+  "450acbad-9039-4c5f-b254-c6e299b587e2": {
+    "id": "450acbad-9039-4c5f-b254-c6e299b587e2",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T09:24:19.432Z",
+    "jobs": [
+      {
+        "id": "27958b02-fb0c-43b5-a65a-dab0af66d79f",
+        "imageUrl": "/uploads/bulk-i2v/089af80c-7cfe-49a8-b962-6ddca48c9e43.png",
+        "prompt": "The woman holds the fitness tracker steady, offering a warm, soft smile and a gentle, brief nod towards the camera. The shot features natural, very subtle handheld micro-shakes and a slight, almost imperceptible drift as the camera maintains focus on the tracker.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291770314190.mp4",
+        "error": null
+      },
+      {
+        "id": "664836ce-0585-4258-a2a8-620c4b060562",
+        "imageUrl": "/uploads/bulk-i2v/f80185f7-83d9-4eed-ae4d-a20013e70f1c.png",
+        "prompt": "The person's hand slowly descends to press the alarm's snooze button, followed by a slight shift under the duvet and a soft sigh. The camera, held by the same person, exhibits a gentle wobble and subtle vertical drift, with the blurred finger in the foreground momentarily shifting as the other hand interacts with the clock.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291770313669.mp4",
+        "error": null
+      },
+      {
+        "id": "792bc2d7-5990-4db1-84b4-ef411e308b25",
+        "imageUrl": "/uploads/bulk-i2v/0ff5335b-babf-4771-be1e-bbaafaa205db.png",
+        "prompt": "The man subtly shifts the fitness tracker in his hand, his smile holding as he makes natural eye contact with the camera. The handheld iPhone exhibits a gentle, natural sway, with a minor autofocus adjustment on his face, creating an authentic selfie-video feel.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291770530225.mp4",
+        "error": null
+      },
+      {
+        "id": "0ea723d1-2a3f-432a-a380-bd026f67a77b",
+        "imageUrl": "/uploads/bulk-i2v/924585b0-561e-4881-bf43-baef9ee02314.png",
+        "prompt": "The man blinks slowly, groggily shifting his head slightly on the pillow. The camera has a natural, subtle handheld drift, and his close finger briefly wiggles, causing a soft, momentary focus hunt before settling back.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291783506984.mp4",
+        "error": null
+      },
+      {
+        "id": "520e6898-7d14-4b46-a0ff-954f72a75e04",
+        "imageUrl": "/uploads/bulk-i2v/37ee0704-656d-429a-83db-7d92dd85c723.png",
+        "prompt": "The woman subtly adjusts her grip and continues stirring the pot with a focused expression, as the camera exhibits a natural, slight handheld wobble and a tiny vertical drift. Faint steam should be visibly rising from the pot.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291785503586.mp4",
+        "error": null
+      },
+      {
+        "id": "ea1087d0-da0b-42a9-b920-f24e49852c96",
+        "imageUrl": "/uploads/bulk-i2v/37a339fa-c59f-45ec-888e-2f8d7cc2e071.png",
+        "prompt": "The woman is mid-sentence, a slight exhalation on her face, as her ponytail subtly bounces with each light step. The phone exhibits natural handheld vertical bounce and a gentle horizontal sway as she moves forward, with the street and houses smoothly drifting in the background.",
+        "status": "done",
+        "videoUrl": "https://storage.theapi.app/videos/303291791316031.mp4",
+        "error": null
+      }
+    ]
+  },
+  "afd362c2-c4cf-4c49-ac28-7e9d19c251d6": {
+    "id": "afd362c2-c4cf-4c49-ac28-7e9d19c251d6",
+    "status": "partial",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T10:09:12.307Z",
+    "jobs": [
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/f4ecc998-6c72-4ce0-b489-6626f7563399.png",
+        "prompt": "The hand subtly adjusts its grip on the diamond painting pen, slightly rotating it to showcase the textured area and the button. The camera exhibits natural handheld micro-shakes, with a very gentle, almost imperceptible vertical drift as the person holding the phone slightly repositions for a better view.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/784ae0cf-015b-4565-a08e-d2a851dcbff6.png",
+        "prompt": "A hand enters the frame from the top right, gently lifting the unpackaged pink pen from its holder. The iPhone camera exhibits a subtle, natural handheld shake, with a slight forward tilt and minor autofocus adjustment as the hand interacts with the product.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/fb0111e1-d385-4d4f-bc1a-6f1684dbab6b.png",
+        "prompt": "The woman on the TV screen subtly gestures while speaking about the diamond painting pen, with the on-screen text banners slightly animating. The phone, held loosely from the couch, shows a natural, gentle handheld drift and slight wobble, occasionally performing a shallow auto-focus hunt on the bright TV display.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/e7084794-1aae-4960-8d84-35610491eb92.png",
+        "prompt": "The woman holds her genuine smile, blinking naturally and offering a slight, almost imperceptible nod while presenting the product. The handheld iPhone drifts gently with subtle shake, occasionally adjusting focus slightly between her face and the diamond painting pen she's holding.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/5ac0fb0f-ef4a-4d4b-9a85-1d5d9ad07773.png",
+        "prompt": "The hand holding the pink diamond painting pen subtly adjusts, showing its illuminated digital display before delicately pressing down to check a box on the \"PASS\" clipboard. The camera executes a slow, natural handheld pan, following the pen's subtle movement across the table, with a slight, almost imperceptible auto-focus adjustment.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/ac5f8729-0d65-482d-aa17-64650b0b312c.png",
+        "prompt": "The hand gently presses the light-up diamond painting pen to place a single blue diamond onto the canvas. The shot features a natural handheld drift and slight, almost imperceptible focus adjustment as the diamond settles, with existing diamonds subtly glimmering.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      }
+    ]
+  },
+  "88428357-df73-4905-8640-2968ab7be7fd": {
+    "id": "88428357-df73-4905-8640-2968ab7be7fd",
+    "status": "partial",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T10:10:07.213Z",
+    "jobs": [
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/ce4a7541-3d28-4841-a8af-f04226d9c547.png",
+        "prompt": "The hand subtly rotates the diamond painting pen to show its textured grip, while the thumb briefly presses the power button. The camera exhibits a natural, subtle handheld sway, with a faint, almost imperceptible auto-focus adjustment.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/35d81084-5a67-4f7d-9358-95a27301d13b.png",
+        "prompt": "A hand reaches into the box, gently shifting the packing paper and picking up the loose pink diamond painting pen. The camera exhibits subtle handheld drift and a slight auto-focus hunt as the object is lifted.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/8636e3fb-4fe0-46be-b6ed-157d4d69a604.png",
+        "prompt": "The woman on the TV screen subtly continues her presentation, gesturing naturally with the diamond painting pen as the text overlays remain active. The phone, held loosely from the couch, exhibits a slight, natural handheld sway and a barely noticeable vertical drift.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/00d6a0bb-6df0-4939-9237-d4f7fefb88c4.png",
+        "prompt": "The woman's smile subtly softens as she gives a tiny, approving nod, shifting her grip slightly on the product and box. The handheld camera exhibits a very gentle, almost imperceptible sway, with a minor autofocus adjustment as her head subtly shifts. Her hair softly settles with the slight head movement.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/31f496e0-e02c-46d0-ba2b-f947a5b97361.png",
+        "prompt": "The person's hand uses the diamond painting pen to effortlessly pick up a gem, then fluidly moves to check off the last empty box on the \"PASS\" clipboard. The camera maintains a natural, subtle handheld wobble with a slight auto-focus adjustment as the hand moves.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      },
+      {
+        "id": null,
+        "imageUrl": "/uploads/bulk-i2v/4d443094-5048-4278-b1e8-92a1f9c00540.png",
+        "prompt": "The hand gently lowers the illuminated diamond painting pen to place a gem on the canvas, then lifts and shifts slightly to select another from the tray. A natural, subtle handheld drift and micro-adjustments keep the action framed, with the pen's light providing a consistent glow.",
+        "status": "failed",
+        "videoUrl": null,
+        "error": "failed to do kling preprocess request"
+      }
+    ]
+  },
+  "bb8e37de-727b-402c-842d-9327c3233ea0": {
+    "id": "bb8e37de-727b-402c-842d-9327c3233ea0",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T10:13:48.113Z",
+    "jobs": [
+      {
+        "id": "6fb64f3d-2253-4919-a3fe-4ddd71ced126",
+        "imageUrl": "/uploads/bulk-i2v/d856a4ca-1632-4dce-a762-4fb0bd2415f9.png",
+        "prompt": "The person's hand should rotate the diamond painting pen slightly to show the whole product, and then press the power button. The camera should drift slightly and have a little handheld shake, with a subtle auto-focus hunt as the button is pressed.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed32d/0GyTpdzK5351KoHU13XUu_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/6fb64f3d-2253-4919-a3fe-4ddd71ced126/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/6fb64f3d-2253-4919-a3fe-4ddd71ced126",
+        "error": null
+      },
+      {
+        "id": "3b4a619c-3501-4f93-935d-131ece90578e",
+        "imageUrl": "/uploads/bulk-i2v/4d27180d-c392-4162-b37d-468e154b00f8.png",
+        "prompt": "Slightly angle the phone down and into the box as a hand reaches in to pick up the pink pen. The camera should hunt for focus slightly and have a small amount of handheld shake as the pen is lifted a few inches.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed32e/8eNqm-lbKonJBw1QdZrmO_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/3b4a619c-3501-4f93-935d-131ece90578e/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/3b4a619c-3501-4f93-935d-131ece90578e",
+        "error": null
+      },
+      {
+        "id": "2f865a42-999b-4931-9bae-2163d4189129",
+        "imageUrl": "/uploads/bulk-i2v/c8088337-588e-4b81-8e65-8310a1b6b9b4.png",
+        "prompt": "Simulate watching the TV, with slight handheld camera shake and subtle drift to the right. The on-screen presenter should have slight head movement and hand gestures as if she's talking, with the camera briefly losing focus on her face.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed32d/T0dV3BIiS5jUA9-AxJs85_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/2f865a42-999b-4931-9bae-2163d4189129/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/2f865a42-999b-4931-9bae-2163d4189129",
+        "error": null
+      },
+      {
+        "id": "bf3c8989-a367-4368-be3a-c001b2b57582",
+        "imageUrl": "/uploads/bulk-i2v/a9756d2b-7562-4475-ba22-2b94c476abbd.png",
+        "prompt": "The woman smiles and nods slightly as if agreeing with a point she's making, while gesturing towards the diamond painting pen and box in her hands. The camera has a slight handheld drift and hunts for focus between her face and the product packaging. The background window light flickers subtly.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed32d/8ablD4Esrvpl_OAwd4Hw1_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/bf3c8989-a367-4368-be3a-c001b2b57582/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/bf3c8989-a367-4368-be3a-c001b2b57582",
+        "error": null
+      },
+      {
+        "id": "02d77637-5dbc-43bc-8d1b-3fab1c59b163",
+        "imageUrl": "/uploads/bulk-i2v/7411e8a3-989e-4809-8960-ef022854671f.png",
+        "prompt": "Have the person's hand holding the diamond painting pen move slightly as if picking up and placing small gems. Add subtle handheld camera shake and slight focus adjustments as the hand moves. The number on the decibel meter should flicker slightly between readings.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed32d/VYOsPxtbkd25jr2erP-qF_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/02d77637-5dbc-43bc-8d1b-3fab1c59b163/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/02d77637-5dbc-43bc-8d1b-3fab1c59b163",
+        "error": null
+      },
+      {
+        "id": "1e58c1ce-1b1e-4ebb-862c-555a2b455944",
+        "imageUrl": "/uploads/bulk-i2v/28677fe9-5b38-4632-a5dd-de518cc41c1b.png",
+        "prompt": "The hand holding the pen moves slightly as it places a few gems, then pauses. The camera drifts slightly to the left and the autofocus subtly adjusts to keep the pen tip sharp.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed32d/gs9vVxaH0koofh7D42gTM_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/1e58c1ce-1b1e-4ebb-862c-555a2b455944/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/1e58c1ce-1b1e-4ebb-862c-555a2b455944",
+        "error": null
+      }
+    ]
+  },
+  "3aeeb836-156a-47db-933a-add75ed10d7e": {
+    "id": "3aeeb836-156a-47db-933a-add75ed10d7e",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T10:14:51.034Z",
+    "jobs": [
+      {
+        "id": "fccfd404-c7a7-4d19-9737-f7cf66e9f060",
+        "imageUrl": "/uploads/bulk-i2v/488d0084-f933-4e48-a61b-962eaad50b37.png",
+        "prompt": "The hand holding the applicator tool should make small, deliberate movements as if placing another rhinestone, with slight pressure applied. Simulate handheld camera movement with subtle drift and occasional auto-focus pulsing on the denim jacket.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed334/2MftycSw_Dpxtj1jejJ0Y_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/fccfd404-c7a7-4d19-9737-f7cf66e9f060/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/fccfd404-c7a7-4d19-9737-f7cf66e9f060",
+        "error": null
+      },
+      {
+        "id": "fb69eff1-0940-44e1-8b9b-fc058130ba60",
+        "imageUrl": "/uploads/bulk-i2v/af58e2fa-aa9b-43b8-a272-4a4932441de1.png",
+        "prompt": "The hand holding the applicator moves slightly, placing another rhinestone on the denim. Simulate handheld camera shake with a subtle, slow zoom in and out, and minor focus adjustments to mimic auto-focus hunting.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed334/s2XMny71JrleuoZovH2rj_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/fb69eff1-0940-44e1-8b9b-fc058130ba60/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/fb69eff1-0940-44e1-8b9b-fc058130ba60",
+        "error": null
+      },
+      {
+        "id": "e1e88765-ea78-449f-ad94-30e36b28f428",
+        "imageUrl": "/uploads/bulk-i2v/8001236d-7533-499a-9712-e70d466b91e3.png",
+        "prompt": "Slightly angle the rhinestone applicator up and down while the woman talks and smiles naturally, as if explaining the product. Have the camera drift slightly left and right with a subtle handheld wobble and occasional auto-focus adjustments on the applicator. Simulate natural light changes from the window by subtly adjusting the brightness.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed333/F6F4NCXN1YEsDgNjgyMJ-_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/e1e88765-ea78-449f-ad94-30e36b28f428/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/e1e88765-ea78-449f-ad94-30e36b28f428",
+        "error": null
+      },
+      {
+        "id": "c60ee9e6-9045-4afb-b2a3-57f9ee875e59",
+        "imageUrl": "/uploads/bulk-i2v/8f3b3397-6d4f-4d02-af4c-8cbe4b4de4eb.png",
+        "prompt": "The phone is handheld and slightly tilted, with a small, slow zoom in on the TV screen. The TV screen plays a video of a woman talking and gesturing with her hands. Add slight, natural handheld camera shake and auto-focus hunting.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed334/pJwgko5x88F588FLf506A_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/c60ee9e6-9045-4afb-b2a3-57f9ee875e59/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/c60ee9e6-9045-4afb-b2a3-57f9ee875e59",
+        "error": null
+      },
+      {
+        "id": "ed7d0513-3f09-497b-aa21-b42952717e3e",
+        "imageUrl": "/uploads/bulk-i2v/dd721caa-5f82-4df0-9e27-56093c822358.png",
+        "prompt": "The hand reaches in and picks up the blue rhinestone applicator, examining it closely. The camera is handheld, with slight vertical drift and subtle autofocus adjustments as the hand moves. Sunlight flickers gently through the window in the background.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed338/uPDOzrfzZ7DRM_draYBbl_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/ed7d0513-3f09-497b-aa21-b42952717e3e/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/ed7d0513-3f09-497b-aa21-b42952717e3e",
+        "error": null
+      },
+      {
+        "id": "d3f1b150-8daa-4dde-a32f-1988db79eef3",
+        "imageUrl": "/uploads/bulk-i2v/61824c7f-9928-4b7e-9ed5-191e806b5d67.png",
+        "prompt": "The hand holding the applicator should subtly rotate it back and forth to show all sides, almost like admiring it. The camera should have a slight handheld drift, with gentle auto-focus adjustments on the applicator tip.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ed33b/5kbgEMLIwKUELlBv68rDq_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/d3f1b150-8daa-4dde-a32f-1988db79eef3/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/d3f1b150-8daa-4dde-a32f-1988db79eef3",
+        "error": null
+      }
+    ]
+  },
+  "2bc488a9-8f53-4f44-aba5-c2b8b0de090c": {
+    "id": "2bc488a9-8f53-4f44-aba5-c2b8b0de090c",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-17T19:21:18.158Z",
+    "jobs": [
+      {
+        "id": "1b439be3-e9b5-4a1c-8449-511090331884",
+        "imageUrl": "/uploads/bulk-i2v/b6c9820b-0f91-4b0d-be70-9ff7b770bae8.png",
+        "prompt": "The person adjusts the multimeter probes on the device under test. The camera is handheld, with a slight vertical drift and subtle zoom as the person focuses on the reading; the laptop screen should have some flickering.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ee003/LUr7-Jm-YQ7iVwxLIvFLJ_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/1b439be3-e9b5-4a1c-8449-511090331884/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/1b439be3-e9b5-4a1c-8449-511090331884",
+        "error": null
+      },
+      {
+        "id": "9105f45c-46f5-4983-a638-9b76613ae4d4",
+        "imageUrl": "/uploads/bulk-i2v/54c74b41-423f-4d0f-9c3a-a2a5153ef994.png",
+        "prompt": "Start with the phone propped up on something, angled slightly down at the box. Have a hand reach in, rustle the packing paper, and pick up the boxed fitness tracker, turning it slightly in the light. The phone wobbles slightly as the hand moves.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ee002/EGFDEI06MnJzJ4lk8TcPU_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/9105f45c-46f5-4983-a638-9b76613ae4d4/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/9105f45c-46f5-4983-a638-9b76613ae4d4",
+        "error": null
+      },
+      {
+        "id": "94208dab-2c29-4c4c-ac1e-04d4d73aec90",
+        "imageUrl": "/uploads/bulk-i2v/5074f178-0f00-49e5-b9b1-298c16dd46ed.png",
+        "prompt": "The TV presenter gestures slightly while talking, and the person holding the camera nods their head in agreement with what is being said on the TV. Add subtle handheld camera drift and slight auto-focus hunting as the camera holder shifts their weight on the couch. The steam from the mug on the table dissipates upwards.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ee002/ZQIu5siFpNiZY0PwSv3sF_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/94208dab-2c29-4c4c-ac1e-04d4d73aec90/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/94208dab-2c29-4c4c-ac1e-04d4d73aec90",
+        "error": null
+      },
+      {
+        "id": "c56c75e8-844c-4574-b615-e56bdbd0611c",
+        "imageUrl": "/uploads/bulk-i2v/8b63cadd-dc4b-4623-bf01-7753f2fcffc4.png",
+        "prompt": "The woman glances at the fitness tracker on her wrist, tapping it lightly with her other hand as she talks off-camera, describing the product. Simulate handheld camera movement with subtle vertical drift and slight focus adjustments on the tracker face, along with gentle movement in the background foliage.",
+        "status": "done",
+        "videoUrl": "https://v3b.fal.media/files/b/0a8ee002/4ALl3nLOr6BbQ4-z8R87J_output.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/c56c75e8-844c-4574-b615-e56bdbd0611c/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/c56c75e8-844c-4574-b615-e56bdbd0611c",
         "error": null
       }
     ]

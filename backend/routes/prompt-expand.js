@@ -15,21 +15,32 @@ const contextProfileRoute = require('./context-profile');
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
-// Base prompt template - Nano Banana B-Roll-Realism 4.0 Engine
-const UGC_EXPANSION_PROMPT = `You are the Nano Banana B-Roll-Realism 4.0 Engine. Your goal is to convert simple prompts into complex JSON profiles that simulate raw, unpolished video frames taken by everyday people for TikTok, Instagram Stories, or Snapchat.
+// Base prompt template - Nano Banana B-Roll Architect v2.0
+const UGC_EXPANSION_PROMPT = `You are the Nano Banana B-Roll Architect (v2.0). Your goal is to turn generic descriptions of human behavior into authentic "Camera Roll" video frame descriptions ready for high-fidelity image synthesis.
 
-Core Philosophy:
-1. Video, Not Photo: The output must look like a *screen grab* from a video. This means motion blur, rolling shutter, auto-focus hunting, and video compression artifacts are desirable.
-2. Logistical Realism: You must ask: "How did they film this?"
-   * *sad/crying:* Handheld in bed (shaky) or propped on a knee. Never a tripod.
-   * *cooking:* Propped against a toaster or held in one hand while stirring with the other.
-   * *outfit check:* Mirror selfie OR phone propped on the floor leaning against a shoe.
-3. No Pro Lighting: Lighting must be incidental (ceiling fans, TV glow, windows, harsh bathroom vanity). No rim lights or softboxes.
+The Core Philosophy: "Creator Logic"
+Real people do not have camera crews. They only have four ways to capture content. You must immediately classify the User Prompt into one of these four setups:
+
+1. The "Prop" (Hands-Free Task)
+   * Logic: They need both hands (cooking, working, cleaning).
+   * The Look: The phone is leaning against a water bottle, a toaster, or wedged in a car cup holder. The angle is slightly low or tilted.
+
+2. The "Selfie" (Reaction/POV)
+   * Logic: They are talking, reacting, or walking.
+   * The Look: One arm is extended (shoulder visible). The camera shakes. The angle is high (flattering) or low (lazy).
+
+3. The "Staged Aesthetic" (Tripod/Timer)
+   * Logic: They are showing off an outfit or a "morning routine."
+   * The Look: The phone is stationary on a cheap tripod or window sill. The framing is *too* perfect, but the lighting is still domestic/amateur.
+
+4. The "Stolen Shot" (Third Person)
+   * Logic: The subject is unaware (sleeping, scrolling, arguing) OR asking a friend to film them ("take a video of me walking away").
+   * The Look: Zoomed in (digital grain), shaky hand, obstructed view (filming past a doorframe or shoulder).
 
 Instructions:
-* Analyze the Scenario: Determine the most likely *lazy* way a human would record this.
-* Enforce Imperfection: Add "messy room," "dirty mirror," "bad skin texture," or "awkward cropping."
-* Output: Valid JSON only.
+1. Hallucinate Context: If the prompt is "Mom mad scrolling," you must invent *why* (e.g., "sitting at a messy kitchen island, ignoring kids").
+2. Enforce Imperfection: Add "dirty lens," "finger over the mic," "messy room," or "bad overhead lighting."
+3. Output: Valid JSON Only.
 
 {{CONTEXT}}
 
@@ -38,62 +49,27 @@ USER REQUEST: {{INPUT}}
 Output Schema:
 {
   "metadata": {
-    "engine": "UGC-REALISM-4.0",
-    "media_type": "video_frame_extraction",
-    "platform_context": "[e.g., TikTok Live, Instagram Story, Snapchat Memory]",
-    "time_of_capture": "[e.g., 2:43 AM, 11:30 AM]",
-    "determinism": {
-      "imperfection_lock": true,
-      "shaky_cam_lock": true,
-      "bad_lighting_lock": true
-    }
-  },
-  "visual_artifacts": {
-    "video_quality": {
-      "resolution": "1080p_upscaled",
-      "compression": "[e.g., heavy_bitrate_starvation, macroblocking in shadows]",
-      "motion_blur": "[e.g., moderate_hand_tremor, fast_pan]",
-      "focus": "[e.g., hunting, slightly soft on face, focused on background]"
-    },
-    "lens_character": {
-      "distortion": "[e.g., wide_angle_edge_stretch, fisheye_selfie]",
-      "sensor_noise": "high_ISO_grain"
-    }
+    "engine": "NanoBanana_BROLL_v2",
+    "shot_type": "[The Prop / The Selfie / The Staged Aesthetic / The Stolen Shot]",
+    "viral_context": "[e.g., 'caught_in_4k', 'relatable_mom_moment', 'aesthetic_morning']"
   },
   "camera_setup": {
-    "device": "[e.g., iPhone 13 Mini, cracked screen Android]",
-    "mounting_method": "[CRITICAL: e.g., propped_against_water_bottle, handheld_arm_extended, wedged_in_steering_wheel]",
-    "angle": "[e.g., low_angle_double_chin_risk, high_angle_myspace_style]",
-    "framing": "vertical_9:16_crowded"
+    "device": "iPhone 15 Pro Max (Video Mode)",
+    "mounting_logic": "[e.g., Propped against a jar of pasta sauce on the counter]",
+    "lens_characteristics": "[e.g., 0.5x Ultra Wide, Smudged Lens, Digital Zoom Grain]",
+    "angle": "[e.g., Tilted upward from counter height, slightly crooked]"
   },
-  "subject": {
-    "identity": {
-      "demographics": "...",
-      "state": "[e.g., tired, sweaty, crying, laughing, drunk]"
-    },
-    "grooming": {
-      "hair": "[e.g., messy bun, bedhead, grease_visible]",
-      "makeup": "[e.g., none, smeared_eyeliner, half_removed]",
-      "skin": "[e.g., acne_visible, oily_sheen, dry_patches]"
-    },
-    "wardrobe": {
-      "item": "...",
-      "condition": "[e.g., wrinkled, stained, inside_out]",
-      "fit": "casual/loose"
-    }
+  "subject_action": {
+    "identity": "[Specific details: age, ethnicity, styling]",
+    "activity": "[What are they doing? e.g., aggressively tapping screen, chopping onions while crying]",
+    "gaze": "[Where are they looking? e.g., fixated on phone screen, ignoring camera]",
+    "expression": "[Micro-expression: e.g., pursed lips, furrowed brow, holding back a laugh]"
   },
-  "environment": {
-    "location": "[e.g., messy bedroom, car interior, gym corner]",
-    "clutter_level": "high",
-    "background_details": "[e.g., unmade bed, piles of laundry, dirty dishes, car dashboard dust]",
-    "lighting": {
-      "primary_source": "[e.g., laptop_screen_blue_glow, overhead_fluorescent_flicker]",
-      "quality": "unflattering/harsh"
-    }
-  },
-  "action_context": {
-    "pose_snapshot": "[e.g., mid-speech, mouth open, wiping tear, fixing hair]",
-    "interaction": "[e.g., looking at self on screen rather than lens, adjusting phone position]"
+  "environment_reality": {
+    "location": "[e.g., suburban kitchen island]",
+    "clutter_density": "High",
+    "background_details": "[e.g., pile of unopened mail, half-eaten toast, blurry kids running in back]",
+    "lighting": "[e.g., harsh 4000K kitchen recessed lights, morning sun hitting dust motes]"
   }
 }
 
@@ -294,7 +270,7 @@ router.post('/expand', async (req, res) => {
       engineName = 'OVAE-7.0 Talking Head (legacy)';
     } else {
       basePrompt = UGC_EXPANSION_PROMPT;
-      engineName = 'UGC-REALISM-4.0 B-Roll';
+      engineName = 'NanoBanana_BROLL_v2';
     }
     console.log(`[Prompt] Using ${engineName} engine`);
 
@@ -344,7 +320,7 @@ router.post('/expand', async (req, res) => {
 
 /**
  * Convert JSON prompt to string format for Nano Banana Pro
- * Handles VFA-9.0, UGC-REALISM-4.0, and legacy schemas
+ * Handles NanoBanana_BROLL_v2, VFA-9.0, and legacy schemas
  */
 function convertJsonToPrompt(json) {
   const parts = [];
@@ -405,7 +381,45 @@ function convertJsonToPrompt(json) {
     return parts.filter(p => p && p.trim()).join('. ').replace(/\s+/g, ' ').trim();
   }
 
-  // New UGC-REALISM-4.0 schema
+  // NanoBanana_BROLL_v2 schema (newest)
+  if (json.metadata?.engine === 'NanoBanana_BROLL_v2') {
+    // Shot type and context
+    if (json.metadata.shot_type) parts.push(`${json.metadata.shot_type} shot setup`);
+    if (json.metadata.viral_context) parts.push(`${json.metadata.viral_context.replace(/_/g, ' ')} vibe`);
+
+    // Camera setup (critical for authenticity)
+    if (json.camera_setup) {
+      const c = json.camera_setup;
+      if (c.device) parts.push(`shot on ${c.device}`);
+      if (c.mounting_logic) parts.push(`phone ${c.mounting_logic}`);
+      if (c.lens_characteristics) parts.push(`lens: ${c.lens_characteristics}`);
+      if (c.angle) parts.push(`angle: ${c.angle}`);
+    }
+
+    // Subject action (critical - what they're doing)
+    if (json.subject_action) {
+      const s = json.subject_action;
+      if (s.identity) parts.push(s.identity);
+      if (s.activity) parts.push(`ACTION: ${s.activity}`);
+      if (s.gaze) parts.push(`gaze: ${s.gaze}`);
+      if (s.expression) parts.push(`expression: ${s.expression}`);
+    }
+
+    // Environment reality
+    if (json.environment_reality) {
+      const e = json.environment_reality;
+      if (e.location) parts.push(`location: ${e.location}`);
+      if (e.clutter_density) parts.push(`clutter: ${e.clutter_density}`);
+      if (e.background_details) parts.push(`background: ${e.background_details}`);
+      if (e.lighting) parts.push(`lighting: ${e.lighting}`);
+    }
+
+    parts.push('vertical 9:16 portrait, raw video frame from phone camera roll, authentic UGC aesthetic, no UI overlays, no timestamps, candid casual real-looking phone capture');
+
+    return parts.filter(p => p && p.trim()).join('. ').replace(/\s+/g, ' ').trim();
+  }
+
+  // Legacy UGC-REALISM-4.0 schema (fallback)
   if (json.metadata?.engine === 'UGC-REALISM-4.0') {
     // Platform/time context
     if (json.metadata.platform_context) parts.push(`${json.metadata.platform_context} video frame`);

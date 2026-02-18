@@ -64,9 +64,35 @@
       "type": "prompt",
       "config": {
         "model": "anthropic/claude-sonnet-4-5",
-        "systemPrompt": "You are an expert at generating detailed image prompts for AI image generation. Create prompts that recreate the exact composition and style of the original ad, but with different product/person assets.",
-        "userPrompt": "Create a detailed image generation prompt that recreates this ad composition with the client's product.\n\nOriginal Ad Analysis:\n{analysis}\n\nClient Product: {product_name}\nClient Product Image: {product_image}\nClient Creator: {creator_image}\n\nGenerate a detailed prompt that:\n1. Maintains the exact composition and layout\n2. Uses the same color palette and lighting\n3. Recreates the same camera angle and style\n4. Places the client's product where the original product was\n5. Places the client's creator where the original person was (if applicable)\n\nThe prompt should be highly detailed and specific to ensure the recreation matches the original style.\n\nOutput format: A single detailed prompt ready for Flux image generation.",
-        "outputFormat": "text"
+        "systemPrompt": "You are the Nano Banana B-Roll Architect (v2.0). Your goal is to turn generic descriptions of human behavior into authentic \"Camera Roll\" video frame descriptions ready for high-fidelity image synthesis.\n\nThe Core Philosophy: \"Creator Logic\"\nReal people do not have camera crews. They only have four ways to capture content. You must immediately classify the input into one of these four setups:\n\n1. The \"Prop\" (Hands-Free Task)\n   Logic: They need both hands (cooking, working, cleaning).\n   The Look: The phone is leaning against a water bottle, a toaster, or wedged in a car cup holder. The angle is slightly low or tilted.\n\n2. The \"Selfie\" (Reaction/POV)\n   Logic: They are talking, reacting, or walking.\n   The Look: One arm is extended (shoulder visible). The camera shakes. The angle is high (flattering) or low (lazy).\n\n3. The \"Staged Aesthetic\" (Tripod/Timer)\n   Logic: They are showing off an outfit or a \"morning routine.\"\n   The Look: The phone is stationary on a cheap tripod or window sill. The framing is *too* perfect, but the lighting is still domestic/amateur.\n\n4. The \"Stolen Shot\" (Third Person)\n   Logic: The subject is unaware (sleeping, scrolling, arguing) OR asking a friend to film them (\"take a video of me walking away\").\n   The Look: Zoomed in (digital grain), shaky hand, obstructed view (filming past a doorframe or shoulder).\n\nInstructions:\n1. Hallucinate Context: If the prompt is vague, you must invent *why* (e.g., \"sitting at a messy kitchen island, ignoring kids\").\n2. Enforce Imperfection: Add \"dirty lens,\" \"finger over the mic,\" \"messy room,\" or \"bad overhead lighting.\"\n3. Output: Valid JSON Only.",
+        "userPrompt": "Create authentic b-roll frame descriptions based on this ad composition.\n\nOriginal Ad Analysis:\n{analysis}\n\nClient Product: {product_name}\nClient Product Image: {product_image}\nClient Creator: {creator_image}\n\nUsing the Nano Banana B-Roll Architect v2.0 Creator Logic:\n1. Classify into one of the 4 shot types (Prop, Selfie, Staged Aesthetic, Stolen Shot)\n2. Hallucinate specific context if the scenario is vague\n3. Enforce imperfection (dirty lens, messy room, bad lighting, finger over mic)\n4. Describe the exact mounting logic (propped against what? held how?)\n5. Specify lens characteristics (0.5x ultra wide, digital zoom grain, smudged lens)\n6. Detail subject action, gaze direction, and micro-expression\n7. Fill in environment clutter and domestic lighting\n8. Place the client's product naturally in the scene\n9. Generate a final flux_prompt combining all elements into one detailed image generation prompt\n\nOutput valid JSON only.",
+        "outputFormat": "json",
+        "schema": {
+          "metadata": {
+            "engine": "NanoBanana_BROLL_v2",
+            "shot_type": "string (The Prop / The Selfie / The Staged Aesthetic / The Stolen Shot)",
+            "viral_context": "string (e.g., caught_in_4k, relatable_mom_moment, aesthetic_morning)"
+          },
+          "camera_setup": {
+            "device": "iPhone 15 Pro Max (Video Mode)",
+            "mounting_logic": "string (e.g., Propped against a jar of pasta sauce on the counter)",
+            "lens_characteristics": "string (e.g., 0.5x Ultra Wide, Smudged Lens, Digital Zoom Grain)",
+            "angle": "string (e.g., Tilted upward from counter height, slightly crooked)"
+          },
+          "subject_action": {
+            "identity": "string (Specific details: age, ethnicity, styling)",
+            "activity": "string (What are they doing? e.g., aggressively tapping screen, chopping onions while crying)",
+            "gaze": "string (Where are they looking? e.g., fixated on phone screen, ignoring camera)",
+            "expression": "string (Micro-expression: e.g., pursed lips, furrowed brow, holding back a laugh)"
+          },
+          "environment_reality": {
+            "location": "string (e.g., suburban kitchen island)",
+            "clutter_density": "string (Low/Medium/High)",
+            "background_details": "string (e.g., pile of unopened mail, half-eaten toast, blurry kids running in back)",
+            "lighting": "string (e.g., harsh 4000K kitchen recessed lights, morning sun hitting dust motes)"
+          },
+          "flux_prompt": "string - the final detailed prompt for Flux image generation combining all above elements"
+        }
       }
     },
     {
@@ -78,7 +104,7 @@
         "height": 1920,
         "steps": 28,
         "guidance": 3.5,
-        "promptSource": "prompt_builder.output"
+        "promptSource": "prompt_builder.output.flux_prompt"
       }
     },
     {
@@ -87,7 +113,8 @@
       "config": {
         "fields": [
           "analysis",
-          "prompt",
+          "ovae_metadata",
+          "flux_prompt",
           "image_url"
         ]
       }
@@ -135,7 +162,8 @@
       "from": "prompt_builder",
       "to": "output",
       "mapping": {
-        "output": "prompt"
+        "output.metadata": "ovae_metadata",
+        "output.flux_prompt": "flux_prompt"
       }
     },
     {

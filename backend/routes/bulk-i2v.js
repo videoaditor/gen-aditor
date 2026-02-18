@@ -1,5 +1,5 @@
 /**
- * Bulk Image-to-Video via Kling 3.0 (PiAPI) + Gemini prompt analysis
+ * Bulk Image-to-Video via Kling 3.0 (fal.ai) + Gemini prompt analysis
  */
 const express = require('express');
 const router = express.Router();
@@ -9,8 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
-const PIAPI_BASE_URL = 'https://api.piapi.ai/api/v1';
-const PIAPI_API_KEY = process.env.PIAPI_API_KEY;
+const FAL_API_KEY = process.env.FAL_API_KEY;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 
 // Multer for image uploads
@@ -73,8 +72,8 @@ router.post('/upload', upload.array('images', 20), (req, res) => {
     return res.status(400).json({ error: 'No images uploaded' });
   }
   const images = req.files.map(f => ({
-    filename: f.originalname,  // Return original filename for frontend matching
-    serverFilename: f.filename, // UUID filename on disk
+    filename: f.originalname,
+    serverFilename: f.filename,
     url: `/uploads/bulk-i2v/${f.filename}`,
     originalName: f.originalname
   }));
@@ -92,64 +91,65 @@ router.post('/analyze', async (req, res) => {
   if (!images || !images.length) {
     return res.status(400).json({ error: 'No images provided' });
   }
-  // Validate URLs - reject blob URLs
   const invalidUrls = images.filter(img => !img.url || img.url.startsWith('blob:'));
   if (invalidUrls.length > 0) {
     console.error('[Bulk-I2V] Invalid blob URLs detected:', invalidUrls.map(i => i.url));
     return res.status(400).json({ error: 'Invalid image URLs - images not uploaded correctly', invalidUrls: invalidUrls.map(i => i.filename) });
   }
-  if (!GOOGLE_API_KEY) {
-    return res.status(500).json({ error: 'GOOGLE_API_KEY not configured' });
-  }
 
-  // Process all images in parallel (Gemini can handle concurrent requests)
-  const analyzeImage = async (img) => {
+  const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'https://gen.aditor.ai';
+  const results = [];
+
+  for (const img of images) {
+    let imageUrl = img.url;
+    if (imageUrl.startsWith('/')) {
+      imageUrl = `${PUBLIC_BASE_URL}${imageUrl}`;
+    }
+
     try {
-      const imgPath = path.join(__dirname, '..', img.url.startsWith('/') ? img.url.slice(1) : img.url);
-      const imgBuffer = fs.readFileSync(imgPath);
-      const base64 = imgBuffer.toString('base64');
-      const mimeType = img.url.endsWith('.png') ? 'image/png' : 'image/jpeg';
-
-      const geminiRes = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
+      const response = await axios.post(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_API_KEY}`,
         {
-          systemInstruction: { parts: [{ text: GEMINI_SYSTEM_PROMPT }] },
           contents: [{
             parts: [
-              { inlineData: { mimeType, data: base64 } },
-              { text: 'Generate a motion prompt for this image.' }
+              { text: GEMINI_SYSTEM_PROMPT },
+              { inline_data: { mime_type: 'image/jpeg', data: await fetchImageAsBase64(imageUrl) } }
             ]
-          }]
+          }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
         },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
+        { headers: { 'Content-Type': 'application/json' } }
       );
 
-      const prompt = geminiRes.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-      return { url: img.url, filename: img.filename, prompt, status: 'ready' };
+      const text = response.data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      results.push({ filename: img.filename, url: img.url, prompt: text.trim() });
     } catch (err) {
-      console.error(`[Bulk-I2V] Gemini error for ${img.filename}:`, err.response?.data?.error?.message || err.message);
-      return { url: img.url, filename: img.filename, prompt: '', status: 'error', error: err.message };
+      console.error(`[Bulk-I2V] Gemini error for ${img.filename}:`, err.response?.data || err.message);
+      results.push({ filename: img.filename, url: img.url, prompt: '', error: err.message });
     }
-  };
+  }
 
-  const results = await Promise.all(images.map(analyzeImage));
-  console.log(`[Bulk-I2V] Analyzed ${results.filter(r => r.status === 'ready').length}/${images.length} images`);
-
+  console.log(`[Bulk-I2V] Analyzed ${results.filter(r => r.prompt).length}/${images.length} images`);
   res.json({ results });
 });
 
+async function fetchImageAsBase64(url) {
+  const response = await axios.get(url, { responseType: 'arraybuffer' });
+  return Buffer.from(response.data).toString('base64');
+}
+
 /**
  * POST /api/bulk-i2v/generate
- * Start Kling 3.0 i2v jobs
- * Body: { items: [{ url, prompt }], duration: 5, mode: 'std', aspectRatio: '9:16' }
+ * Start Kling 3.0 i2v jobs via fal.ai
+ * Body: { items: [{ url, prompt }], duration: 5, mode: 'standard', aspectRatio: '9:16' }
  */
 router.post('/generate', async (req, res) => {
-  const { items, duration = 5, mode = 'std', aspectRatio = '9:16' } = req.body;
+  const { items, duration = 5, mode = 'standard', aspectRatio = '9:16' } = req.body;
   if (!items || !items.length) {
     return res.status(400).json({ error: 'No items provided' });
   }
-  if (!PIAPI_API_KEY) {
-    return res.status(500).json({ error: 'PIAPI_API_KEY not configured' });
+  if (!FAL_API_KEY) {
+    return res.status(500).json({ error: 'FAL_API_KEY not configured' });
   }
 
   const batchId = uuidv4();
@@ -161,11 +161,14 @@ router.post('/generate', async (req, res) => {
     jobs: []
   };
 
-  // Public base URL for image access (PiAPI needs to reach them)
+  // Public base URL for image access
   const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'https://gen.aditor.ai';
+  
+  // fal.ai endpoint for Kling V3 image-to-video
+  const tier = mode === 'pro' ? 'pro' : 'standard';
+  const falEndpoint = `https://queue.fal.run/fal-ai/kling-video/v3/${tier}/image-to-video`;
 
   for (const item of items) {
-    // Make image URL publicly accessible for PiAPI
     let imageUrl = item.url;
     if (imageUrl.startsWith('/')) {
       imageUrl = `${PUBLIC_BASE_URL}${imageUrl}`;
@@ -177,46 +180,37 @@ router.post('/generate', async (req, res) => {
       prompt: item.prompt,
       status: 'pending',
       videoUrl: null,
+      statusUrl: null,
+      responseUrl: null,
       error: null
     };
 
     try {
       const response = await axios.post(
-        `${PIAPI_BASE_URL}/task`,
+        falEndpoint,
         {
-          model: 'kling',
-          task_type: 'video_generation',
-          input: {
-            prompt: item.prompt,
-            negative_prompt: '',
-            cfg_scale: 0.5,
-            duration,
-            aspect_ratio: aspectRatio,
-            mode,
-            version: '3.0',
-            image_url: imageUrl
-          },
-          config: {
-            service_mode: 'public',
-            webhook_config: { endpoint: '', secret: '' }
-          }
+          prompt: item.prompt,
+          image_url: imageUrl,
+          duration: String(duration),
+          aspect_ratio: aspectRatio
         },
         {
-          headers: { 'X-API-Key': PIAPI_API_KEY, 'Content-Type': 'application/json' }
+          headers: {
+            'Authorization': `Key ${FAL_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
         }
       );
 
-      if (response.data.code === 200) {
-        job.id = response.data.data.task_id;
-        job.status = 'generating';
-        console.log(`[Bulk-I2V] Started job ${job.id}`);
-      } else {
-        job.status = 'failed';
-        job.error = response.data.message || 'API error';
-      }
+      const { request_id, status_url, response_url } = response.data;
+      job.id = request_id;
+      job.statusUrl = status_url;
+      job.responseUrl = response_url;
+      job.status = 'generating';
+      console.log(`[Bulk-I2V] Started job ${job.id}`);
     } catch (err) {
       job.status = 'failed';
-      job.error = err.response?.data?.message || err.message;
+      job.error = err.response?.data?.detail || err.message;
       console.error(`[Bulk-I2V] Failed to start job:`, job.error);
     }
 
@@ -230,7 +224,7 @@ router.post('/generate', async (req, res) => {
 
 /**
  * GET /api/bulk-i2v/status/:batchId
- * Poll batch status - checks PiAPI for each pending job
+ * Poll batch status - checks fal.ai for each pending job
  */
 router.get('/status/:batchId', async (req, res) => {
   const batch = batches.get(req.params.batchId);
@@ -240,27 +234,34 @@ router.get('/status/:batchId', async (req, res) => {
 
   let allDone = true;
   for (const job of batch.jobs) {
-    if (job.status === 'generating' && job.id) {
+    if (job.status === 'generating' && job.id && job.statusUrl) {
       try {
-        const response = await axios.get(`${PIAPI_BASE_URL}/task/${job.id}`, {
-          headers: { 'X-API-Key': PIAPI_API_KEY }
+        const statusResponse = await axios.get(job.statusUrl, {
+          headers: { 'Authorization': `Key ${FAL_API_KEY}` }
         });
-        if (response.data.code === 200) {
-          const task = response.data.data;
-          const videoUrl = task.output?.video_url || task.output?.video || task.output?.works?.[0]?.video?.resource;
-          if (task.status === 'completed' && videoUrl) {
+
+        const { status } = statusResponse.data;
+
+        if (status === 'COMPLETED') {
+          // Fetch the result
+          const resultResponse = await axios.get(job.responseUrl, {
+            headers: { 'Authorization': `Key ${FAL_API_KEY}` }
+          });
+          const videoUrl = resultResponse.data.video?.url;
+          if (videoUrl) {
             job.status = 'done';
             job.videoUrl = videoUrl;
-          } else if (task.status === 'failed') {
-            job.status = 'failed';
-            job.error = task.error?.message || 'Generation failed';
-          } else {
-            allDone = false;
+            console.log(`[Bulk-I2V] Job ${job.id} completed: ${videoUrl}`);
           }
-          saveBatches();
+        } else if (status === 'FAILED') {
+          job.status = 'failed';
+          job.error = 'Generation failed';
+          console.log(`[Bulk-I2V] Job ${job.id} failed`);
+        } else {
+          allDone = false;
         }
       } catch (err) {
-        // Don't fail the whole batch on a status check error
+        console.error(`[Bulk-I2V] Status check error for ${job.id}:`, err.message);
         allDone = false;
       }
     } else if (job.status === 'generating') {
@@ -269,10 +270,10 @@ router.get('/status/:batchId', async (req, res) => {
   }
 
   if (allDone) {
-    batch.status = batch.jobs.some(j => j.status === 'failed') ? 'completed_with_errors' : 'done';
-    saveBatches();
+    batch.status = batch.jobs.every(j => j.status === 'done') ? 'done' : 'partial';
   }
 
+  saveBatches();
   res.json({ batch });
 });
 

@@ -1,16 +1,15 @@
 /**
- * Kling Video Generation via PiAPI
+ * Kling Video Generation via fal.ai
  * 
- * Endpoint: https://api.piapi.ai/api/v1/task
- * Supports Kling 1.5, 1.6, 2.1, 2.5, 2.6
+ * Supports Kling 3.0 (V3, O3) text-to-video and image-to-video
+ * Docs: https://fal.ai/models/fal-ai/kling-video
  */
 
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-const PIAPI_BASE_URL = 'https://api.piapi.ai/api/v1';
-const PIAPI_API_KEY = process.env.PIAPI_API_KEY;
+const FAL_API_KEY = process.env.FAL_API_KEY;
 
 // In-memory job storage
 const videoJobs = new Map();
@@ -24,16 +23,16 @@ const videoJobs = new Map();
  *   prompt: string (required) - motion/action prompt
  *   duration: number (optional) - 5 or 10 seconds, default 5
  *   aspectRatio: string (optional) - "9:16", "16:9", "1:1", default "9:16"
- *   version: string (optional) - "2.5" (default), "2.6", "2.1", "1.6", "1.5"
- *   mode: string (optional) - "std" or "pro", default "std"
+ *   mode: string (optional) - "standard" or "pro", default "standard"
+ *   enableAudio: boolean (optional) - enable native audio, default false
  * }
  */
 router.post('/generate', async (req, res) => {
   try {
-    if (!PIAPI_API_KEY) {
+    if (!FAL_API_KEY) {
       return res.status(500).json({ 
-        error: 'PIAPI_API_KEY not configured',
-        message: 'Please set PIAPI_API_KEY in environment variables'
+        error: 'FAL_API_KEY not configured',
+        message: 'Please set FAL_API_KEY in environment variables'
       });
     }
 
@@ -42,91 +41,83 @@ router.post('/generate', async (req, res) => {
       prompt, 
       duration = 5, 
       aspectRatio = '9:16', 
-      version = '2.5',
-      mode = 'std'
+      mode = 'standard',
+      enableAudio = false
     } = req.body;
 
     if (!prompt) {
       return res.status(400).json({ error: 'prompt is required' });
     }
 
-    // Build input object
-    const input = {
+    // Determine endpoint based on mode and input type
+    // Using Kling V3 (3.0) - latest version
+    const tier = mode === 'pro' ? 'pro' : 'standard';
+    const inputType = imageUrl ? 'image-to-video' : 'text-to-video';
+    const endpoint = `https://queue.fal.run/fal-ai/kling-video/v3/${tier}/${inputType}`;
+
+    // Build request body
+    const requestBody = {
       prompt: prompt,
-      negative_prompt: '',
-      cfg_scale: 0.5,
-      duration: duration,
+      duration: String(duration), // fal expects string "5" or "10"
       aspect_ratio: aspectRatio,
-      mode: mode,
-      version: version
     };
 
-    // Add image_url for image-to-video
+    // Add image for i2v
     if (imageUrl) {
-      input.image_url = imageUrl;
+      requestBody.image_url = imageUrl;
     }
 
-    // Create video generation task
+    // Add audio if enabled (V3 supports native audio)
+    if (enableAudio) {
+      requestBody.enable_audio = true;
+    }
+
+    console.log(`[Kling/fal] Starting ${inputType} (${tier}, ${duration}s, audio=${enableAudio})`);
+
+    // Queue the request
     const response = await axios.post(
-      `${PIAPI_BASE_URL}/task`,
-      {
-        model: 'kling',
-        task_type: 'video_generation',
-        input: input,
-        config: {
-          service_mode: 'public',  // Use pay-as-you-go pool
-          webhook_config: {
-            endpoint: '',
-            secret: ''
-          }
-        }
-      },
+      endpoint,
+      requestBody,
       {
         headers: {
-          'X-API-Key': PIAPI_API_KEY,
+          'Authorization': `Key ${FAL_API_KEY}`,
           'Content-Type': 'application/json'
         }
       }
     );
 
-    if (response.data.code !== 200) {
-      console.error('[Kling] API error:', response.data);
-      return res.status(500).json({ 
-        error: 'Kling API error', 
-        details: response.data.message || response.data 
-      });
-    }
-
-    const taskId = response.data.data.task_id;
+    const { request_id, status_url, response_url } = response.data;
 
     // Store job locally
     const job = {
-      id: taskId,
+      id: request_id,
       status: 'pending',
       prompt,
       imageUrl,
       duration,
       aspectRatio,
-      version,
       mode,
+      enableAudio,
+      statusUrl: status_url,
+      responseUrl: response_url,
       createdAt: new Date().toISOString()
     };
-    videoJobs.set(taskId, job);
+    videoJobs.set(request_id, job);
 
-    console.log(`[Kling] Started job ${taskId}`);
+    console.log(`[Kling/fal] Queued job ${request_id}`);
 
     res.json({
       success: true,
-      taskId,
+      taskId: request_id,
       status: 'pending',
-      message: `Video generation started (${version} ${mode}, ${duration}s)`
+      message: `Video generation started (Kling V3 ${tier}, ${duration}s${enableAudio ? ', +audio' : ''})`
     });
 
   } catch (error) {
-    console.error('[Kling] Generate error:', error.response?.data || error.message);
+    console.error('[Kling/fal] Generate error:', error.response?.data || error.message);
     res.status(500).json({ 
       error: 'Failed to start video generation',
-      details: error.response?.data?.message || error.message
+      details: error.response?.data?.detail || error.message
     });
   }
 });
@@ -139,50 +130,66 @@ router.get('/status/:taskId', async (req, res) => {
   try {
     const { taskId } = req.params;
 
-    if (!PIAPI_API_KEY) {
-      return res.status(500).json({ error: 'PIAPI_API_KEY not configured' });
+    if (!FAL_API_KEY) {
+      return res.status(500).json({ error: 'FAL_API_KEY not configured' });
     }
 
+    const job = videoJobs.get(taskId);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    // Check status via fal
     const response = await axios.get(
-      `${PIAPI_BASE_URL}/task/${taskId}`,
+      job.statusUrl,
       {
         headers: {
-          'X-API-Key': PIAPI_API_KEY
+          'Authorization': `Key ${FAL_API_KEY}`
         }
       }
     );
 
-    if (response.data.code !== 200) {
-      return res.status(500).json({ 
-        error: 'Failed to get status',
-        details: response.data.message
+    const { status, logs } = response.data;
+
+    // If completed, fetch result
+    if (status === 'COMPLETED') {
+      const resultResponse = await axios.get(
+        job.responseUrl,
+        {
+          headers: {
+            'Authorization': `Key ${FAL_API_KEY}`
+          }
+        }
+      );
+
+      const videoUrl = resultResponse.data.video?.url;
+      job.status = 'completed';
+      job.videoUrl = videoUrl;
+      job.completedAt = new Date().toISOString();
+      videoJobs.set(taskId, job);
+
+      return res.json({
+        taskId,
+        status: 'completed',
+        videoUrl,
+        error: null
       });
     }
 
-    const task = response.data.data;
-    const job = videoJobs.get(taskId) || {};
-
-    // Update local job
-    job.status = task.status;
-    if (task.status === 'completed' && task.output?.video_url) {
-      job.videoUrl = task.output.video_url;
-      job.completedAt = new Date().toISOString();
-    }
-    if (task.status === 'failed') {
-      job.error = task.error?.message || 'Generation failed';
-    }
+    // Update status
+    job.status = status.toLowerCase();
     videoJobs.set(taskId, job);
 
     res.json({
       taskId,
-      status: task.status,
-      videoUrl: task.output?.video_url || null,
-      error: task.error?.message || null,
-      progress: task.meta?.progress || null
+      status: status.toLowerCase(),
+      videoUrl: null,
+      error: status === 'FAILED' ? 'Generation failed' : null,
+      logs: logs || null
     });
 
   } catch (error) {
-    console.error('[Kling] Status error:', error.response?.data || error.message);
+    console.error('[Kling/fal] Status error:', error.response?.data || error.message);
     res.status(500).json({ 
       error: 'Failed to get status',
       details: error.message
@@ -201,6 +208,47 @@ router.get('/jobs', (req, res) => {
     .slice(0, limit);
 
   res.json({ jobs });
+});
+
+/**
+ * GET /api/kling/models
+ * List available models/tiers
+ */
+router.get('/models', (req, res) => {
+  res.json({
+    models: [
+      {
+        id: 'kling-v3-standard',
+        name: 'Kling V3 Standard',
+        description: 'Fast, cost-effective video generation',
+        pricing: '$0.168/sec (no audio), $0.224/sec (with audio)',
+        durations: [5, 10, 15]
+      },
+      {
+        id: 'kling-v3-pro',
+        name: 'Kling V3 Pro',
+        description: 'Higher quality, cinematic output',
+        pricing: '$0.28/sec (no audio), $0.392/sec (with audio)',
+        durations: [5, 10, 15]
+      },
+      {
+        id: 'kling-o3-standard',
+        name: 'Kling O3 Standard (Omni)',
+        description: 'Multi-character, element referencing',
+        pricing: '$0.168/sec (no audio), $0.224/sec (with audio)',
+        durations: [5, 10, 15]
+      },
+      {
+        id: 'kling-o3-pro',
+        name: 'Kling O3 Pro (Omni)',
+        description: 'Best quality, full feature set',
+        pricing: '$0.28/sec (no audio), $0.392/sec (with audio)',
+        durations: [5, 10, 15]
+      }
+    ],
+    provider: 'fal.ai',
+    docs: 'https://fal.ai/models/fal-ai/kling-video'
+  });
 });
 
 module.exports = router;

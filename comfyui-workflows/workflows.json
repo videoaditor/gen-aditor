@@ -1,5 +1,12 @@
 [
   {
+    "id": "product-easy-wins",
+    "name": "Product Easy Wins",
+    "description": "1 product image → 9 lifestyle shots (UGC-style, unboxing, testimonial, etc.)",
+    "type": "multi-step",
+    "thumbnail": "/thumbnails/product-easy-wins.jpg"
+  },
+  {
     "id": "kickstarter",
     "name": "Kickstarter",
     "description": "Product page → 9:16 brolls + offer badges for VSLs",

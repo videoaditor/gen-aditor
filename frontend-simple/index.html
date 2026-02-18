@@ -812,7 +812,7 @@
     }
 
     .generating.active {
-      display: flex;
+      display: none; /* Removed - placeholder cards already show loading state */
     }
 
     .generating-spinner {
@@ -1783,13 +1783,18 @@
     .video-queue-preview {
       position: relative;
       aspect-ratio: 9 / 16;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      overflow: hidden;
     }
 
     .video-queue-thumb {
       width: 100%;
+      height: 100%;
       aspect-ratio: 9 / 16;
       border-radius: 8px;
       object-fit: cover;
+      background: var(--bg-secondary);
     }
 
     .video-queue-thumb.generating-blur {
@@ -2796,6 +2801,18 @@
             </div>
           </div>
 
+          <div class="workflow-item" data-workflow="product-easy-wins">
+            <div class="workflow-item-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div class="workflow-item-text">
+              <div class="workflow-item-name">Product Easy Wins</div>
+              <div class="workflow-item-desc">1 image → 9 lifestyle shots</div>
+            </div>
+          </div>
+
           <div class="workflow-divider">Coming Soon</div>
 
           <div class="workflow-item coming-soon" data-workflow="kickstarter">
@@ -3242,9 +3259,36 @@
           }
         }
         
-        // Render bulk i2v jobs when switching to Videos tab
+        // Refresh and render bulk i2v jobs when switching to Videos tab
         if (tab.dataset.tab === 'videos' && typeof renderBulkJobsInVideoTab === 'function') {
-          setTimeout(renderBulkJobsInVideoTab, 100);
+          // Fetch fresh data from server
+          fetch('/api/bulk-i2v/jobs?limit=20')
+            .then(res => res.json())
+            .then(data => {
+              if (data.batches && data.batches.length > 0) {
+                window._bulkVideoTabItems = [];
+                for (const batch of data.batches) {
+                  for (const j of batch.jobs) {
+                    if (j.status === 'done' || j.status === 'failed' || j.status === 'generating') {
+                      window._bulkVideoTabItems.push({
+                        id: j.id,
+                        batchId: batch.id,
+                        url: j.imageUrl || '',
+                        filename: j.imageUrl ? j.imageUrl.split('/').pop() : '',
+                        prompt: j.prompt || '',
+                        displayedPrompt: j.prompt || '',
+                        status: j.status === 'failed' ? 'error' : j.status,
+                        taskId: j.id,
+                        videoUrl: j.videoUrl || null
+                      });
+                    }
+                  }
+                }
+              }
+              renderBulkJobsInVideoTab();
+              updateVideoTabBadge();
+            })
+            .catch(() => renderBulkJobsInVideoTab());
         }
       });
     });
@@ -3622,9 +3666,18 @@ Return ONLY the JSON, no explanation.`;
       promptBar.classList.remove('drag-over');
     });
 
-    promptBar.addEventListener('drop', (e) => {
+    promptBar.addEventListener('drop', async (e) => {
       e.preventDefault();
       promptBar.classList.remove('drag-over');
+      
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+      
+      // If multiple images dropped, enter bulk mode
+      if (files.length > 1) {
+        enterBulkMode();
+        await handleBulkFiles(files);
+        return;
+      }
       
       // Handle image from grid (http URLs or local /outputs/ paths)
       const imgSrc = e.dataTransfer.getData('text/plain');
@@ -3635,16 +3688,11 @@ Return ONLY the JSON, no explanation.`;
         return;
       }
       
-      // Handle file drop
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        Array.from(files).forEach(file => {
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => addReference(e.target.result);
-            reader.readAsDataURL(file);
-          }
-        });
+      // Handle single file drop
+      if (files.length === 1) {
+        const reader = new FileReader();
+        reader.onload = (ev) => addReference(ev.target.result);
+        reader.readAsDataURL(files[0]);
       }
     });
 
@@ -3893,8 +3941,17 @@ Return ONLY the JSON, no explanation.`;
     }
 
     function toggleVideoQueue(index) {
+      console.log('[Star] toggleVideoQueue called with index:', index);
       const img = images[index];
+      console.log('[Star] Image:', img);
+      
+      if (!img) {
+        console.error('[Star] No image found at index', index);
+        return;
+      }
+      
       const existingIndex = videoQueue.findIndex(v => v.image.url === img.url);
+      console.log('[Star] Existing in queue:', existingIndex);
       
       if (existingIndex >= 0) {
         // Remove from queue
@@ -3903,8 +3960,30 @@ Return ONLY the JSON, no explanation.`;
         renderVideoQueue();
         updateVideoTabBadge();
       } else {
-        // Show popup for video prompt
-        showVideoPromptPopup(img);
+        // Auto-add with generated prompt and start video gen immediately
+        const videoPrompt = generateVideoPrompt(img.prompt);
+        console.log('[Star] Generated video prompt:', videoPrompt?.substring(0, 50));
+        
+        const newItem = {
+          id: Date.now(),
+          image: img,
+          prompt: videoPrompt,
+          status: 'pending', // Start as pending, generateVideo will set to generating
+          model: defaultVideoModel,
+          videoUrl: null
+        };
+        
+        console.log('[Star] Adding new item to videoQueue:', newItem.id);
+        videoQueue.unshift(newItem); // Add to top, not bottom
+        console.log('[Star] videoQueue length now:', videoQueue.length);
+        
+        renderGrid();
+        renderVideoQueue();
+        updateVideoTabBadge();
+        
+        // Auto-start video generation
+        console.log('[Star] Starting video generation for:', newItem.id);
+        generateVideo(newItem.id);
       }
     }
     
@@ -3943,7 +4022,7 @@ Return ONLY the JSON, no explanation.`;
           videoUrl: null
         };
         
-        videoQueue.push(newItem);
+        videoQueue.unshift(newItem); // Add to top, not bottom
         
         renderGrid();
         renderVideoQueue();
@@ -4061,13 +4140,35 @@ Return ONLY the JSON, no explanation.`;
     function renderBulkJobsInVideoTab() {
       let bulkSection = document.getElementById('bulk-i2v-video-section');
       
+      // Merge historical items (from page load) with current session items
+      // Use Map to dedupe by taskId
+      const itemMap = new Map();
+      
+      // Add historical items first
+      if (window._bulkVideoTabItems) {
+        for (const item of window._bulkVideoTabItems) {
+          itemMap.set(item.taskId, item);
+        }
+      }
+      
+      // Add/update with current session items (takes precedence for status updates)
+      if (bulkItems && bulkItems.length > 0) {
+        for (const item of bulkItems) {
+          if (item.status === 'generating' || item.status === 'done' || item.status === 'error') {
+            itemMap.set(item.taskId, item);
+          }
+        }
+      }
+      
+      const allItems = Array.from(itemMap.values());
+      
       // Check if we have any bulk items
-      if (typeof bulkItems === 'undefined' || bulkItems.length === 0) {
+      if (allItems.length === 0) {
         if (bulkSection) bulkSection.remove();
         return;
       }
       
-      const visibleItems = bulkItems.filter(it => it.status === 'generating' || it.status === 'done' || it.status === 'error');
+      const visibleItems = allItems.filter(it => it.status === 'generating' || it.status === 'done' || it.status === 'error');
       if (visibleItems.length === 0) {
         if (bulkSection) bulkSection.remove();
         return;
@@ -4089,8 +4190,8 @@ Return ONLY the JSON, no explanation.`;
         videoQueueContainer.parentElement.insertBefore(bulkSection, videoQueueContainer);
       }
       
-      // Render each batch as its own row (newest first)
-      const batchEntries = [...batches.entries()].reverse();
+      // Render each batch as its own row (newest first - backend already sorts)
+      const batchEntries = [...batches.entries()];
       bulkSection.innerHTML = batchEntries.map(([batchId, items], batchIdx) => {
         const generating = items.filter(it => it.status === 'generating').length;
         const done = items.filter(it => it.status === 'done').length;
@@ -4118,7 +4219,7 @@ Return ONLY the JSON, no explanation.`;
               ${items.map(item => `
                 <div style="position: relative; aspect-ratio: 9/16; border-radius: 8px; overflow: hidden; background: var(--bg-tertiary);">
                   ${item.status === 'done' && item.videoUrl 
-                    ? `<video src="${item.videoUrl}" style="width: 100%; height: 100%; object-fit: cover;" muted loop playsinline preload="none" onmouseover="this.play()" onmouseout="this.pause(); this.currentTime=0;"></video>`
+                    ? `<video class="lazy-video" data-src="${item.videoUrl}" style="width: 100%; height: 100%; object-fit: cover;" muted loop playsinline preload="none"></video>`
                     : `<img src="${item.url}" style="width: 100%; height: 100%; object-fit: cover; ${item.status === 'generating' ? 'filter: brightness(0.5);' : ''}" loading="lazy">
                        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
                          ${item.status === 'generating' 
@@ -4141,7 +4242,11 @@ Return ONLY the JSON, no explanation.`;
     
     // Download videos for a specific batch as ZIP
     async function downloadBatchVideos(batchId) {
-      const batchDone = bulkItems.filter(it => it.batchId === batchId && it.status === 'done' && it.videoUrl);
+      // Use merged items (same as video tab render)
+      const allItems = window._bulkVideoTabItems && window._bulkVideoTabItems.length > 0 
+        ? [...window._bulkVideoTabItems, ...bulkItems] 
+        : bulkItems;
+      const batchDone = allItems.filter(it => it.batchId === batchId && it.status === 'done' && it.videoUrl);
       if (!batchDone.length) return;
       
       const btn = document.querySelector(`[onclick*="${batchId}"]`);
@@ -4182,6 +4287,7 @@ Return ONLY the JSON, no explanation.`;
     }
 
     function renderVideoQueue() {
+      console.log('[VideoQueue] Rendering, length:', videoQueue.length);
       if (videoQueue.length === 0) {
         videoQueueContainer.innerHTML = '';
         videoEmptyState.style.display = 'block';
@@ -4190,6 +4296,7 @@ Return ONLY the JSON, no explanation.`;
       }
 
       videoEmptyState.style.display = 'none';
+      console.log('[VideoQueue] Hiding empty state, showing', videoQueue.length, 'items');
       videoCount.textContent = `${videoQueue.length} video${videoQueue.length === 1 ? '' : 's'}`;
       
       videoQueueContainer.innerHTML = `
@@ -4198,9 +4305,9 @@ Return ONLY the JSON, no explanation.`;
             <div class="video-queue-item ${item.status}" data-id="${item.id}">
               <div class="video-queue-preview">
                 ${item.status === 'complete' && item.videoUrl ? `
-                  <video class="video-queue-thumb" src="${item.videoUrl}" autoplay loop muted playsinline></video>
+                  <video class="video-queue-thumb lazy-video" data-src="${item.videoUrl}" poster="${item.image.url}" muted loop playsinline preload="none"></video>
                 ` : `
-                  <img class="video-queue-thumb ${item.status === 'generating' ? 'generating-blur' : ''}" src="${item.image.url}" alt="">
+                  <img class="video-queue-thumb ${item.status === 'generating' ? 'generating-blur' : ''}" src="${item.image.url}" alt="" loading="lazy" decoding="async">
                   ${item.status === 'generating' ? '<div class="video-generating-overlay"><div class="spinner"></div><span>Generating...</span></div>' : ''}
                 `}
               </div>
@@ -4602,6 +4709,7 @@ Return ONLY the JSON, no explanation.`;
     let currentWorkflow = 'script-to-video';
     let workflowFiles = [];
     let workflowResults = [];
+    const workflowResultsCache = {}; // Store results per workflow
 
     // Workflow sidebar click handler
     document.querySelectorAll('.workflow-item').forEach(item => {
@@ -4612,6 +4720,12 @@ Return ONLY the JSON, no explanation.`;
     });
 
     function selectWorkflow(workflow) {
+      // Handle special modal workflows
+      if (workflow === 'product-easy-wins') {
+        openProductEasyWinsModal();
+        return;
+      }
+      
       currentWorkflow = workflow;
       const config = workflowConfigs[workflow];
       if (!config) return;
@@ -4658,14 +4772,14 @@ Return ONLY the JSON, no explanation.`;
         document.getElementById('workflow-upload-hint').textContent = config.uploadHint;
       }
 
-      // Clear form
+      // Clear form inputs (but preserve results per workflow)
       document.getElementById('workflow-url').value = '';
       document.getElementById('workflow-script').value = '';
       workflowFiles = [];
       renderWorkflowPreviews();
 
-      // Clear results
-      workflowResults = [];
+      // Restore workflow-specific results (don't clear - each workflow keeps its results)
+      workflowResults = workflowResultsCache[workflow] || [];
       renderWorkflowResults();
     }
 
@@ -4882,14 +4996,22 @@ Return ONLY the JSON, no explanation.`;
       renderWorkflowResults();
 
       try {
-        const formData = new FormData();
-        formData.append('avatar', ugcAvatarFile);
-        formData.append('script', script);
-        formData.append('voice', voice);
+        // Convert avatar file to base64 for the API
+        const avatarBase64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(ugcAvatarFile);
+        });
 
-        const response = await fetch('/api/ugc-video', {
+        const response = await fetch('/api/ugc/generate', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            script,
+            voiceId: voice,
+            avatarFile: avatarBase64,
+            avatarUrl: null
+          })
         });
 
         const data = await response.json();
@@ -4922,7 +5044,7 @@ Return ONLY the JSON, no explanation.`;
       return new Promise((resolve) => {
         const pollInterval = setInterval(async () => {
           try {
-            const res = await fetch(`/api/ugc-video/status/${jobId}`);
+            const res = await fetch(`/api/ugc/status/${jobId}`);
             const status = await res.json();
             
             if (status.status === 'complete' && status.videoUrl) {
@@ -5349,6 +5471,12 @@ Return ONLY the JSON, no explanation.`;
       const empty = document.getElementById('workflow-results-empty');
       const count = document.getElementById('workflow-results-count');
 
+      // Save results to workflow-specific cache (skip if only loading states)
+      const hasRealResults = workflowResults.some(r => r.url);
+      if (hasRealResults && currentWorkflow) {
+        workflowResultsCache[currentWorkflow] = [...workflowResults];
+      }
+
       const actualResults = workflowResults.filter(r => r.url);
       count.textContent = actualResults.length;
 
@@ -5678,49 +5806,64 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
     let bulkPollInterval = null;
     let bulkMode = false;
 
-    // Load all bulk jobs from backend on page load
+    // Load bulk jobs from backend on page load
+    // Video tab gets ALL historical data, prompt tab only gets actively generating jobs
     (async function loadActiveBulkJobs() {
       try {
         const res = await fetch('/api/bulk-i2v/jobs');
         const data = await res.json();
         if (data.batches && data.batches.length > 0) {
-          // Load ALL batches with done or generating jobs
-          bulkItems = [];
+          // Separate: video tab items (all done/failed) vs prompt tab items (only generating)
+          let videoTabItems = [];
+          let promptTabItems = [];
           let generatingBatchId = null;
           
           for (const batch of data.batches) {
-            const hasRelevantJobs = batch.jobs.some(j => j.status === 'generating' || j.status === 'done' || j.status === 'failed');
-            if (hasRelevantJobs) {
-              for (const j of batch.jobs) {
-                bulkItems.push({
-                  id: j.id,
-                  batchId: batch.id,
-                  url: j.imageUrl || '',
-                  filename: j.imageUrl ? j.imageUrl.split('/').pop() : '',
-                  prompt: j.prompt || '',
-                  displayedPrompt: j.prompt || '',
-                  status: j.status === 'failed' ? 'error' : j.status === 'done' ? 'done' : 'generating',
-                  taskId: j.id,
-                  videoUrl: j.videoUrl || null
-                });
+            for (const j of batch.jobs) {
+              const item = {
+                id: j.id,
+                batchId: batch.id,
+                url: j.imageUrl || '',
+                filename: j.imageUrl ? j.imageUrl.split('/').pop() : '',
+                prompt: j.prompt || '',
+                displayedPrompt: j.prompt || '',
+                status: j.status === 'failed' ? 'error' : j.status === 'done' ? 'done' : 'generating',
+                taskId: j.id,
+                videoUrl: j.videoUrl || null
+              };
+              
+              // All done/error/generating go to video tab
+              if (j.status === 'done' || j.status === 'failed' || j.status === 'generating') {
+                videoTabItems.push(item);
               }
-              // Track the batch with generating jobs for polling
-              if (batch.jobs.some(j => j.status === 'generating')) {
+              
+              // Only generating go to prompt tab (for active progress)
+              if (j.status === 'generating') {
+                promptTabItems.push(item);
                 generatingBatchId = batch.id;
               }
             }
           }
           
-          if (bulkItems.length > 0) {
-            bulkBatchId = generatingBatchId || data.batches[0].id;
-            console.log(`[Bulk I2V] Loaded ${bulkItems.length} jobs from ${data.batches.length} batches`);
+          // Populate bulkItems ONLY with generating jobs (prompt tab)
+          bulkItems = promptTabItems;
+          
+          // Store video tab items separately for rendering
+          window._bulkVideoTabItems = videoTabItems;
+          
+          if (videoTabItems.length > 0) {
+            console.log(`[Bulk I2V] Loaded ${videoTabItems.length} jobs for video tab, ${promptTabItems.length} generating`);
             renderBulkJobsInVideoTab();
             updateVideoTabBadge();
-            
-            // Resume polling if still generating
-            if (bulkItems.some(it => it.status === 'generating')) {
-              bulkPollInterval = setInterval(pollBulkStatus, 5000);
-            }
+          }
+          
+          // Resume polling and show prompt tab only if still generating
+          if (promptTabItems.length > 0) {
+            bulkBatchId = generatingBatchId;
+            bulkMode = true;
+            promptBar.classList.add('bulk-mode');
+            renderBulkTerminal();
+            bulkPollInterval = setInterval(pollBulkStatus, 5000);
           }
         }
       } catch (err) {
@@ -5760,33 +5903,8 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
 
     bulkCloseBtn.addEventListener('click', exitBulkMode);
 
-    // Handle file drops on prompt bar for bulk mode
-    promptBar.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      promptBar.classList.remove('drag-over');
-      
-      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-      
-      // If multiple images dropped, enter bulk mode
-      if (files.length > 1) {
-        enterBulkMode();
-        await handleBulkFiles(files);
-        return;
-      }
-      
-      // Single image or grid drag - handle as reference (existing behavior)
-      const imgSrc = e.dataTransfer.getData('text/plain');
-      if (imgSrc && imgSrc.length > 0) {
-        addReference(imgSrc);
-        return;
-      }
-      
-      if (files.length === 1) {
-        const reader = new FileReader();
-        reader.onload = (ev) => addReference(ev.target.result);
-        reader.readAsDataURL(files[0]);
-      }
-    });
+    // Handle file drops on prompt bar for bulk mode ONLY (single drops handled by earlier listener)
+    // NOTE: Removed duplicate single-image handling - the handler at line ~3625 already does this
 
     // Also allow dropping on the whole main area when in Images tab
     document.querySelector('#images-section')?.addEventListener('dragover', (e) => {
@@ -6049,6 +6167,7 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
           
           if (data.batch && data.batch.jobs) {
             data.batch.jobs.forEach(job => {
+              // Update bulkItems (prompt tab)
               const item = bulkItems.find(it => it.taskId === job.id);
               if (item) {
                 if (job.status === 'done' && job.videoUrl && item.status !== 'done') {
@@ -6059,6 +6178,21 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
                   item.status = 'error';
                   item.error = job.error;
                   changed = true;
+                }
+              }
+              // Also update _bulkVideoTabItems (video tab history)
+              if (window._bulkVideoTabItems) {
+                const historyItem = window._bulkVideoTabItems.find(it => it.taskId === job.id);
+                if (historyItem) {
+                  if (job.status === 'done' && job.videoUrl) {
+                    historyItem.status = 'done';
+                    historyItem.videoUrl = job.videoUrl;
+                    changed = true;
+                  } else if (job.status === 'failed') {
+                    historyItem.status = 'error';
+                    historyItem.error = job.error;
+                    changed = true;
+                  }
                 }
               }
             });
@@ -6086,11 +6220,16 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
         const failCount = bulkItems.filter(it => it.status === 'error').length;
         console.log(`[Bulk I2V] All complete: ${doneCount} done, ${failCount} failed`);
         
-        // Completion handled by UI state
-        if (doneCount > 0) {
-          // Videos tab and section update automatically
-        } else {
-          // All failed - section shows retry buttons
+        // Auto-clear prompt tab UI after completion (videos are in Video tab now)
+        if (doneCount > 0 && failCount === 0) {
+          // All succeeded - clear prompt tab after brief delay
+          setTimeout(() => {
+            console.log('[Bulk I2V] Auto-clearing prompt tab (all done)');
+            exitBulkMode();
+          }, 2000);
+        } else if (failCount > 0) {
+          // Some failed - keep UI visible for retry buttons
+          console.log('[Bulk I2V] Keeping prompt tab open for retries');
         }
       }
       } catch (err) {
@@ -6232,7 +6371,74 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
       .spin { animation: spin 1s linear infinite; }
     `;
     document.head.appendChild(spinStyle);
+
+    // ===== LAZY LOADING FOR VIDEOS =====
+    // Intersection Observer to load videos only when visible
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const video = entry.target;
+          if (video.dataset.src && !video.src) {
+            video.src = video.dataset.src;
+            video.load();
+          }
+          videoObserver.unobserve(video);
+        }
+      });
+    }, { rootMargin: '100px' }); // Start loading 100px before visible
+
+    // Watch for new lazy videos (after renders)
+    const lazyVideoMutationObserver = new MutationObserver((mutations) => {
+      document.querySelectorAll('video.lazy-video:not([src])').forEach(video => {
+        videoObserver.observe(video);
+        // Add hover-to-play behavior
+        video.addEventListener('mouseenter', () => {
+          if (video.src) video.play();
+        });
+        video.addEventListener('mouseleave', () => {
+          video.pause();
+          video.currentTime = 0;
+        });
+      });
+    });
+    lazyVideoMutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Initial scan for lazy videos
+    document.querySelectorAll('video.lazy-video').forEach(video => {
+      videoObserver.observe(video);
+      video.addEventListener('mouseenter', () => {
+        if (video.src) video.play();
+      });
+      video.addEventListener('mouseleave', () => {
+        video.pause();
+        video.currentTime = 0;
+      });
+    });
   </script>
+
+  <!-- Product Easy Wins Modal -->
+  <div id="product-easy-wins-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-white">Product Easy Wins</h2>
+            <p class="text-sm text-gray-400">Generate 9 lifestyle shots from one product image</p>
+          </div>
+          <button onclick="closeProductEasyWinsModal()" class="text-gray-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div id="product-easy-wins-content">
+          <!-- Content populated by product-easy-wins.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="product-easy-wins.js"></script>
 
 </body>
 </html>

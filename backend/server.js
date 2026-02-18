@@ -76,6 +76,7 @@ const videoRoutes = require('./routes/video');
 const charactersRoutes = require('./routes/characters');
 const ugcRoutes = require('./routes/ugc');
 const kickstarterRoutes = require('./routes/kickstarter');
+const productEasyWinsRoutes = require('./routes/product-easy-wins');
 const elevenlabsRoutes = require('./routes/elevenlabs');
 const imageAdsRoutes = require('./routes/image-ads');
 const scriptExplainerRoutes = require('./routes/script-explainer');
@@ -111,6 +112,7 @@ app.use('/api/admin', adminRoutes); // Admin panel (no auth for now, add later)
 // Protected workflow routes (optional auth for beta, will be required after launch)
 app.use('/api/video', optionalAuth, optionalUsageCheck, videoRoutes);
 app.use('/api/kickstarter', optionalAuth, optionalUsageCheck, kickstarterRoutes);
+app.use('/api/product-easy-wins', optionalAuth, optionalUsageCheck, productEasyWinsRoutes);
 app.use('/api/image-ads', optionalAuth, optionalUsageCheck, imageAdsRoutes);
 app.use('/api/script-explainer', optionalAuth, optionalUsageCheck, scriptExplainerRoutes);
 app.use('/api/script-explainer-v2', optionalAuth, optionalUsageCheck, scriptExplainerV2Routes);
@@ -246,7 +248,9 @@ app.post('/api/generate', async (req, res) => {
       
       // Save reference images temporarily if provided
       const tempRefPaths = [];
+      console.log(`[Generate] References received: ${references ? references.length : 0}`);
       if (references && references.length > 0) {
+        console.log(`[Generate] Processing ${references.length} reference images`);
         for (let i = 0; i < references.length; i++) {
           const ref = references[i];
           if (ref.startsWith('data:image')) {
@@ -305,6 +309,8 @@ app.post('/api/generate', async (req, res) => {
         const cmd = `GEMINI_API_KEY="${apiKey}" uv run "${scriptPath}" --prompt "${enhancedPrompt.replace(/"/g, '\\"')}" --filename "${localPath}" --resolution 2K ${refArgs}`;
         
         console.log('[Generate] Running Nano Banana Pro:', enhancedPrompt.substring(0, 50) + '...');
+        console.log('[Generate] Reference args:', refArgs || '(none)');
+        console.log('[Generate] Full command:', cmd.replace(apiKey, 'REDACTED'));
         
         const { stdout, stderr } = await execPromise(cmd, { timeout: 120000 });
         console.log('[Generate] Output:', stdout);
