@@ -44,7 +44,7 @@ router.post('/trigger', async (req, res) => {
   };
   jobs.set(jobId, job);
 
-  // Run async pipeline
+  // TODO: Configure Zapier Webhook URL
   runPipeline(job).catch(err => {
     job.status = 'failed';
     job.error = err.message;
@@ -217,7 +217,7 @@ Respond in JSON format:
       } else {
         // Fallback: Nano Banana Pro text-to-image
         const resp = await axios.post(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
           {
             contents: [{ parts: [{ text: scenes[i] }] }],
             generationConfig: { responseModalities: ['IMAGE', 'TEXT'] }
@@ -343,7 +343,7 @@ Respond in JSON format:
     images: generatedImages.map(i => i.url),
   };
 
-  console.log(`[BookingAutopilot] ✅ Job ${job.id} complete: ${generatedImages.length} images for ${brandInfo.brandName}`);
+  // TODO: Add Zapier webhook trigger here with prospect info, image URLs, and Drive folder URL
 }
 
 module.exports = router;

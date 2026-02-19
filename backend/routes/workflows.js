@@ -104,7 +104,45 @@ router.post('/:id/run', async (req, res) => {
 });
 
 // Execute a single pipeline step
-async function executeStep(step, context, workflow) {
+async function callRunComfy(model, payload) {
+  const RUNCOMFY_KEY = process.env.RUNCOMFY_API_KEY;
+  const RUNCOMFY_BASE = 'https://model-api.runcomfy.net/v1';
+
+  const resp = await axios.post(
+    `${RUNCOMFY_BASE}/models/${model}/generate`,
+    payload,
+    { headers: { 'Authorization': `Bearer ${RUNCOMFY_KEY}`, 'Content-Type': 'application/json' } }
+  );
+
+  const requestId = resp.data.request_id || resp.data.id;
+
+  // Poll for completion
+  let result;
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    const status = await axios.get(
+      `${RUNCOMFY_BASE}/requests/${requestId}/status`,
+      { headers: { 'Authorization': `Bearer ${RUNCOMFY_KEY}` } }
+    );
+    if (status.data.status === 'completed' || status.data.status === 'success') {
+      const res = await axios.get(
+        `${RUNCOMFY_BASE}/requests/${requestId}/result`,
+        { headers: { 'Authorization': `Bearer ${RUNCOMFY_KEY}` } }
+      );
+      result = res.data;
+      break;
+    }
+    if (status.data.status === 'failed') {
+      throw new Error(`RunComfy step failed: ${status.data.error || 'unknown'}`);
+    }
+  }
+
+  if (!result) throw new Error('RunComfy timeout');
+  return { output: result.output?.video || result.output?.image || result.output };
+}
+
+// Execute a single step based on provider
+async function executeStepInternal(step, context, workflow) {
   const RUNCOMFY_KEY = process.env.RUNCOMFY_API_KEY;
   const RUNCOMFY_BASE = 'https://model-api.runcomfy.net/v1';
 
@@ -220,6 +258,11 @@ function buildRunComfyPayload(step, context) {
   if (step.params?.cfg_scale) payload.cfg_scale = step.params.cfg_scale;
 
   return payload;
+}
+
+// Wrapper for backward compatibility
+async function executeStep(step, context, workflow) {
+  return executeStepInternal(step, context, workflow);
 }
 
 module.exports = router;
