@@ -53,6 +53,7 @@ async function upload(fileOrPath, key, contentType) {
     Key: key,
     Body: body,
     ContentType: contentType || 'application/octet-stream',
+    CacheControl: 'public, max-age=31536000, immutable',
   }));
 
   // Return the URL
