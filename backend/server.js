@@ -322,7 +322,7 @@ app.get('/api/outputs/recent', optionalAuthMiddleware, attachTenant, async (req,
         const images = (result.Contents || [])
           .sort((a, b) => (b.LastModified || 0) - (a.LastModified || 0))
           .map(obj => ({
-            url: `/r2/${obj.Key}`,
+            url: process.env.R2_PUBLIC_URL ? `${process.env.R2_PUBLIC_URL}/${obj.Key}` : `/r2/${obj.Key}`,
             prompt: 'Generated image',
             ratio: '9:16',
             model: 'nano-banana-pro',
