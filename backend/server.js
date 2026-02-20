@@ -4,6 +4,7 @@ const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const { initDatabase } = require('./db');
@@ -26,19 +27,48 @@ let dbInstance;
 })();
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
+app.use(cookieParser());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve frontend at root (current) and /studio (for Framer transition)
 const frontendPath = path.join(__dirname, '../frontend-simple');
-// Serve index.html with no-cache to prevent Cloudflare from caching stale versions
-app.get(['/', '/studio', '/studio/'], (req, res) => {
+
+// Public pages (no auth required)
+const publicPages = ['/login.html', '/privacy.html', '/terms.html', '/landing.html', '/landing-v2.html'];
+
+// Serve login page (always accessible) — inject Google Client ID
+app.get(['/login', '/login.html'], (req, res) => {
+  const loginPath = path.join(frontendPath, 'login.html');
+  let html = fs.readFileSync(loginPath, 'utf8');
+  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID || 'GOOGLE_CLIENT_ID_PLACEHOLDER';
+  html = html.replace(/GOOGLE_CLIENT_ID_PLACEHOLDER/g, clientId);
+  res.setHeader('Content-Type', 'text/html');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.send(html);
+});
+
+// Auth check for main pages — redirect to login if REQUIRE_AUTH and no valid token
+app.get(['/', '/studio', '/studio/'], (req, res, next) => {
+  if (!REQUIRE_AUTH) return next();
+  
+  // Check for auth cookie or header
+  const cookieToken = req.cookies && req.cookies['gen-token'];
+  const authHeader = req.headers['authorization'];
+  const headerToken = authHeader && authHeader.split(' ')[1];
+  
+  if (!cookieToken && !headerToken) {
+    return res.redirect('/login.html');
+  }
+  next();
+}, (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('CDN-Cache-Control', 'no-store');
   res.setHeader('Cloudflare-CDN-Cache-Control', 'no-store');
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
+
 app.use(express.static(frontendPath));
 app.use('/studio', express.static(frontendPath));
 
@@ -97,13 +127,21 @@ const bulkI2vRoutes = require('./routes/bulk-i2v');
 const workflowRoutes = require('./routes/workflows');
 const bookingAutopilotRoutes = require('./routes/booking-autopilot');
 
-// Import auth middleware
-const { authenticateToken, checkUsageLimit, incrementUsage } = require('./middleware/auth');
+// Import auth & tenant middleware
+const { authenticateToken, optionalAuth: optionalAuthMiddleware, checkUsageLimit, incrementUsage } = require('./middleware/auth');
+const { attachTenant, getTenantKey } = require('./middleware/tenant');
 
-// Optional auth protection (set REQUIRE_AUTH=true in .env to enforce)
+// Auth protection — REQUIRE_AUTH=true means all routes need login
 const REQUIRE_AUTH = process.env.REQUIRE_AUTH === 'true';
-const optionalAuth = REQUIRE_AUTH ? authenticateToken : (req, res, next) => next();
+const authMiddleware = REQUIRE_AUTH ? [authenticateToken, attachTenant] : [optionalAuthMiddleware, attachTenant];
+const optionalAuth = authMiddleware[0] === authenticateToken ? authenticateToken : optionalAuthMiddleware;
 const optionalUsageCheck = REQUIRE_AUTH ? checkUsageLimit : (req, res, next) => next();
+
+// Make getTenantKey available on all requests
+app.use((req, res, next) => {
+  req.getTenantKey = (keyName) => getTenantKey(req, keyName);
+  next();
+});
 
 console.log(`🔒 Auth protection: ${REQUIRE_AUTH ? 'ENABLED' : 'DISABLED (set REQUIRE_AUTH=true to enable)'}`);
 
@@ -302,7 +340,7 @@ app.post('/api/generate', async (req, res) => {
         const execPromise = util.promisify(exec);
         
         const scriptPath = '/opt/homebrew/lib/node_modules/openclaw/skills/nano-banana-pro/scripts/generate_image.py';
-        const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+        const apiKey = (req.getTenantKey && req.getTenantKey('GOOGLE_API_KEY')) || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
         
         if (!apiKey) {
           return res.status(500).json({ error: 'GOOGLE_API_KEY not configured' });
@@ -629,6 +667,17 @@ app.get('/dashboard', (req, res) => res.sendFile(path.join(frontendPath, 'dashbo
 // SPA fallback — serve index.html for any non-API route
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/') && !req.path.startsWith('/outputs/') && !req.path.startsWith('/uploads/')) {
+    // Check if it's a public page
+    if (publicPages.includes(req.path)) {
+      return res.sendFile(path.join(frontendPath, req.path.replace('/', '')));
+    }
+    // For protected pages, check auth if REQUIRE_AUTH
+    if (REQUIRE_AUTH) {
+      const cookieToken = req.cookies && req.cookies['gen-token'];
+      if (!cookieToken) {
+        return res.redirect('/login.html');
+      }
+    }
     res.sendFile(path.join(frontendPath, 'index.html'));
   } else {
     res.status(404).json({ error: 'Not found' });
@@ -643,9 +692,10 @@ const server = app.listen(PORT, () => {
 });
 
 // HQ WebSocket for live updates
+let wss;
 try {
   const WebSocket = require('ws');
-  const wss = new WebSocket.Server({ server, path: '/hq' });
+  wss = new WebSocket.Server({ server, path: '/hq' });
   wss.on('connection', (ws) => {
     console.log('[HQ] Client connected');
     const sendState = () => {
@@ -662,3 +712,33 @@ try {
 } catch(e) {
   console.log('[HQ] WebSocket not available:', e.message);
 }
+
+// Graceful shutdown handling - prevents orphan processes holding the port
+const shutdown = (signal) => {
+  console.log(`\n[Server] Received ${signal}, shutting down gracefully...`);
+  
+  // Close WebSocket server first
+  if (wss) {
+    wss.clients.forEach(client => client.terminate());
+    wss.close();
+  }
+  
+  // Close HTTP server
+  server.close((err) => {
+    if (err) {
+      console.error('[Server] Error during shutdown:', err);
+      process.exit(1);
+    }
+    console.log('[Server] Closed out remaining connections');
+    process.exit(0);
+  });
+  
+  // Force exit after 5 seconds if graceful shutdown fails
+  setTimeout(() => {
+    console.error('[Server] Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 5000);
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

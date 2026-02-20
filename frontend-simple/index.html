@@ -2868,8 +2868,20 @@
       <button class="nav-tab" data-tab="shortcuts">Shortcuts</button>
     </div>
     
-    <div class="nav-profile"></div>
+    <div class="nav-profile" id="nav-profile" style="display:flex;align-items:center;gap:10px;">
+      <span id="tenant-name" style="font-size:13px;color:#8b8b9e;"></span>
+      <div id="user-avatar" style="width:32px;height:32px;border-radius:50%;background:#232330;overflow:hidden;cursor:pointer;display:none;" onclick="document.getElementById('user-menu').classList.toggle('show')">
+        <img id="user-pic" style="width:100%;height:100%;object-fit:cover;" src="" alt="">
+      </div>
+      <div id="user-menu" style="display:none;position:absolute;top:60px;right:24px;background:#0f0f14;border:1px solid #232330;border-radius:12px;padding:8px;min-width:180px;z-index:200;">
+        <div id="user-email" style="padding:8px 12px;font-size:12px;color:#8b8b9e;border-bottom:1px solid #232330;margin-bottom:4px;"></div>
+        <button onclick="signOut()" style="width:100%;padding:8px 12px;background:none;border:none;color:#ef4444;font-size:13px;text-align:left;cursor:pointer;border-radius:6px;">Sign out</button>
+      </div>
+    </div>
   </nav>
+  <style>
+    #user-menu.show { display: block !important; }
+  </style>
 
   <!-- Main Content -->
   <main class="main">
@@ -6782,6 +6794,46 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
   </div>
 
   <script src="product-easy-wins.js"></script>
+
+  <!-- Auth check + tenant display -->
+  <script>
+    (async function initAuth() {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          const user = data.user;
+          // Show tenant name in nav
+          document.getElementById('tenant-name').textContent = user.tenant || '';
+          // Show avatar
+          if (user.picture) {
+            document.getElementById('user-pic').src = user.picture;
+            document.getElementById('user-avatar').style.display = 'block';
+          }
+          // Set email in dropdown
+          document.getElementById('user-email').textContent = user.email;
+        }
+      } catch (e) {
+        // Not logged in or auth disabled — just continue
+      }
+    })();
+
+    async function signOut() {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      localStorage.removeItem('gen-token');
+      localStorage.removeItem('gen-user');
+      window.location.href = '/login.html';
+    }
+
+    // Close user menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('user-menu');
+      const avatar = document.getElementById('user-avatar');
+      if (menu && !menu.contains(e.target) && !avatar.contains(e.target)) {
+        menu.classList.remove('show');
+      }
+    });
+  </script>
 
 </body>
 </html>

@@ -16,4 +16,5 @@ tmp/
 *service-account*.json
 *.db
 backend/data/*.db
+backend/data/tenants.json
 gcp-service-account-key.json

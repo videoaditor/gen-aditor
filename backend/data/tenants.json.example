@@ -1,0 +1,15 @@
+{
+  "user@example.com": {
+    "name": "My Org",
+    "role": "owner",
+    "keys": {}
+  },
+  "beta@client.com": {
+    "name": "Beta Client",
+    "role": "beta",
+    "keys": {
+      "GOOGLE_API_KEY": "their-google-api-key",
+      "KLING_ACCESS_KEY": "their-kling-key"
+    }
+  }
+}

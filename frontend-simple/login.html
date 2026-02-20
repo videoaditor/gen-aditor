@@ -1,238 +1,356 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - gen.aditor.ai</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            dark: {
-              bg: '#0a0a0a',
-              card: '#111111',
-              border: '#222222',
-              hover: '#1a1a1a'
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <title>Sign In - Aditor Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #08080c;
+      --card: #0f0f14;
+      --border: #232330;
+      --text: #ffffff;
+      --text-dim: #8b8b9e;
+      --accent: #f97316;
+      --accent-hover: #ea580c;
+    }
+
     body {
-      background-color: #0a0a0a;
-      color: #ffffff;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent) 0%, #c2410c 100%);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .logo h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .logo p {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 32px;
+      text-align: center;
+    }
+
+    .login-card h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .login-card .subtitle {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    /* Google Sign-In button wrapper */
+    .google-btn-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    /* Custom Google button (fallback) */
+    .google-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: #fff;
+      color: #1f1f1f;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .google-btn:hover {
+      background: #f0f0f0;
+      transform: translateY(-1px);
+    }
+
+    .google-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error-msg.show {
+      display: block;
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px;
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .loading.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+
+    .footer a {
+      color: var(--text-dim);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      color: var(--text);
+    }
+
+    /* Tenant badge after login */
+    .tenant-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(249, 115, 22, 0.2);
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 16px;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
-  
-  <!-- Header -->
-  <header class="border-b border-dark-border">
-    <div class="container mx-auto px-6 py-4">
-      <div class="flex items-center justify-between">
-        <a href="/landing.html" class="text-2xl font-bold text-orange-500">
-          gen.aditor.ai
-        </a>
-        <a href="/signup.html" class="text-sm text-gray-400 hover:text-white transition">
-          Don't have an account? <span class="text-orange-500">Sign up</span>
-        </a>
+<body>
+
+  <div class="login-container">
+    <div class="logo">
+      <div class="logo-icon">A</div>
+      <h1>Aditor Studio</h1>
+      <p>AI-powered creative suite</p>
+    </div>
+
+    <div class="login-card">
+      <h2>Sign in</h2>
+      <p class="subtitle">Use your Google account to continue</p>
+
+      <div id="error" class="error-msg"></div>
+
+      <div class="google-btn-wrapper">
+        <div id="g_id_onload"
+          data-client_id="GOOGLE_CLIENT_ID_PLACEHOLDER"
+          data-callback="handleGoogleSignIn"
+          data-auto_prompt="false"
+          data-context="signin"
+          data-ux_mode="popup">
+        </div>
+
+        <!-- Fallback button if GSI doesn't render -->
+        <button class="google-btn" id="google-fallback-btn" onclick="triggerGoogleSignIn()" style="display: none;">
+          <svg viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Sign in with Google
+        </button>
+      </div>
+
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <span>Signing in...</span>
       </div>
     </div>
-  </header>
 
-  <!-- Main Content -->
-  <main class="flex-1 flex items-center justify-center px-6 py-12">
-    <div class="w-full max-w-md">
-      
-      <!-- Login Card -->
-      <div class="bg-dark-card border border-dark-border rounded-xl p-8">
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p class="text-gray-400">Log in to continue creating</p>
-        </div>
-
-        <!-- Error Message -->
-        <div id="error-message" class="hidden bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm">
-        </div>
-
-        <!-- Login Form -->
-        <form id="login-form" class="space-y-6">
-          
-          <!-- Email -->
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              class="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition"
-              placeholder="you@example.com"
-            >
-          </div>
-
-          <!-- Password -->
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              class="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition"
-              placeholder="••••••••"
-            >
-          </div>
-
-          <!-- Remember Me & Forgot Password -->
-          <div class="flex items-center justify-between text-sm">
-            <label class="flex items-center text-gray-400 cursor-pointer">
-              <input type="checkbox" id="remember" class="mr-2 rounded bg-dark-bg border-dark-border text-orange-500 focus:ring-orange-500">
-              Remember me
-            </label>
-            <a href="/forgot-password.html" class="text-orange-500 hover:text-orange-400 transition">
-              Forgot password?
-            </a>
-          </div>
-
-          <!-- Submit Button -->
-          <button
-            type="submit"
-            id="submit-btn"
-            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Log In
-          </button>
-
-        </form>
-
-        <!-- Divider -->
-        <div class="relative my-8">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-dark-border"></div>
-          </div>
-          <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-dark-card text-gray-500">or</span>
-          </div>
-        </div>
-
-        <!-- Sign Up Link -->
-        <div class="text-center">
-          <a href="/signup.html" class="text-sm text-gray-400 hover:text-white transition">
-            Don't have an account? <span class="text-orange-500 font-semibold">Sign up for free</span>
-          </a>
-        </div>
-
-      </div>
-
-      <!-- Trial Info -->
-      <div class="mt-6 text-center text-sm text-gray-500">
-        <p>🎉 7-day free trial • No credit card required</p>
-      </div>
-
+    <div class="footer">
+      <p>&copy; 2026 Aditor Inc.</p>
+      <p style="margin-top: 4px;">
+        <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
+      </p>
     </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="border-t border-dark-border py-6">
-    <div class="container mx-auto px-6 text-center text-sm text-gray-500">
-      <p>&copy; 2026 Aditor Inc. All rights reserved.</p>
-      <div class="mt-2 space-x-4">
-        <a href="/privacy.html" class="hover:text-gray-400 transition">Privacy</a>
-        <a href="/terms.html" class="hover:text-gray-400 transition">Terms</a>
-        <a href="mailto:support@aditor.ai" class="hover:text-gray-400 transition">Support</a>
-      </div>
-    </div>
-  </footer>
+  </div>
 
   <script>
-    const form = document.getElementById('login-form');
-    const submitBtn = document.getElementById('submit-btn');
-    const errorMessage = document.getElementById('error-message');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Clear previous errors
-      errorMessage.classList.add('hidden');
-      
-      // Get form data
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const remember = document.getElementById('remember').checked;
-      
-      // Disable button
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Logging in...';
-      
+    // Check if already logged in
+    (async function checkSession() {
       try {
-        const response = await fetch('/api/auth/login', {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          window.location.href = '/';
+          return;
+        }
+      } catch (e) {}
+      
+      // Show fallback button after a delay if GSI doesn't load
+      setTimeout(() => {
+        const gsiBtn = document.querySelector('.g_id_signin, [id^="credential_picker"]');
+        if (!gsiBtn) {
+          document.getElementById('google-fallback-btn').style.display = 'flex';
+        }
+      }, 2000);
+    })();
+
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+
+    function hideError() {
+      document.getElementById('error').classList.remove('show');
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('show', show);
+    }
+
+    // Called by Google Identity Services
+    async function handleGoogleSignIn(response) {
+      hideError();
+      showLoading(true);
+
+      try {
+        const res = await fetch('/api/auth/google', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password })
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ credential: response.credential })
         });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || 'Login failed');
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Sign in failed');
         }
-        
-        // Store tokens
-        localStorage.setItem('access_token', data.tokens.access_token);
-        if (remember) {
-          localStorage.setItem('refresh_token', data.tokens.refresh_token);
+
+        // Store token in localStorage as backup
+        if (data.token) {
+          localStorage.setItem('gen-token', data.token);
+          localStorage.setItem('gen-user', JSON.stringify(data.user));
         }
-        
-        // Store user data
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Redirect to dashboard
-        window.location.href = '/dashboard.html';
-        
-      } catch (error) {
-        // Show error
-        errorMessage.textContent = error.message;
-        errorMessage.classList.remove('hidden');
-        
-        // Re-enable button
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Log In';
+
+        // Redirect to studio
+        window.location.href = '/';
+
+      } catch (err) {
+        showLoading(false);
+        showError(err.message);
+      }
+    }
+
+    // Fallback trigger
+    function triggerGoogleSignIn() {
+      if (window.google && google.accounts) {
+        google.accounts.id.prompt();
+      } else {
+        showError('Google Sign-In failed to load. Please refresh the page.');
+      }
+    }
+
+    // Initialize GSI with rendered button
+    window.addEventListener('load', () => {
+      if (window.google && google.accounts) {
+        const clientId = document.querySelector('[data-client_id]')?.getAttribute('data-client_id');
+        if (clientId && clientId !== 'GOOGLE_CLIENT_ID_PLACEHOLDER') {
+          google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleGoogleSignIn,
+            auto_select: false
+          });
+          
+          // Render the Google button
+          const wrapper = document.querySelector('.google-btn-wrapper');
+          const btnDiv = document.createElement('div');
+          wrapper.innerHTML = '';
+          wrapper.appendChild(btnDiv);
+          google.accounts.id.renderButton(btnDiv, {
+            theme: 'filled_black',
+            size: 'large',
+            width: 356,
+            text: 'signin_with',
+            shape: 'pill'
+          });
+        } else {
+          // No client ID configured yet, show fallback
+          document.getElementById('google-fallback-btn').style.display = 'flex';
+        }
       }
     });
-
-    // Check if already logged in
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      // Verify token is still valid
-      fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      .then(res => {
-        if (res.ok) {
-          window.location.href = '/dashboard.html';
-        }
-      })
-      .catch(() => {
-        // Token invalid, stay on login page
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-      });
-    }
   </script>
 
 </body>
