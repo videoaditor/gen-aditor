@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const { initDatabase } = require('./db');
+const r2 = require('./services/r2');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -97,6 +98,44 @@ app.use('/studio', express.static(frontendPath));
 // Serve generated outputs (global + per-user)
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/studio/outputs', express.static(path.join(__dirname, 'outputs')));
+
+// R2 proxy — serve R2 objects without needing public bucket access
+app.get('/r2/*', async (req, res) => {
+  if (!r2.isConfigured()) {
+    return res.status(404).json({ error: 'R2 not configured' });
+  }
+  try {
+    const { GetObjectCommand } = require('@aws-sdk/client-s3');
+    const { S3Client } = require('@aws-sdk/client-s3');
+    const key = req.params[0]; // everything after /r2/
+    
+    const client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${process.env.R2_ACCOUNT_ID || 'caf450765faba6d0bd111820e62868ef'}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+      },
+    });
+    
+    const response = await client.send(new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET || 'aditorstudio',
+      Key: key,
+    }));
+    
+    res.setHeader('Content-Type', response.ContentType || 'application/octet-stream');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    if (response.ContentLength) res.setHeader('Content-Length', response.ContentLength);
+    
+    response.Body.pipe(res);
+  } catch (err) {
+    if (err.name === 'NoSuchKey') {
+      return res.status(404).json({ error: 'File not found' });
+    }
+    console.error('[R2 Proxy] Error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch file' });
+  }
+});
 
 // Serve uploaded files (for RunComfy file transfers)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -416,9 +455,20 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
         
         // Check if file was created
         if (fs.existsSync(localPath)) {
+          let finalUrl = `${urlPrefix}/${filename}`;
+          // Upload to R2 if configured
+          if (r2.isConfigured()) {
+            try {
+              const r2Url = await r2.uploadImage(localPath, req.user?.email);
+              finalUrl = r2Url;
+              console.log(`[R2] Uploaded: ${filename}`);
+            } catch (r2Err) {
+              console.error('[R2] Upload failed, using local:', r2Err.message);
+            }
+          }
           return res.json({ 
             success: true,
-            url: `${urlPrefix}/${filename}`,
+            url: finalUrl,
             model: 'nano-banana-pro'
           });
         } else {
@@ -481,9 +531,14 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
               const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
               fs.writeFileSync(localPath, imageResponse.data);
               
+              let finalUrl = `${urlPrefix}/${filename}`;
+              if (r2.isConfigured()) {
+                try { finalUrl = await r2.uploadImage(localPath, req.user?.email); } catch (e) { /* fallback local */ }
+              }
+              
               return res.json({
                 success: true,
-                url: `${urlPrefix}/${filename}`,
+                url: finalUrl,
                 model: 'seedream'
               });
             }

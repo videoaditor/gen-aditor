@@ -251,6 +251,7 @@ router.get('/status/:batchId', async (req, res) => {
           if (videoUrl) {
             // Download video locally so URL never expires
             try {
+              const r2 = require('../services/r2');
               const videoFilename = `video-${job.id}.mp4`;
               const videoDir = path.join(__dirname, '../outputs/videos');
               fs.mkdirSync(videoDir, { recursive: true });
@@ -259,12 +260,21 @@ router.get('/status/:batchId', async (req, res) => {
               const videoResponse = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 120000 });
               fs.writeFileSync(localVideoPath, videoResponse.data);
               
+              let finalUrl = `/outputs/videos/${videoFilename}`;
+              // Upload to R2 if configured
+              if (r2.isConfigured()) {
+                try {
+                  finalUrl = await r2.uploadVideo(localVideoPath, 'bulk-i2v');
+                } catch (r2Err) {
+                  console.error(`[Bulk-I2V] R2 upload failed for ${job.id}:`, r2Err.message);
+                }
+              }
+              
               job.status = 'done';
-              job.videoUrl = `/outputs/videos/${videoFilename}`;
-              job.externalUrl = videoUrl; // keep original as backup
-              console.log(`[Bulk-I2V] Job ${job.id} completed + saved locally`);
+              job.videoUrl = finalUrl;
+              job.externalUrl = videoUrl;
+              console.log(`[Bulk-I2V] Job ${job.id} completed + saved`);
             } catch (dlErr) {
-              // Fallback to external URL if download fails
               console.error(`[Bulk-I2V] Download failed for ${job.id}, using external URL:`, dlErr.message);
               job.status = 'done';
               job.videoUrl = videoUrl;

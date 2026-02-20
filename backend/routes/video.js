@@ -262,12 +262,13 @@ async function generateVideoAsync(jobId, params, provider = 'vap', model = null)
         break;
     }
 
-    // Video is ready — download locally so URL never expires
+    // Video is ready — download locally + upload to R2
     let finalVideoUrl = result.videoUrl;
     try {
       const fs = require('fs');
       const path = require('path');
       const axios = require('axios');
+      const r2 = require('../services/r2');
       const videoFilename = `video-${jobId}.mp4`;
       const videoDir = path.join(__dirname, '../outputs/videos');
       fs.mkdirSync(videoDir, { recursive: true });
@@ -276,7 +277,17 @@ async function generateVideoAsync(jobId, params, provider = 'vap', model = null)
       const vidResp = await axios.get(result.videoUrl, { responseType: 'arraybuffer', timeout: 120000 });
       fs.writeFileSync(localPath, vidResp.data);
       finalVideoUrl = `/outputs/videos/${videoFilename}`;
-      console.log(`✅ Video ${jobId} saved locally: ${videoFilename}`);
+      
+      // Upload to R2 if configured
+      if (r2.isConfigured()) {
+        try {
+          finalVideoUrl = await r2.uploadVideo(localPath, job.userEmail || 'anonymous');
+          console.log(`✅ Video ${jobId} → R2`);
+        } catch (r2Err) {
+          console.error(`⚠️ Video ${jobId} R2 upload failed:`, r2Err.message);
+        }
+      }
+      console.log(`✅ Video ${jobId} saved: ${videoFilename}`);
     } catch (dlErr) {
       console.error(`⚠️ Video ${jobId} download failed, using external URL:`, dlErr.message);
     }
