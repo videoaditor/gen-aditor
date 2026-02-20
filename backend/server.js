@@ -38,8 +38,36 @@ const frontendPath = path.join(__dirname, '../frontend-simple');
 // Public pages (no auth required)
 const publicPages = ['/login.html', '/privacy.html', '/terms.html', '/landing.html', '/landing-v2.html'];
 
+// Import findByCode for auto-login
+const { findByCode } = require('./middleware/tenant');
+
 // Serve login page (always accessible)
+// If ?code= param present, auto-login server-side and redirect to /
 app.get(['/login', '/login.html'], (req, res) => {
+  const code = req.query.code;
+  if (code) {
+    const result = findByCode(code);
+    if (result) {
+      // Auto-login: pick first admin or first user
+      const entries = Object.entries(result.org.users);
+      const admin = entries.find(([_, u]) => u.role === 'owner' || u.role === 'admin');
+      const [email, user] = admin || entries[0];
+      
+      const { generateAccessToken } = require('./middleware/auth');
+      const token = generateAccessToken({
+        email, name: user.name, tenant: result.org.name,
+        orgId: result.orgId, role: user.role
+      });
+      
+      res.cookie('gen-token', token, {
+        httpOnly: true, secure: true, sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, path: '/'
+      });
+      
+      console.log(`[Auth] Auto-login: ${email} → ${result.org.name} via URL code`);
+      return res.redirect('/');
+    }
+  }
   res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(frontendPath, 'login.html'));
 });
@@ -48,7 +76,6 @@ app.get(['/login', '/login.html'], (req, res) => {
 app.get(['/', '/studio', '/studio/'], (req, res, next) => {
   if (!REQUIRE_AUTH) return next();
   
-  // Check for auth cookie or header
   const cookieToken = req.cookies && req.cookies['gen-token'];
   const authHeader = req.headers['authorization'];
   const headerToken = authHeader && authHeader.split(' ')[1];
@@ -67,7 +94,7 @@ app.get(['/', '/studio', '/studio/'], (req, res, next) => {
 app.use(express.static(frontendPath));
 app.use('/studio', express.static(frontendPath));
 
-// Serve generated outputs
+// Serve generated outputs (global + per-user)
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
 app.use('/studio/outputs', express.static(path.join(__dirname, 'outputs')));
 
@@ -230,22 +257,42 @@ function healthHandler(req, res) {
   });
 }
 
-// Get recent outputs for gallery seeding
-app.get('/api/outputs/recent', (req, res) => {
+// Get recent outputs for gallery — user-isolated if authenticated
+app.get('/api/outputs/recent', optionalAuthMiddleware, attachTenant, (req, res) => {
   try {
-    const outputDir = path.join(__dirname, 'outputs');
+    // Determine which output directory to scan
+    let outputDir = path.join(__dirname, 'outputs');
+    let urlPrefix = '/outputs';
+    
+    // If user is authenticated, show only their images
+    if (req.user && req.user.email) {
+      const safeEmail = req.user.email.replace(/[^a-zA-Z0-9@._-]/g, '_');
+      const userDir = path.join(__dirname, 'outputs', 'users', safeEmail);
+      if (fs.existsSync(userDir)) {
+        outputDir = userDir;
+        urlPrefix = `/outputs/users/${safeEmail}`;
+      } else if (req.user.role === 'owner') {
+        // Owner falls back to root outputs (backward compat)
+        outputDir = path.join(__dirname, 'outputs');
+        urlPrefix = '/outputs';
+      } else {
+        // Non-owner with no images yet
+        return res.json({ images: [] });
+      }
+    }
+    
     const files = fs.readdirSync(outputDir)
-      .filter(f => f.endsWith('.png') || f.endsWith('.jpg'))
+      .filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg') || f.endsWith('.webp'))
       .map(f => ({
         name: f,
         path: path.join(outputDir, f),
         mtime: fs.statSync(path.join(outputDir, f)).mtime
       }))
       .sort((a, b) => b.mtime - a.mtime)
-      .slice(0, 20);
+      .slice(0, 50);
     
     const images = files.map(f => ({
-      url: `/outputs/${f.name}`,
+      url: `${urlPrefix}/${f.name}`,
       prompt: 'Generated image',
       ratio: '9:16',
       model: 'nano-banana-pro',
@@ -273,7 +320,7 @@ app.get('/api/workflows/:id', (req, res) => {
 });
 
 // Submit generation job
-app.post('/api/generate', async (req, res) => {
+app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res) => {
   const { workflowId, params, prompt, negativePrompt, ratio, references } = req.body;
 
   // Simple image generation (no workflowId) - use Nano Banana Pro or VAP
@@ -281,7 +328,16 @@ app.post('/api/generate', async (req, res) => {
     try {
       const model = req.body.model || 'nano-banana-pro';
       const filename = `gen-${uuidv4()}.png`;
-      const localPath = path.join(__dirname, 'outputs', filename);
+      // Save to user-specific directory if authenticated
+      let outputSubdir = 'outputs';
+      let urlPrefix = '/outputs';
+      if (req.user && req.user.email) {
+        const safeEmail = req.user.email.replace(/[^a-zA-Z0-9@._-]/g, '_');
+        outputSubdir = path.join('outputs', 'users', safeEmail);
+        urlPrefix = `/outputs/users/${safeEmail}`;
+        fs.mkdirSync(path.join(__dirname, outputSubdir), { recursive: true });
+      }
+      const localPath = path.join(__dirname, outputSubdir, filename);
       
       // Save reference images temporarily if provided
       const tempRefPaths = [];
@@ -362,7 +418,7 @@ app.post('/api/generate', async (req, res) => {
         if (fs.existsSync(localPath)) {
           return res.json({ 
             success: true,
-            url: `/outputs/${filename}`,
+            url: `${urlPrefix}/${filename}`,
             model: 'nano-banana-pro'
           });
         } else {
@@ -427,7 +483,7 @@ app.post('/api/generate', async (req, res) => {
               
               return res.json({
                 success: true,
-                url: `/outputs/${filename}`,
+                url: `${urlPrefix}/${filename}`,
                 model: 'seedream'
               });
             }
@@ -478,7 +534,7 @@ app.post('/api/generate', async (req, res) => {
             
             return res.json({ 
               success: true,
-              url: `/outputs/${filename}`,
+              url: `${urlPrefix}/${filename}`,
               externalUrl: imageUrl
             });
           }

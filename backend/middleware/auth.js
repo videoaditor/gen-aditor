@@ -90,7 +90,10 @@ function generateAccessToken(user) {
       id: user.id || user.email,
       email: user.email,
       name: user.name,
-      tenant: user.tenant
+      tenant: user.tenant,
+      orgId: user.orgId,
+      role: user.role,
+      picture: user.picture
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
