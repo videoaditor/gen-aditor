@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -71,55 +70,85 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 40px 32px;
-      text-align: center;
     }
 
     .login-card h2 {
       font-size: 20px;
       font-weight: 600;
       margin-bottom: 8px;
+      text-align: center;
     }
 
     .login-card .subtitle {
       color: var(--text-dim);
       font-size: 14px;
       margin-bottom: 32px;
+      text-align: center;
     }
 
-    /* Google Sign-In button wrapper */
-    .google-btn-wrapper {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 24px;
+    .input-group {
+      margin-bottom: 20px;
     }
 
-    /* Custom Google button (fallback) */
-    .google-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 24px;
-      background: #fff;
-      color: #1f1f1f;
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .code-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 16px;
+      font-family: 'Inter', monospace;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .code-input:focus {
+      border-color: var(--accent);
+    }
+
+    .code-input::placeholder {
+      color: #3a3a4a;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: none;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: white;
       border: none;
       border-radius: 12px;
       font-size: 15px;
-      font-weight: 500;
+      font-weight: 600;
       font-family: 'Inter', sans-serif;
       cursor: pointer;
       transition: all 0.2s;
-      width: 100%;
-      justify-content: center;
     }
 
-    .google-btn:hover {
-      background: #f0f0f0;
+    .submit-btn:hover {
+      background: var(--accent-hover);
       transform: translateY(-1px);
     }
 
-    .google-btn svg {
-      width: 20px;
-      height: 20px;
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .error-msg {
@@ -131,37 +160,27 @@
       font-size: 13px;
       margin-bottom: 20px;
       display: none;
+      text-align: center;
     }
 
     .error-msg.show {
       display: block;
     }
 
-    .loading {
+    .success-msg {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #22c55e;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
       display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 16px;
-      color: var(--text-dim);
-      font-size: 14px;
+      text-align: center;
     }
 
-    .loading.show {
-      display: flex;
-    }
-
-    .spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .success-msg.show {
+      display: block;
     }
 
     .footer {
@@ -179,20 +198,6 @@
     .footer a:hover {
       color: var(--text);
     }
-
-    /* Tenant badge after login */
-    .tenant-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: rgba(249, 115, 22, 0.1);
-      border: 1px solid rgba(249, 115, 22, 0.2);
-      border-radius: 20px;
-      font-size: 13px;
-      color: var(--accent);
-      margin-bottom: 16px;
-    }
   </style>
 </head>
 <body>
@@ -205,49 +210,40 @@
     </div>
 
     <div class="login-card">
-      <h2>Sign in</h2>
-      <p class="subtitle">Use your Google account to continue</p>
+      <h2>Welcome</h2>
+      <p class="subtitle">Enter your invite code to continue</p>
 
       <div id="error" class="error-msg"></div>
+      <div id="success" class="success-msg"></div>
 
-      <div class="google-btn-wrapper">
-        <div id="g_id_onload"
-          data-client_id="GOOGLE_CLIENT_ID_PLACEHOLDER"
-          data-callback="handleGoogleSignIn"
-          data-auto_prompt="false"
-          data-context="signin"
-          data-ux_mode="popup">
+      <form id="login-form">
+        <div class="input-group">
+          <label for="code">Invite Code</label>
+          <input 
+            type="text" 
+            id="code" 
+            class="code-input" 
+            placeholder="Enter code"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          >
         </div>
 
-        <!-- Fallback button if GSI doesn't render -->
-        <button class="google-btn" id="google-fallback-btn" onclick="triggerGoogleSignIn()" style="display: none;">
-          <svg viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          Sign in with Google
+        <button type="submit" class="submit-btn" id="submit-btn">
+          Continue
         </button>
-      </div>
-
-      <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <span>Signing in...</span>
-      </div>
+      </form>
     </div>
 
     <div class="footer">
       <p>&copy; 2026 Aditor Inc.</p>
-      <p style="margin-top: 4px;">
-        <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
-      </p>
     </div>
   </div>
 
   <script>
     // Check if already logged in
-    (async function checkSession() {
+    (async function() {
       try {
         const res = await fetch('/api/auth/me', { credentials: 'include' });
         if (res.ok) {
@@ -255,100 +251,66 @@
           return;
         }
       } catch (e) {}
-      
-      // Show fallback button after a delay if GSI doesn't load
-      setTimeout(() => {
-        const gsiBtn = document.querySelector('.g_id_signin, [id^="credential_picker"]');
-        if (!gsiBtn) {
-          document.getElementById('google-fallback-btn').style.display = 'flex';
-        }
-      }, 2000);
+
+      // Check for code in URL params
+      const params = new URLSearchParams(window.location.search);
+      const urlCode = params.get('code');
+      if (urlCode) {
+        document.getElementById('code').value = urlCode;
+        // Auto-submit if code came from URL
+        document.getElementById('login-form').dispatchEvent(new Event('submit'));
+      }
     })();
 
-    function showError(msg) {
-      const el = document.getElementById('error');
-      el.textContent = msg;
-      el.classList.add('show');
-    }
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorEl = document.getElementById('error');
+    const successEl = document.getElementById('success');
 
-    function hideError() {
-      document.getElementById('error').classList.remove('show');
-    }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      errorEl.classList.remove('show');
+      successEl.classList.remove('show');
+      
+      const code = document.getElementById('code').value.trim();
+      if (!code) return;
 
-    function showLoading(show) {
-      document.getElementById('loading').classList.toggle('show', show);
-    }
-
-    // Called by Google Identity Services
-    async function handleGoogleSignIn(response) {
-      hideError();
-      showLoading(true);
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying...';
 
       try {
-        const res = await fetch('/api/auth/google', {
+        const res = await fetch('/api/auth/code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ credential: response.credential })
+          body: JSON.stringify({ code })
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || 'Sign in failed');
+          throw new Error(data.error || 'Invalid code');
         }
 
-        // Store token in localStorage as backup
+        // Store token as backup
         if (data.token) {
           localStorage.setItem('gen-token', data.token);
           localStorage.setItem('gen-user', JSON.stringify(data.user));
         }
 
-        // Redirect to studio
-        window.location.href = '/';
+        successEl.textContent = `Welcome, ${data.user.name}! Redirecting...`;
+        successEl.classList.add('show');
+
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 800);
 
       } catch (err) {
-        showLoading(false);
-        showError(err.message);
-      }
-    }
-
-    // Fallback trigger
-    function triggerGoogleSignIn() {
-      if (window.google && google.accounts) {
-        google.accounts.id.prompt();
-      } else {
-        showError('Google Sign-In failed to load. Please refresh the page.');
-      }
-    }
-
-    // Initialize GSI with rendered button
-    window.addEventListener('load', () => {
-      if (window.google && google.accounts) {
-        const clientId = document.querySelector('[data-client_id]')?.getAttribute('data-client_id');
-        if (clientId && clientId !== 'GOOGLE_CLIENT_ID_PLACEHOLDER') {
-          google.accounts.id.initialize({
-            client_id: clientId,
-            callback: handleGoogleSignIn,
-            auto_select: false
-          });
-          
-          // Render the Google button
-          const wrapper = document.querySelector('.google-btn-wrapper');
-          const btnDiv = document.createElement('div');
-          wrapper.innerHTML = '';
-          wrapper.appendChild(btnDiv);
-          google.accounts.id.renderButton(btnDiv, {
-            theme: 'filled_black',
-            size: 'large',
-            width: 356,
-            text: 'signin_with',
-            shape: 'pill'
-          });
-        } else {
-          // No client ID configured yet, show fallback
-          document.getElementById('google-fallback-btn').style.display = 'flex';
-        }
+        errorEl.textContent = err.message;
+        errorEl.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Continue';
       }
     });
   </script>

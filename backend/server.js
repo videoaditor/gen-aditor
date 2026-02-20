@@ -38,15 +38,10 @@ const frontendPath = path.join(__dirname, '../frontend-simple');
 // Public pages (no auth required)
 const publicPages = ['/login.html', '/privacy.html', '/terms.html', '/landing.html', '/landing-v2.html'];
 
-// Serve login page (always accessible) — inject Google Client ID
+// Serve login page (always accessible)
 app.get(['/login', '/login.html'], (req, res) => {
-  const loginPath = path.join(frontendPath, 'login.html');
-  let html = fs.readFileSync(loginPath, 'utf8');
-  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID || 'GOOGLE_CLIENT_ID_PLACEHOLDER';
-  html = html.replace(/GOOGLE_CLIENT_ID_PLACEHOLDER/g, clientId);
-  res.setHeader('Content-Type', 'text/html');
   res.setHeader('Cache-Control', 'no-cache');
-  res.send(html);
+  res.sendFile(path.join(frontendPath, 'login.html'));
 });
 
 // Auth check for main pages — redirect to login if REQUIRE_AUTH and no valid token
