@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const axios = require('axios');
 const runcomfy = require('../services/runcomfy');
 
 const router = express.Router();
@@ -238,10 +239,32 @@ async function pollJobAsync(jobId, requestId, maxRetries = 100) {
         job.result = result;
         job.completedAt = new Date().toISOString();
         
-        // Extract primary output URL
+        // Extract primary output URL and download locally
         if (result.files && result.files.length > 0) {
-          job.outputUrl = result.files[0].url;
+          const extUrl = result.files[0].url;
           job.outputType = result.files[0].type;
+          job.externalUrl = extUrl;
+          
+          // Download locally so URL never expires
+          try {
+            const ext = (job.outputType || '').includes('video') ? 'mp4' : 'png';
+            const outFilename = `runcomfy-${jobId}.${ext}`;
+            const outDir = ext === 'mp4' 
+              ? path.join(__dirname, '../outputs/videos')
+              : path.join(__dirname, '../outputs');
+            fs.mkdirSync(outDir, { recursive: true });
+            const localPath = path.join(outDir, outFilename);
+            
+            const dlResp = await axios.get(extUrl, { responseType: 'arraybuffer', timeout: 120000 });
+            fs.writeFileSync(localPath, dlResp.data);
+            job.outputUrl = ext === 'mp4' 
+              ? `/outputs/videos/${outFilename}` 
+              : `/outputs/${outFilename}`;
+            console.log(`✅ RunComfy job ${jobId} saved locally: ${outFilename}`);
+          } catch (dlErr) {
+            console.error(`⚠️ RunComfy ${jobId} download failed:`, dlErr.message);
+            job.outputUrl = extUrl;
+          }
         }
         
         console.log(`✅ RunComfy job ${jobId} completed`);

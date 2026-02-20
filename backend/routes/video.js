@@ -262,9 +262,28 @@ async function generateVideoAsync(jobId, params, provider = 'vap', model = null)
         break;
     }
 
-    // Video is ready
+    // Video is ready — download locally so URL never expires
+    let finalVideoUrl = result.videoUrl;
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const axios = require('axios');
+      const videoFilename = `video-${jobId}.mp4`;
+      const videoDir = path.join(__dirname, '../outputs/videos');
+      fs.mkdirSync(videoDir, { recursive: true });
+      const localPath = path.join(videoDir, videoFilename);
+      
+      const vidResp = await axios.get(result.videoUrl, { responseType: 'arraybuffer', timeout: 120000 });
+      fs.writeFileSync(localPath, vidResp.data);
+      finalVideoUrl = `/outputs/videos/${videoFilename}`;
+      console.log(`✅ Video ${jobId} saved locally: ${videoFilename}`);
+    } catch (dlErr) {
+      console.error(`⚠️ Video ${jobId} download failed, using external URL:`, dlErr.message);
+    }
+
     job.status = 'completed';
-    job.videoUrl = result.videoUrl;
+    job.videoUrl = finalVideoUrl;
+    job.externalUrl = result.videoUrl;
     job.cost = result.cost || null;
     job.completedAt = new Date().toISOString();
     job.updatedAt = new Date().toISOString();

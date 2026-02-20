@@ -249,9 +249,26 @@ router.get('/status/:batchId', async (req, res) => {
           });
           const videoUrl = resultResponse.data.video?.url;
           if (videoUrl) {
-            job.status = 'done';
-            job.videoUrl = videoUrl;
-            console.log(`[Bulk-I2V] Job ${job.id} completed: ${videoUrl}`);
+            // Download video locally so URL never expires
+            try {
+              const videoFilename = `video-${job.id}.mp4`;
+              const videoDir = path.join(__dirname, '../outputs/videos');
+              fs.mkdirSync(videoDir, { recursive: true });
+              const localVideoPath = path.join(videoDir, videoFilename);
+              
+              const videoResponse = await axios.get(videoUrl, { responseType: 'arraybuffer', timeout: 120000 });
+              fs.writeFileSync(localVideoPath, videoResponse.data);
+              
+              job.status = 'done';
+              job.videoUrl = `/outputs/videos/${videoFilename}`;
+              job.externalUrl = videoUrl; // keep original as backup
+              console.log(`[Bulk-I2V] Job ${job.id} completed + saved locally`);
+            } catch (dlErr) {
+              // Fallback to external URL if download fails
+              console.error(`[Bulk-I2V] Download failed for ${job.id}, using external URL:`, dlErr.message);
+              job.status = 'done';
+              job.videoUrl = videoUrl;
+            }
           }
         } else if (status === 'FAILED') {
           job.status = 'failed';
