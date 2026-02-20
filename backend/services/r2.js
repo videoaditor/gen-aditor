@@ -55,10 +55,11 @@ async function upload(fileOrPath, key, contentType) {
     ContentType: contentType || 'application/octet-stream',
   }));
 
-  // Return the URL — use /r2/ proxy route (no public access needed)
+  // Return the URL
   if (R2_PUBLIC_URL) {
     return `${R2_PUBLIC_URL}/${key}`;
   }
+  // Use /r2/ proxy route (works without public bucket access)
   return `/r2/${key}`;
 }
 

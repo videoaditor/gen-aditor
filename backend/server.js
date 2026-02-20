@@ -296,49 +296,72 @@ function healthHandler(req, res) {
   });
 }
 
-// Get recent outputs for gallery — user-isolated if authenticated
-app.get('/api/outputs/recent', optionalAuthMiddleware, attachTenant, (req, res) => {
+// Get recent outputs for gallery — user-isolated, R2-first
+app.get('/api/outputs/recent', optionalAuthMiddleware, attachTenant, async (req, res) => {
   try {
-    // Determine which output directory to scan
+    const userEmail = req.user?.email || 'anonymous';
+    const safeEmail = userEmail.replace(/[^a-zA-Z0-9@._-]/g, '_');
+    
+    // Try R2 first
+    if (r2.isConfigured()) {
+      try {
+        const { S3Client, ListObjectsV2Command } = require('@aws-sdk/client-s3');
+        const client = new S3Client({
+          region: 'auto',
+          endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+          credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY }
+        });
+        
+        const prefix = `images/${safeEmail}/`;
+        const result = await client.send(new ListObjectsV2Command({
+          Bucket: process.env.R2_BUCKET || 'aditorstudio',
+          Prefix: prefix,
+          MaxKeys: 50,
+        }));
+        
+        const images = (result.Contents || [])
+          .sort((a, b) => (b.LastModified || 0) - (a.LastModified || 0))
+          .map(obj => ({
+            url: `/r2/${obj.Key}`,
+            prompt: 'Generated image',
+            ratio: '9:16',
+            model: 'nano-banana-pro',
+            createdAt: obj.LastModified ? obj.LastModified.toISOString() : new Date().toISOString()
+          }));
+        
+        return res.json({ images });
+      } catch (r2Err) {
+        console.error('[Gallery] R2 list failed, falling back to local:', r2Err.message);
+      }
+    }
+    
+    // Fallback: local disk
     let outputDir = path.join(__dirname, 'outputs');
     let urlPrefix = '/outputs';
     
-    // If user is authenticated, show only their images
     if (req.user && req.user.email) {
-      const safeEmail = req.user.email.replace(/[^a-zA-Z0-9@._-]/g, '_');
       const userDir = path.join(__dirname, 'outputs', 'users', safeEmail);
       if (fs.existsSync(userDir)) {
         outputDir = userDir;
         urlPrefix = `/outputs/users/${safeEmail}`;
-      } else if (req.user.role === 'owner') {
-        // Owner falls back to root outputs (backward compat)
-        outputDir = path.join(__dirname, 'outputs');
-        urlPrefix = '/outputs';
-      } else {
-        // Non-owner with no images yet
+      } else if (req.user.role !== 'owner') {
         return res.json({ images: [] });
       }
     }
     
     const files = fs.readdirSync(outputDir)
       .filter(f => f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.jpeg') || f.endsWith('.webp'))
-      .map(f => ({
-        name: f,
-        path: path.join(outputDir, f),
-        mtime: fs.statSync(path.join(outputDir, f)).mtime
-      }))
+      .map(f => ({ name: f, mtime: fs.statSync(path.join(outputDir, f)).mtime }))
       .sort((a, b) => b.mtime - a.mtime)
       .slice(0, 50);
     
-    const images = files.map(f => ({
+    res.json({ images: files.map(f => ({
       url: `${urlPrefix}/${f.name}`,
       prompt: 'Generated image',
       ratio: '9:16',
       model: 'nano-banana-pro',
       createdAt: f.mtime.toISOString()
-    }));
-    
-    res.json({ images });
+    })) });
   } catch (err) {
     res.json({ images: [] });
   }
