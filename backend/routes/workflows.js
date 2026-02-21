@@ -142,7 +142,40 @@ async function callRunComfy(model, payload) {
 }
 
 // Execute a single step based on provider
+
+// Evaluate step conditions (e.g., "!portrait" means run only if portrait is not in context)
+function evaluateCondition(condition, context) {
+  if (!condition) return true;
+  
+  // Handle negation: "!portrait" → true if portrait is falsy
+  if (condition.startsWith('!')) {
+    const varName = condition.slice(1);
+    return !context[varName] && !context[varName + '_url'];
+  }
+  
+  // Handle equality: "var==value"
+  if (condition.includes('==')) {
+    const [varName, value] = condition.split('==');
+    return String(context[varName.trim()]) === value.trim();
+  }
+  
+  // Handle inequality: "var!=value"
+  if (condition.includes('!=')) {
+    const [varName, value] = condition.split('!=');
+    return String(context[varName.trim()]) !== value.trim();
+  }
+  
+  // Simple truthy check
+  return !!context[condition];
+}
+
 async function executeStepInternal(step, context, workflow) {
+  // Check condition before executing step
+  if (step.condition && !evaluateCondition(step.condition, context)) {
+    console.log('[Workflows] Skipping step "' + step.step + '" - condition "' + step.condition + '" not met');
+    return { skipped: true, reason: 'Condition not met: ' + step.condition };
+  }
+
   const RUNCOMFY_KEY = process.env.RUNCOMFY_API_KEY;
   const RUNCOMFY_BASE = 'https://model-api.runcomfy.net/v1';
 
