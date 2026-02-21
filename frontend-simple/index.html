@@ -1038,10 +1038,11 @@
 
     /* Left sidebar - workflow list */
     .workflow-sidebar {
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border);
+      background: #0a0a0f;
+      border-right: 1px solid #1a1a24;
       padding: 16px 0;
       overflow-y: auto;
+      max-height: calc(100vh - 65px);
     }
 
     .workflow-sidebar-title {
@@ -1056,21 +1057,22 @@
 
     .workflow-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 12px;
-      padding: 12px 16px;
+      padding: 14px 16px;
       cursor: pointer;
       transition: all 0.15s ease;
       border-left: 3px solid transparent;
+      margin: 2px 0;
     }
 
     .workflow-item:hover {
-      background: var(--bg-hover);
+      background: #111118;
     }
 
     .workflow-item.active {
-      background: var(--accent-glow);
-      border-left-color: var(--accent);
+      background: #111118;
+      border-left-color: #E97B2C;
     }
 
     .workflow-item-icon {
@@ -1150,8 +1152,10 @@
     .workflow-main {
       padding: 32px;
       overflow-y: auto;
+      max-height: calc(100vh - 65px);
       display: flex;
       flex-direction: column;
+      background: #0d0d12;
     }
 
     .workflow-header {
@@ -1912,19 +1916,20 @@
     .dynamic-wf-field input[type="number"],
     .dynamic-wf-field textarea,
     .dynamic-wf-field select {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-size: 14px;
+      background: #111118;
+      border: 1px solid #1a1a24;
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: #e0e0e8;
+      font-size: 13px;
       outline: none;
       transition: border-color 0.15s;
+      font-family: 'Inter', sans-serif;
     }
     .dynamic-wf-field input:focus,
     .dynamic-wf-field textarea:focus,
     .dynamic-wf-field select:focus {
-      border-color: var(--accent);
+      border-color: #333;
     }
     .dynamic-wf-field textarea {
       min-height: 100px;
@@ -1966,22 +1971,62 @@
     .dynamic-wf-run-btn {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 12px 28px;
-      background: var(--accent);
-      color: #000;
+      justify-content: center;
+      width: 100%;
+      padding: 13px 28px;
+      background: #E97B2C;
+      color: #fff;
       border: none;
-      border-radius: 8px;
-      font-size: 15px;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.15s;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.2px;
     }
     .dynamic-wf-run-btn:hover { opacity: 0.85; }
     .dynamic-wf-run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .dynamic-wf-cost {
       font-size: 12px;
-      color: var(--text-dim);
+      color: #555;
+    }
+
+    .batch-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid #1a1a24;
+      background: #111118;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 140px;
+      user-select: none;
+    }
+    .batch-pill:hover {
+      border-color: #333;
+    }
+    .batch-pill.active {
+      border-color: #E97B2C;
+      background: #E97B2C12;
+    }
+    .batch-pill-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+    }
+    .batch-pill.active .batch-pill-label {
+      color: #e0e0e8;
+    }
+    .batch-pill-count {
+      font-size: 11px;
+      color: #555;
+    }
+    .batch-pill.active .batch-pill-count {
+      color: #E97B2C;
     }
     .dynamic-wf-status {
       margin-top: 16px;
@@ -5060,6 +5105,19 @@ Return ONLY the JSON, no explanation.`;
             field = `<input type="text" data-wf-input="${input.id}" placeholder="${input.placeholder || ''}">`;
             break;
           case 'number':
+            if (input.id.startsWith('batches_')) {
+              // Render as toggle pill for batch categories
+              const isOn = (input.default || 0) > 0;
+              const count = input.default || 3;
+              field = `
+                <div class="batch-pill ${isOn ? 'active' : ''}" data-batch-id="${input.id}" data-count="${count}" onclick="toggleBatchPill(this)">
+                  <span class="batch-pill-label">${input.label}</span>
+                  <span class="batch-pill-count">${isOn ? count + ' clips' : 'off'}</span>
+                </div>
+                <input type="hidden" data-wf-input="${input.id}" value="${isOn ? count : 0}">
+              `;
+              return `<div class="dynamic-wf-field" style="display:inline-block;margin-right:8px;margin-bottom:8px;">${field}</div>`;
+            }
             field = `<input type="number" data-wf-input="${input.id}" min="${input.min || 1}" max="${input.max || 100}" value="${input.default || 1}">`;
             break;
           case 'select':
@@ -7049,6 +7107,20 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
           { id: 'avatar-boss', filename: 'avatar-boss.png', url: '/r2/avatars/avatar-boss.png' },
           { id: 'avatar-frog', filename: 'avatar-frog.png', url: '/r2/avatars/avatar-frog.png' }
         ];
+      }
+    }
+
+    function toggleBatchPill(pill) {
+      const isActive = pill.classList.toggle('active');
+      const count = parseInt(pill.dataset.count) || 3;
+      const countEl = pill.querySelector('.batch-pill-count');
+      const hiddenInput = pill.parentElement.querySelector('input[type="hidden"]');
+      if (isActive) {
+        countEl.textContent = count + ' clips';
+        hiddenInput.value = count;
+      } else {
+        countEl.textContent = 'off';
+        hiddenInput.value = '0';
       }
     }
 
