@@ -1,16 +1,16 @@
 {
   "id": "script-to-ugc",
-  "name": "Script → UGC Video",
-  "description": "Script + Portrait → fertiges UGC Talking Head Video",
+  "name": "Script \u2192 UGC Video",
+  "description": "Script + Portrait \u2192 fertiges UGC Talking Head Video",
   "starred": true,
   "category": "video",
-  "icon": "🗣️",
+  "icon": "\ud83d\udde3\ufe0f",
   "inputs": [
     {
       "id": "script",
       "type": "textarea",
       "label": "Script",
-      "placeholder": "Hey, ich muss dir unbedingt von diesem Produkt erzählen...",
+      "placeholder": "Hey, ich muss dir unbedingt von diesem Produkt erz\u00e4hlen...",
       "required": true
     },
     {
@@ -25,10 +25,22 @@
       "type": "select",
       "label": "Stimme",
       "options": [
-        { "value": "sarah", "label": "Sarah (DE, weiblich)" },
-        { "value": "adam", "label": "Adam (DE, männlich)" },
-        { "value": "rachel", "label": "Rachel (EN, weiblich)" },
-        { "value": "josh", "label": "Josh (EN, männlich)" }
+        {
+          "value": "sarah",
+          "label": "Sarah (DE, weiblich)"
+        },
+        {
+          "value": "adam",
+          "label": "Adam (DE, m\u00e4nnlich)"
+        },
+        {
+          "value": "rachel",
+          "label": "Rachel (EN, weiblich)"
+        },
+        {
+          "value": "josh",
+          "label": "Josh (EN, m\u00e4nnlich)"
+        }
       ],
       "default": "sarah"
     },
@@ -37,9 +49,18 @@
       "type": "select",
       "label": "UGC Style",
       "options": [
-        { "value": "testimonial", "label": "Testimonial (direkt in Kamera)" },
-        { "value": "storytime", "label": "Storytime (casual erzählen)" },
-        { "value": "review", "label": "Product Review" }
+        {
+          "value": "testimonial",
+          "label": "Testimonial (direkt in Kamera)"
+        },
+        {
+          "value": "storytime",
+          "label": "Storytime (casual erz\u00e4hlen)"
+        },
+        {
+          "value": "review",
+          "label": "Product Review"
+        }
       ],
       "default": "testimonial"
     }
@@ -60,8 +81,11 @@
     {
       "step": "lipsync",
       "provider": "runcomfy",
-      "model": "sync/sync/lipsync/v2/pro",
-      "input": ["portrait", "audio"],
+      "model": "lipsync",
+      "input": [
+        "portrait",
+        "audio"
+      ],
       "output": "video"
     }
   ],

@@ -1,3 +1,8 @@
+/**
+ * @deprecated This module is DEPRECATED. The n8n webhook is no longer maintained.
+ * Use the new workflow system: POST /api/workflows/script-to-ugc/run
+ */
+
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
@@ -11,6 +16,12 @@ const jobs = new Map();
 
 // Trigger UGC workflow
 router.post('/generate', async (req, res) => {
+  // DEPRECATED: Return 410 Gone
+  return res.status(410).json({
+    error: 'This endpoint is deprecated. Use POST /api/workflows/script-to-ugc/run instead.',
+    migration: '/api/workflows/script-to-ugc/run'
+  });
+  // Original code below (dead):
   const { script, characterId, voiceId, avatarUrl, avatarFile, outputFolder } = req.body;
   
   if (!script) {
