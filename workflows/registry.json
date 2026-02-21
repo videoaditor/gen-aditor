@@ -21,6 +21,11 @@
       "id": "product-360",
       "file": "starred/product-360.json",
       "starred": true
+    },
+    {
+      "id": "content-order",
+      "file": "starred/content-order.json",
+      "starred": true
     }
   ]
 }

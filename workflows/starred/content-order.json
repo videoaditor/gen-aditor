@@ -1,0 +1,92 @@
+{
+  "id": "content-order",
+  "name": "🎬 Content Order",
+  "description": "Script → B-Roll Clips sorted by bucket (Product, Application, Good, Bad)",
+  "starred": true,
+  "category": "video",
+  "icon": "🎬",
+  "inputs": [
+    {
+      "id": "script",
+      "type": "textarea",
+      "label": "Ad Script",
+      "placeholder": "Paste your ad script here...",
+      "required": true
+    },
+    {
+      "id": "brandId",
+      "type": "select",
+      "label": "Brand DNA",
+      "options": [],
+      "dynamicOptions": "/api/brands",
+      "required": false,
+      "hint": "Select brand for on-brand generation (optional)"
+    },
+    {
+      "id": "batches_product",
+      "type": "number",
+      "label": "🎁 Product Shots",
+      "default": 0,
+      "min": 0,
+      "max": 10
+    },
+    {
+      "id": "batches_application",
+      "type": "number",
+      "label": "🖐️ Application Clips",
+      "default": 0,
+      "min": 0,
+      "max": 10
+    },
+    {
+      "id": "batches_good",
+      "type": "number",
+      "label": "✨ Desired State",
+      "default": 3,
+      "min": 0,
+      "max": 10
+    },
+    {
+      "id": "batches_bad",
+      "type": "number",
+      "label": "💀 Pain Points",
+      "default": 3,
+      "min": 0,
+      "max": 10
+    },
+    {
+      "id": "duration",
+      "type": "select",
+      "label": "Clip Duration",
+      "options": [
+        {"value": "5", "label": "5 seconds"},
+        {"value": "10", "label": "10 seconds"}
+      ],
+      "default": "5"
+    },
+    {
+      "id": "model",
+      "type": "select",
+      "label": "Video Model",
+      "options": [
+        {"value": "sora-2", "label": "Sora 2 (OpenAI)"},
+        {"value": "kling-3", "label": "Kling 3.0 (fal.ai)"},
+        {"value": "veo-3", "label": "Veo 3.1 (RunComfy)"}
+      ],
+      "default": "sora-2"
+    }
+  ],
+  "pipeline": [
+    {
+      "step": "expand_prompts",
+      "provider": "gemini",
+      "description": "Gemini reads script + brand DNA → generates B-roll prompts per category"
+    },
+    {
+      "step": "generate_clips",
+      "provider": "sora/kling/veo",
+      "description": "All clips fire in parallel → organized by bucket"
+    }
+  ],
+  "endpoint": "/api/content-order/run"
+}

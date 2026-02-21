@@ -602,5 +602,80 @@
         "error": null
       }
     ]
+  },
+  "d60d4d2c-52ed-4db3-aea0-d58b232f50fc": {
+    "id": "d60d4d2c-52ed-4db3-aea0-d58b232f50fc",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-20T16:53:58.573Z",
+    "jobs": [
+      {
+        "id": "820447a9-68e5-4802-b580-1d26732ca93c",
+        "imageUrl": "/uploads/bulk-i2v/d9126875-8b54-4f36-9813-2d5b88b6edee.jpeg",
+        "prompt": "The woman slowly turns her head to look directly at the camera, then back to her original position. Simulate handheld camera movement with subtle vertical drift and slight focus adjustments, and add gentle hair movement as if there's a light breeze.",
+        "status": "done",
+        "videoUrl": "https://cdn.gen.aditor.ai/videos/bulk-i2v/video-820447a9-68e5-4802-b580-1d26732ca93c.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/820447a9-68e5-4802-b580-1d26732ca93c/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/820447a9-68e5-4802-b580-1d26732ca93c",
+        "error": null,
+        "externalUrl": "https://v3b.fal.media/files/b/0a8f41ce/rqXMGZScSHDk8Xgo2koA__output.mp4"
+      },
+      {
+        "id": "0da0732b-f43d-4372-8971-28cdd508d07d",
+        "imageUrl": "/uploads/bulk-i2v/1f9215cb-00cb-4c8c-b64f-b7ef85eee6e0.jpeg",
+        "prompt": "The woman smiles and nods slightly as if in conversation. Simulate handheld camera with subtle vertical drift and micro-jitters, with occasional soft auto-focus adjustments on the face. Add gentle wind blowing through the hair and slight movement in the background foliage.",
+        "status": "done",
+        "videoUrl": "https://cdn.gen.aditor.ai/videos/bulk-i2v/video-0da0732b-f43d-4372-8971-28cdd508d07d.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/0da0732b-f43d-4372-8971-28cdd508d07d/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/0da0732b-f43d-4372-8971-28cdd508d07d",
+        "error": null,
+        "externalUrl": "https://v3b.fal.media/files/b/0a8f41ce/SE80DTGaYDCgHw4szkTEp_output.mp4"
+      }
+    ]
+  },
+  "dfe5bb67-0473-4291-b55a-4b966fc2f914": {
+    "id": "dfe5bb67-0473-4291-b55a-4b966fc2f914",
+    "status": "done",
+    "duration": 5,
+    "mode": "std",
+    "aspectRatio": "9:16",
+    "createdAt": "2026-02-20T19:56:07.229Z",
+    "jobs": [
+      {
+        "id": "9e1454d4-de08-4817-827e-2444f79b2da7",
+        "imageUrl": "/uploads/bulk-i2v/4e14cefd-4515-460e-9053-b1919cab151d.png",
+        "prompt": "Slight handheld camera drift to the left as she settles the plant into the pot, focus subtly hunting between her face and the blueberry bush. Her head nods subtly as she narrates the planting process, and a breeze gently moves the clothes hanging in the background.",
+        "status": "done",
+        "videoUrl": "https://cdn.gen.aditor.ai/videos/bulk-i2v/video-9e1454d4-de08-4817-827e-2444f79b2da7.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/9e1454d4-de08-4817-827e-2444f79b2da7/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/9e1454d4-de08-4817-827e-2444f79b2da7",
+        "error": null,
+        "externalUrl": "https://v3b.fal.media/files/b/0a8f4612/-nzJLtPewOUxfqpdYeB1T_output.mp4"
+      },
+      {
+        "id": "169f8630-6847-4fbc-890a-2e550a363434",
+        "imageUrl": "/uploads/bulk-i2v/53d94e41-a24c-4245-8154-05a13d602128.png",
+        "prompt": "Slight handheld camera drift, as if casually showing the blueberries on the bush. A gentle breeze causes the leaves and surrounding branches to sway subtly. The camera briefly hunts for focus on the main cluster of blueberries.",
+        "status": "done",
+        "videoUrl": "https://cdn.gen.aditor.ai/videos/bulk-i2v/video-169f8630-6847-4fbc-890a-2e550a363434.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/169f8630-6847-4fbc-890a-2e550a363434/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/169f8630-6847-4fbc-890a-2e550a363434",
+        "error": null,
+        "externalUrl": "https://v3b.fal.media/files/b/0a8f4613/Z6OrnB5gHpMglE9yoM3cq_output.mp4"
+      },
+      {
+        "id": "e1b6cc76-9dfb-4da7-925f-588c6a561774",
+        "imageUrl": "/uploads/bulk-i2v/b0df88d3-aaeb-41b5-ad94-0f536cac5a89.png",
+        "prompt": "Slight handheld camera drift, focusing on the blueberry plant. A few leaves gently rustle in the breeze, and the person's hand reaches in to pluck a blueberry from the plant, bringing it closer to the camera for a quick focus before the person eats it.",
+        "status": "done",
+        "videoUrl": "https://cdn.gen.aditor.ai/videos/bulk-i2v/video-e1b6cc76-9dfb-4da7-925f-588c6a561774.mp4",
+        "statusUrl": "https://queue.fal.run/fal-ai/kling-video/requests/e1b6cc76-9dfb-4da7-925f-588c6a561774/status",
+        "responseUrl": "https://queue.fal.run/fal-ai/kling-video/requests/e1b6cc76-9dfb-4da7-925f-588c6a561774",
+        "error": null,
+        "externalUrl": "https://v3b.fal.media/files/b/0a8f4613/W5firqnQuA-Lh_K0BO-Bk_output.mp4"
+      }
+    ]
   }
 }

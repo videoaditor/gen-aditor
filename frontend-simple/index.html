@@ -3045,6 +3045,7 @@
     </div>
     
     <div class="nav-profile" id="nav-profile" style="display:flex;align-items:center;gap:10px;position:relative;">
+      <button id="dna-btn" onclick="openBrandDNA()" style="font-size:11px;padding:4px 10px;border-radius:6px;background:linear-gradient(135deg,#10B981,#3B82F6);color:#fff;border:none;cursor:pointer;font-weight:500;letter-spacing:0.3px;opacity:0.9;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">🧬 Brand DNA</button>
       <span id="tenant-name" style="font-size:13px;color:#8b8b9e;"></span>
       <div id="user-avatar" style="width:36px;height:36px;border-radius:50%;background:#232330;overflow:hidden;cursor:pointer;display:none;border:2px solid #232330;transition:border-color 0.2s;" onclick="toggleUserMenu()">
         <img id="user-pic" style="width:100%;height:100%;object-fit:cover;" src="" alt="">
@@ -4999,7 +5000,17 @@ Return ONLY the JSON, no explanation.`;
           return;
         }
 
-        container.innerHTML = dynamicWorkflows.map((wf, i) => `
+        container.innerHTML = dynamicWorkflows.map((wf, i) => {
+          const badges = (wf.pipeline || []).map(step => {
+            const colors = {
+              'elevenlabs': '#8B5CF6', 'nano-banana': '#F59E0B', 'runcomfy': '#3B82F6',
+              'gemini': '#10B981', 'sora': '#EF4444', 'kling': '#EC4899', 'veo': '#6366F1',
+              'sora/kling/veo': '#EF4444', 'local': '#6B7280', 'fal': '#EC4899'
+            };
+            const color = colors[step.provider] || '#6B7280';
+            return `<span style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:${color}22;color:${color};border:1px solid ${color}44;margin-right:3px;margin-top:3px">${step.provider}</span>`;
+          }).join('');
+          return `
           <div class="workflow-item ${i === 0 ? 'active' : ''}" data-dynamic-workflow="${wf.id}">
             <div class="workflow-item-icon">
               <span style="font-size:20px">${wf.icon || '⚡'}</span>
@@ -5007,9 +5018,10 @@ Return ONLY the JSON, no explanation.`;
             <div class="workflow-item-text">
               <div class="workflow-item-name">${wf.name}</div>
               <div class="workflow-item-desc">${wf.description}</div>
+              <div class="workflow-item-badges">${badges}</div>
             </div>
-          </div>
-        `).join('');
+          </div>`;
+        }).join('');
 
         // Click handlers for dynamic workflows
         container.querySelectorAll('[data-dynamic-workflow]').forEach(item => {
@@ -7106,6 +7118,82 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
     function toggleUserMenu() {
       const menu = document.getElementById('user-menu');
       menu.classList.toggle('show');
+    }
+
+    function openBrandDNA() {
+      // Create Brand DNA modal
+      let modal = document.getElementById('brand-dna-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'brand-dna-modal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+        modal.innerHTML = `
+          <div style="background:#0f0f14;border:1px solid #232330;border-radius:16px;padding:32px;width:460px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+              <h2 style="color:#fff;font-size:20px;margin:0;">🧬 Brand DNA</h2>
+              <button onclick="document.getElementById('brand-dna-modal').style.display='none'" style="background:none;border:none;color:#666;font-size:20px;cursor:pointer;">✕</button>
+            </div>
+            <div id="brand-list" style="margin-bottom:20px;"></div>
+            <div style="border-top:1px solid #232330;padding-top:20px;">
+              <p style="color:#8b8b9e;font-size:13px;margin-bottom:12px;">Create new Brand DNA from a website:</p>
+              <div style="display:flex;gap:8px;">
+                <input id="brand-url-input" type="url" placeholder="https://yourbrand.com" style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid #232330;background:#1a1a24;color:#fff;font-size:13px;outline:none;">
+                <button onclick="analyzeBrand()" style="padding:10px 16px;border-radius:8px;background:linear-gradient(135deg,#10B981,#3B82F6);color:#fff;border:none;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;">Analyze</button>
+              </div>
+              <div id="brand-analyze-status" style="margin-top:10px;font-size:12px;color:#8b8b9e;"></div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+      }
+      modal.style.display = 'flex';
+      loadBrands();
+    }
+
+    async function loadBrands() {
+      const list = document.getElementById('brand-list');
+      try {
+        const resp = await fetch('/api/brands');
+        const data = await resp.json();
+        if (!data.brands || data.brands.length === 0) {
+          list.innerHTML = '<p style="color:#555;font-size:13px;text-align:center;padding:20px;">No brands yet. Analyze a website to create your first Brand DNA.</p>';
+          return;
+        }
+        list.innerHTML = data.brands.map(b => `
+          <div style="padding:12px;border:1px solid #232330;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#10B981'" onmouseout="this.style.borderColor='#232330'">
+            <div style="display:flex;align-items:center;gap:10px;">
+              ${b.dna && b.dna.colors ? `<div style="width:24px;height:24px;border-radius:6px;background:${b.dna.colors.primary || '#333'};border:2px solid ${b.dna.colors.secondary || '#555'};"></div>` : ''}
+              <div>
+                <div style="color:#fff;font-size:14px;font-weight:500;">${b.name || b.brand || 'Unknown'}</div>
+                <div style="color:#8b8b9e;font-size:11px;">${b.dna && b.dna.tone ? b.dna.tone : ''}</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) {
+        list.innerHTML = '<p style="color:#ef4444;font-size:12px;">Failed to load brands</p>';
+      }
+    }
+
+    async function analyzeBrand() {
+      const url = document.getElementById('brand-url-input').value;
+      const status = document.getElementById('brand-analyze-status');
+      if (!url) { status.textContent = 'Enter a website URL'; return; }
+      status.innerHTML = '<span style="color:#F59E0B;">⏳ Analyzing brand... (10-15 seconds)</span>';
+      try {
+        const resp = await fetch('/api/brands/analyze', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({url})
+        });
+        const data = await resp.json();
+        if (data.error) { status.innerHTML = `<span style="color:#ef4444;">❌ ${data.error}</span>`; return; }
+        status.innerHTML = '<span style="color:#10B981;">✅ Brand DNA created!</span>';
+        loadBrands();
+      } catch(e) {
+        status.innerHTML = `<span style="color:#ef4444;">❌ Failed: ${e.message}</span>`;
+      }
     }
 
     function openAvatarPicker() {
