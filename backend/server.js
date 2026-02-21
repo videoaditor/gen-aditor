@@ -164,7 +164,6 @@ const jobs = new Map();
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const videoRoutes = require('./routes/video');
-const charactersRoutes = require('./routes/characters');
 const ugcRoutes = require('./routes/ugc');
 const kickstarterRoutes = require('./routes/kickstarter');
 const productEasyWinsRoutes = require('./routes/product-easy-wins');
@@ -172,7 +171,6 @@ const elevenlabsRoutes = require('./routes/elevenlabs');
 const imageAdsRoutes = require('./routes/image-ads');
 const scriptExplainerRoutes = require('./routes/script-explainer');
 const scriptExplainerV2Routes = require('./routes/script-explainer-v2');
-const vslGroundNoiseRoutes = require('./routes/vsl-ground-noise');
 const screenshotBrollRoutes = require('./routes/screenshot-broll');
 const selectionRoutes = require('./routes/selection');
 const videoQueueRoutes = require('./routes/video-queue');
@@ -183,10 +181,8 @@ const klingRoutes = require('./routes/kling');
 const promptExpandRoutes = require('./routes/prompt-expand');
 const variationsRoutes = require('./routes/variations');
 const contextProfileRoutes = require('./routes/context-profile');
-const hqRoutes = require('./routes/hq');
 const bulkI2vRoutes = require('./routes/bulk-i2v');
 const workflowRoutes = require('./routes/workflows');
-const bookingAutopilotRoutes = require('./routes/booking-autopilot');
 const brandRoutes = require('./routes/brands');
 const profileRoutes = require('./routes/profile');
 const contentOrderRoutes = require('./routes/content-order');
@@ -225,10 +221,8 @@ app.use('/api/screenshot-broll', optionalAuth, optionalUsageCheck, screenshotBro
 app.use('/api/video-queue', optionalAuth, optionalUsageCheck, videoQueueRoutes);
 
 // Open routes (no auth required)
-app.use('/api/characters', charactersRoutes);
 app.use('/api/ugc', ugcRoutes);
 app.use('/api/elevenlabs', elevenlabsRoutes);
-app.use('/api/vsl-ground-noise', vslGroundNoiseRoutes);
 app.use('/api/selection', selectionRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/runcomfy', runcomfyRoutes);
@@ -237,10 +231,8 @@ app.use('/api/kling', klingRoutes);
 app.use('/api/prompt', promptExpandRoutes);
 app.use('/api/variations', variationsRoutes);
 app.use('/api/context', contextProfileRoutes);
-app.use('/api/hq', hqRoutes);
 app.use('/api/bulk-i2v', bulkI2vRoutes);
 app.use('/api/workflows', workflowRoutes);
-app.use('/api/booking-autopilot', bookingAutopilotRoutes);
 app.use('/api/brands', optionalAuth, brandRoutes);
 app.use('/api/profile', optionalAuth, profileRoutes);
 app.use('/api/avatars', optionalAuth, avatarRoutes);
@@ -411,9 +403,7 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
       
       // Save reference images temporarily if provided
       const tempRefPaths = [];
-      console.log(`[Generate] References received: ${references ? references.length : 0}`);
       if (references && references.length > 0) {
-        console.log(`[Generate] Processing ${references.length} reference images`);
         for (let i = 0; i < references.length; i++) {
           const ref = references[i];
           if (ref.startsWith('data:image')) {
@@ -431,7 +421,6 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
               // Write base64 to file
               fs.writeFileSync(refPath, Buffer.from(base64Data, 'base64'));
               tempRefPaths.push(refPath);
-              console.log(`[Generate] Saved reference image: ${refPath}`);
             }
           } else if (ref.startsWith('/outputs/') || ref.startsWith('http')) {
             // Local file reference or URL
@@ -443,7 +432,6 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
             }
           }
         }
-        console.log(`[Generate] Using ${tempRefPaths.length} reference images`);
       }
       
       // Add aspect ratio to prompt for Nano Banana Pro
@@ -471,13 +459,9 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
         const refArgs = tempRefPaths.map(p => `-i "${p}"`).join(' ');
         const cmd = `GEMINI_API_KEY="${apiKey}" uv run "${scriptPath}" --prompt "${enhancedPrompt.replace(/"/g, '\\"')}" --filename "${localPath}" --resolution 2K ${refArgs}`;
         
-        console.log('[Generate] Running Nano Banana Pro:', enhancedPrompt.substring(0, 50) + '...');
-        console.log('[Generate] Reference args:', refArgs || '(none)');
-        console.log('[Generate] Full command:', cmd.replace(apiKey, 'REDACTED'));
+        console.log('[Generate] Processing request');
         
         const { stdout, stderr } = await execPromise(cmd, { timeout: 120000 });
-        console.log('[Generate] Output:', stdout);
-        if (stderr) console.log('[Generate] Stderr:', stderr);
         
         // Clean up temp reference files
         for (const tempPath of tempRefPaths) {
@@ -492,7 +476,6 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
             try {
               const r2Url = await r2.uploadImage(localPath, req.user?.email);
               finalUrl = r2Url;
-              console.log(`[R2] Uploaded: ${filename}`);
             } catch (r2Err) {
               console.error('[R2] Upload failed, using local:', r2Err.message);
             }
@@ -514,7 +497,7 @@ app.post('/api/generate', optionalAuthMiddleware, attachTenant, async (req, res)
           return res.status(500).json({ error: 'FAL_API_KEY not configured. Add it to .env' });
         }
         
-        console.log('[Generate] Running Seedream 4:', enhancedPrompt.substring(0, 50) + '...');
+        console.log('[Generate] Processing request');
         
         // Map aspect ratio to fal.ai format
         const imageSize = aspectRatio === '9:16' ? { width: 768, height: 1344 }
@@ -796,11 +779,6 @@ function extractImageUrls(outputs) {
   return urls;
 }
 
-// Serve known HTML pages by name (hq, admin, dashboard)
-app.get('/hq', (req, res) => res.sendFile(path.join(frontendPath, 'hq.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(frontendPath, 'admin.html')));
-app.get('/dashboard', (req, res) => res.sendFile(path.join(frontendPath, 'dashboard.html')));
-
 // SPA fallback — serve index.html for any non-API route
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/') && !req.path.startsWith('/outputs/') && !req.path.startsWith('/uploads/')) {
@@ -828,37 +806,9 @@ const server = app.listen(PORT, () => {
   console.log(`📋 Loaded ${workflows.length} workflows`);
 });
 
-// HQ WebSocket for live updates
-let wss;
-try {
-  const WebSocket = require('ws');
-  wss = new WebSocket.Server({ server, path: '/hq' });
-  wss.on('connection', (ws) => {
-    console.log('[HQ] Client connected');
-    const sendState = () => {
-      try {
-        const state = JSON.parse(fs.readFileSync(path.join(__dirname, 'hq-state.json'), 'utf8'));
-        ws.send(JSON.stringify({ type: 'stateUpdate', data: state }));
-      } catch(e) {}
-    };
-    sendState();
-    const interval = setInterval(sendState, 5000);
-    ws.on('close', () => clearInterval(interval));
-  });
-  console.log('[HQ] WebSocket ready on /hq');
-} catch(e) {
-  console.log('[HQ] WebSocket not available:', e.message);
-}
-
 // Graceful shutdown handling - prevents orphan processes holding the port
 const shutdown = (signal) => {
   console.log(`\n[Server] Received ${signal}, shutting down gracefully...`);
-  
-  // Close WebSocket server first
-  if (wss) {
-    wss.clients.forEach(client => client.terminate());
-    wss.close();
-  }
   
   // Close HTTP server
   server.close((err) => {
