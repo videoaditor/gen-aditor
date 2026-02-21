@@ -60,7 +60,7 @@
     {
       "step": "lipsync",
       "provider": "runcomfy",
-      "model": "sync/sync/lipsync/v2/pro",
+      "model": "lipsync",
       "input": ["portrait", "audio"],
       "output": "video"
     }

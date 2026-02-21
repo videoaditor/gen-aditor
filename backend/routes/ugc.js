@@ -1,3 +1,16 @@
+/**
+ * @deprecated This module is DEPRECATED and will be removed in a future release.
+ * The n8n webhook integration is no longer maintained.
+ *
+ * Use the new workflow system instead:
+ *   POST /api/workflows/script-to-ugc/run
+ *
+ * Example:
+ *   curl -X POST http://localhost:3001/api/workflows/script-to-ugc/run \
+ *     -H "Content-Type: application/json" \
+ *     -d '{"script": "Your script here", "voice": "sarah"}'
+ */
+
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
@@ -9,22 +22,30 @@ const N8N_WEBHOOK_URL = 'https://videoaditor.app.n8n.cloud/form-webhook/bfeed475
 // In-memory job tracking
 const jobs = new Map();
 
-// Trigger UGC workflow
+// Trigger UGC workflow - DEPRECATED: Returns 410 Gone
 router.post('/generate', async (req, res) => {
+  return res.status(410).json({
+    error: 'This endpoint is deprecated. Use POST /api/workflows/script-to-ugc/run instead.',
+    documentation: 'https://docs.gen.aditor.ai/workflows/script-to-ugc',
+    migration_guide: 'Replace /api/ugc/generate with /api/workflows/script-to-ugc/run'
+  });
+
+  // Legacy code below - no longer executed
+  /*
   const { script, characterId, voiceId, avatarUrl, avatarFile, outputFolder } = req.body;
-  
+
   if (!script) {
     return res.status(400).json({ error: 'script required' });
   }
-  
+
   if (!voiceId || !avatarUrl) {
     return res.status(400).json({ error: 'voiceId and avatarUrl required (or characterId)' });
   }
-  
+
   try {
     // Generate folder name if not provided
     const folderName = outputFolder || `UGC_${Date.now()}`;
-    
+
     // Create form data for n8n webhook
     const formData = new FormData();
     formData.append('Script', script);
@@ -78,14 +99,15 @@ router.post('/generate', async (req, res) => {
     });
     
     res.json({ jobId, status: 'pending', folderName });
-    
+
   } catch (error) {
     console.error('UGC generation error:', error);
     res.status(500).json({ error: error.message });
   }
+  */
 });
 
-// Get job status
+// Get job status - DEPRECATED but still functional for checking old jobs
 router.get('/status/:id', (req, res) => {
   const job = jobs.get(req.params.id);
   
