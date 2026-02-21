@@ -1,10 +1,10 @@
 {
   "id": "content-order",
-  "name": "🎬 Content Order",
-  "description": "Script → B-Roll Clips sorted by bucket (Product, Application, Good, Bad)",
+  "name": "Content Order",
+  "description": "Script \u2192 B-Roll Clips sorted by bucket (Product, Application, Good, Bad)",
   "starred": true,
   "category": "video",
-  "icon": "🎬",
+  "icon": "",
   "inputs": [
     {
       "id": "script",
@@ -25,7 +25,7 @@
     {
       "id": "batches_product",
       "type": "number",
-      "label": "🎁 Product Shots",
+      "label": "\ud83c\udf81 Product Shots",
       "default": 0,
       "min": 0,
       "max": 10
@@ -33,7 +33,7 @@
     {
       "id": "batches_application",
       "type": "number",
-      "label": "🖐️ Application Clips",
+      "label": "\ud83d\udd90\ufe0f Application Clips",
       "default": 0,
       "min": 0,
       "max": 10
@@ -41,7 +41,7 @@
     {
       "id": "batches_good",
       "type": "number",
-      "label": "✨ Desired State",
+      "label": "\u2728 Desired State",
       "default": 3,
       "min": 0,
       "max": 10
@@ -49,7 +49,7 @@
     {
       "id": "batches_bad",
       "type": "number",
-      "label": "💀 Pain Points",
+      "label": "\ud83d\udc80 Pain Points",
       "default": 3,
       "min": 0,
       "max": 10
@@ -59,8 +59,14 @@
       "type": "select",
       "label": "Clip Duration",
       "options": [
-        {"value": "5", "label": "5 seconds"},
-        {"value": "10", "label": "10 seconds"}
+        {
+          "value": "5",
+          "label": "5 seconds"
+        },
+        {
+          "value": "10",
+          "label": "10 seconds"
+        }
       ],
       "default": "5"
     },
@@ -69,9 +75,18 @@
       "type": "select",
       "label": "Video Model",
       "options": [
-        {"value": "sora-2", "label": "Sora 2 (OpenAI)"},
-        {"value": "kling-3", "label": "Kling 3.0 (fal.ai)"},
-        {"value": "veo-3", "label": "Veo 3.1 (RunComfy)"}
+        {
+          "value": "sora-2",
+          "label": "Sora 2 (OpenAI)"
+        },
+        {
+          "value": "kling-3",
+          "label": "Kling 3.0 (fal.ai)"
+        },
+        {
+          "value": "veo-3",
+          "label": "Veo 3.1 (RunComfy)"
+        }
       ],
       "default": "sora-2"
     }
@@ -80,12 +95,12 @@
     {
       "step": "expand_prompts",
       "provider": "gemini",
-      "description": "Gemini reads script + brand DNA → generates B-roll prompts per category"
+      "description": "Gemini reads script + brand DNA \u2192 generates B-roll prompts per category"
     },
     {
       "step": "generate_clips",
       "provider": "sora/kling/veo",
-      "description": "All clips fire in parallel → organized by bucket"
+      "description": "All clips fire in parallel \u2192 organized by bucket"
     }
   ],
   "endpoint": "/api/content-order/run"

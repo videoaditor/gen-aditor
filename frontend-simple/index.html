@@ -3045,7 +3045,8 @@
     </div>
     
     <div class="nav-profile" id="nav-profile" style="display:flex;align-items:center;gap:10px;position:relative;">
-      <button id="dna-btn" onclick="openBrandDNA()" style="font-size:11px;padding:4px 10px;border-radius:6px;background:linear-gradient(135deg,#10B981,#3B82F6);color:#fff;border:none;cursor:pointer;font-weight:500;letter-spacing:0.3px;opacity:0.9;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">🧬 Brand DNA</button>
+      <span id="balance-display" style="font-size:11px;color:#555;margin-right:12px;display:none;">$<span id="balance-amount">0.00</span></span>
+      <button id="dna-btn" onclick="openBrandDNA()" style="font-size:11px;padding:5px 14px;border-radius:6px;background:#E97B2C;color:#fff;border:none;cursor:pointer;font-weight:500;letter-spacing:0.3px;opacity:0.9;transition:opacity 0.2s;margin-right:8px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.9'">Brand DNA</button>
       <span id="tenant-name" style="font-size:13px;color:#8b8b9e;"></span>
       <div id="user-avatar" style="width:36px;height:36px;border-radius:50%;background:#232330;overflow:hidden;cursor:pointer;display:none;border:2px solid #232330;transition:border-color 0.2s;" onclick="toggleUserMenu()">
         <img id="user-pic" style="width:100%;height:100%;object-fit:cover;" src="" alt="">
@@ -3130,46 +3131,12 @@
       <div class="workflow-studio">
         <!-- Left Sidebar - Workflow List (dynamically loaded from /api/workflows) -->
         <div class="workflow-sidebar">
-          <div class="workflow-sidebar-title">⭐ Workflows</div>
+          <div class="workflow-sidebar-title">Workflows</div>
           <div id="workflow-sidebar-list">
             <!-- Populated dynamically from starred workflows -->
             <div class="workflow-loading">Loading workflows...</div>
           </div>
-          <div class="workflow-divider">Legacy</div>
-          <div class="workflow-item" data-workflow="script-to-video">
-            <div class="workflow-item-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-              </svg>
-            </div>
-            <div class="workflow-item-text">
-              <div class="workflow-item-name">Script → UGC Video</div>
-              <div class="workflow-item-desc">Script + avatar → full video</div>
-            </div>
-          </div>
-          <div class="workflow-item" data-workflow="product-easy-wins">
-            <div class="workflow-item-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-            </div>
-            <div class="workflow-item-text">
-              <div class="workflow-item-name">Product Easy Wins</div>
-              <div class="workflow-item-desc">1 image → 9 lifestyle shots</div>
-            </div>
-          </div>
-          <div class="workflow-item" data-workflow="motion-transfer">
-            <div class="workflow-item-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="workflow-item-text">
-              <div class="workflow-item-name">Motion Transfer</div>
-              <div class="workflow-item-desc">Image + video → animate</div>
-            </div>
-          </div>
+          <!-- Legacy workflows removed -->
         </div>
 
         <!-- Center - Active Workflow Input -->
@@ -3184,10 +3151,9 @@
             <div id="dynamic-workflow-form" class="dynamic-wf-form"></div>
             <div class="dynamic-wf-actions">
               <button type="button" class="dynamic-wf-run-btn" id="dynamic-wf-run-btn">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
                 Generate
               </button>
-              <span class="dynamic-wf-cost" id="dynamic-wf-cost"></span>
+              <span class="dynamic-wf-cost" id="dynamic-wf-cost" style="color:#555;font-size:12px;"></span>
             </div>
             <div id="dynamic-wf-status" class="dynamic-wf-status" style="display:none;"></div>
             <div id="dynamic-wf-output" class="dynamic-wf-output"></div>
@@ -5002,21 +4968,14 @@ Return ONLY the JSON, no explanation.`;
 
         container.innerHTML = dynamicWorkflows.map((wf, i) => {
           const badges = (wf.pipeline || []).map(step => {
-            const colors = {
-              'elevenlabs': '#8B5CF6', 'nano-banana': '#F59E0B', 'runcomfy': '#3B82F6',
-              'gemini': '#10B981', 'sora': '#EF4444', 'kling': '#EC4899', 'veo': '#6366F1',
-              'sora/kling/veo': '#EF4444', 'local': '#6B7280', 'fal': '#EC4899'
-            };
-            const color = colors[step.provider] || '#6B7280';
-            return `<span style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:${color}22;color:${color};border:1px solid ${color}44;margin-right:3px;margin-top:3px">${step.provider}</span>`;
+            return `<span style="display:inline-block;font-size:8px;padding:1px 5px;border-radius:3px;background:#ffffff08;color:#555;margin-right:3px;margin-top:4px;letter-spacing:0.3px;">${step.provider}</span>`;
           }).join('');
+          // Strip emoji from name for cleaner sidebar
+          const cleanName = wf.name.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim();
           return `
           <div class="workflow-item ${i === 0 ? 'active' : ''}" data-dynamic-workflow="${wf.id}">
-            <div class="workflow-item-icon">
-              <span style="font-size:20px">${wf.icon || '⚡'}</span>
-            </div>
-            <div class="workflow-item-text">
-              <div class="workflow-item-name">${wf.name}</div>
+            <div class="workflow-item-text" style="padding-left:4px;">
+              <div class="workflow-item-name">${cleanName}</div>
               <div class="workflow-item-desc">${wf.description}</div>
               <div class="workflow-item-badges">${badges}</div>
             </div>
@@ -6991,29 +6950,7 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
     });
   </script>
 
-  <!-- Product Easy Wins Modal -->
-  <div id="product-easy-wins-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 hidden">
-    <div class="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-          <div>
-            <h2 class="text-2xl font-bold text-white">Product Easy Wins</h2>
-            <p class="text-sm text-gray-400">Generate 9 lifestyle shots from one product image</p>
-          </div>
-          <button onclick="closeProductEasyWinsModal()" class="text-gray-400 hover:text-white">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-        <div id="product-easy-wins-content">
-          <!-- Content populated by product-easy-wins.js -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="product-easy-wins.js"></script>
+    <!-- Product Easy Wins removed -->
 
   <!-- @ Mention Autocomplete Dropdown -->
   <div id="mention-dropdown" class="mention-dropdown">

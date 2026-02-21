@@ -1,16 +1,16 @@
 {
   "id": "script-to-ugc",
-  "name": "Script → UGC Video",
-  "description": "Script + Portrait → fertiges UGC Talking Head Video",
+  "name": "Script \u2192 UGC Video",
+  "description": "Script + Portrait \u2192 UGC Talking Head Video",
   "starred": true,
   "category": "video",
-  "icon": "🗣️",
+  "icon": "",
   "inputs": [
     {
       "id": "script",
       "type": "textarea",
       "label": "Script",
-      "placeholder": "Hey, ich muss dir unbedingt von diesem Produkt erzählen...",
+      "placeholder": "Hey, ich muss dir unbedingt von diesem Produkt erz\u00e4hlen...",
       "required": true
     },
     {
@@ -18,17 +18,29 @@
       "type": "image",
       "label": "Portrait (optional)",
       "required": false,
-      "hint": "Oder wir generieren einen UGC Creator"
+      "hint": "Or we generate a UGC creator for you"
     },
     {
       "id": "voice",
       "type": "select",
-      "label": "Stimme",
+      "label": "Voice",
       "options": [
-        { "value": "sarah", "label": "Sarah (DE, weiblich)" },
-        { "value": "adam", "label": "Adam (DE, männlich)" },
-        { "value": "rachel", "label": "Rachel (EN, weiblich)" },
-        { "value": "josh", "label": "Josh (EN, männlich)" }
+        {
+          "value": "sarah",
+          "label": "Sarah (DE, female)"
+        },
+        {
+          "value": "adam",
+          "label": "Adam (DE, male)"
+        },
+        {
+          "value": "rachel",
+          "label": "Rachel (EN, female)"
+        },
+        {
+          "value": "josh",
+          "label": "Josh (EN, male)"
+        }
       ],
       "default": "sarah"
     },
@@ -37,9 +49,18 @@
       "type": "select",
       "label": "UGC Style",
       "options": [
-        { "value": "testimonial", "label": "Testimonial (direkt in Kamera)" },
-        { "value": "storytime", "label": "Storytime (casual erzählen)" },
-        { "value": "review", "label": "Product Review" }
+        {
+          "value": "testimonial",
+          "label": "Testimonial (direct to camera)"
+        },
+        {
+          "value": "storytime",
+          "label": "Storytime (casual erz\u00e4hlen)"
+        },
+        {
+          "value": "review",
+          "label": "Product Review"
+        }
       ],
       "default": "testimonial"
     }
@@ -61,7 +82,10 @@
       "step": "lipsync",
       "provider": "runcomfy",
       "model": "lipsync",
-      "input": ["portrait", "audio"],
+      "input": [
+        "portrait",
+        "audio"
+      ],
       "output": "video"
     }
   ],

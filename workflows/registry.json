@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updated": "2026-02-19",
+  "updated": "2026-02-21",
   "workflows": [
     {
       "id": "script-to-ugc",
@@ -10,16 +10,6 @@
     {
       "id": "product-photoshoot",
       "file": "starred/product-photoshoot.json",
-      "starred": true
-    },
-    {
-      "id": "product-broll",
-      "file": "starred/product-broll.json",
-      "starred": true
-    },
-    {
-      "id": "product-360",
-      "file": "starred/product-360.json",
       "starred": true
     },
     {
