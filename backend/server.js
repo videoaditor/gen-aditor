@@ -188,6 +188,7 @@ const bulkI2vRoutes = require('./routes/bulk-i2v');
 const workflowRoutes = require('./routes/workflows');
 const bookingAutopilotRoutes = require('./routes/booking-autopilot');
 const brandRoutes = require('./routes/brands');
+const profileRoutes = require('./routes/profile');
 
 // Import auth & tenant middleware
 const { authenticateToken, optionalAuth: optionalAuthMiddleware, checkUsageLimit, incrementUsage } = require('./middleware/auth');
@@ -239,6 +240,7 @@ app.use('/api/bulk-i2v', bulkI2vRoutes);
 app.use('/api/workflows', workflowRoutes);
 app.use('/api/booking-autopilot', bookingAutopilotRoutes);
 app.use('/api/brands', optionalAuth, brandRoutes);
+app.use('/api/profile', optionalAuth, profileRoutes);
 
 // Health check (both paths for convenience)
 app.get('/health', healthHandler);

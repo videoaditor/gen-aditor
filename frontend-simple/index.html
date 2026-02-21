@@ -508,6 +508,182 @@
       color: var(--text-tertiary);
     }
 
+    /* ===== @ MENTION AUTOCOMPLETE ===== */
+    .mention-dropdown {
+      position: absolute;
+      background: #0f0f14;
+      border: 1px solid #232330;
+      border-radius: 12px;
+      padding: 8px 0;
+      min-width: 280px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      display: none;
+    }
+
+    .mention-dropdown.show {
+      display: block;
+    }
+
+    .mention-header {
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #8b8b9e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mention-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .mention-item:hover,
+    .mention-item.active {
+      background: #232330;
+    }
+
+    .mention-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #1a1a24;
+    }
+
+    .mention-item .mention-info {
+      flex: 1;
+    }
+
+    .mention-item .mention-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .mention-item .mention-brand {
+      font-size: 11px;
+      color: #8b8b9e;
+    }
+
+    .mention-item .mention-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid #232330;
+    }
+
+    /* ===== AVATAR PICKER MODAL ===== */
+    .avatar-picker-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+    }
+
+    .avatar-picker-overlay.show {
+      display: flex;
+    }
+
+    .avatar-picker-modal {
+      background: #0f0f14;
+      border: 1px solid #232330;
+      border-radius: 16px;
+      padding: 24px;
+      width: 90%;
+      max-width: 480px;
+    }
+
+    .avatar-picker-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-option {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+      background: #1a1a24;
+    }
+
+    .avatar-option:hover {
+      border-color: #8b5cf6;
+      transform: scale(1.05);
+    }
+
+    .avatar-option.selected {
+      border-color: #a78bfa;
+      box-shadow: 0 0 20px rgba(167,139,250,0.3);
+    }
+
+    .avatar-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-picker-close {
+      width: 100%;
+      padding: 12px;
+      background: #232330;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .avatar-picker-close:hover {
+      background: #2a2a3a;
+    }
+
+    /* Product reference chip */
+    .product-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    .product-chip .remove {
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+
+    .product-chip .remove:hover {
+      opacity: 1;
+    }
+
     .prompt-btn {
       width: 44px;
       height: 44px;
@@ -2868,14 +3044,27 @@
       <button class="nav-tab" data-tab="shortcuts">Shortcuts</button>
     </div>
     
-    <div class="nav-profile" id="nav-profile" style="display:flex;align-items:center;gap:10px;">
+    <div class="nav-profile" id="nav-profile" style="display:flex;align-items:center;gap:10px;position:relative;">
       <span id="tenant-name" style="font-size:13px;color:#8b8b9e;"></span>
-      <div id="user-avatar" style="width:32px;height:32px;border-radius:50%;background:#232330;overflow:hidden;cursor:pointer;display:none;" onclick="document.getElementById('user-menu').classList.toggle('show')">
+      <div id="user-avatar" style="width:36px;height:36px;border-radius:50%;background:#232330;overflow:hidden;cursor:pointer;display:none;border:2px solid #232330;transition:border-color 0.2s;" onclick="toggleUserMenu()">
         <img id="user-pic" style="width:100%;height:100%;object-fit:cover;" src="" alt="">
       </div>
-      <div id="user-menu" style="display:none;position:absolute;top:60px;right:24px;background:#0f0f14;border:1px solid #232330;border-radius:12px;padding:8px;min-width:180px;z-index:200;">
-        <div id="user-email" style="padding:8px 12px;font-size:12px;color:#8b8b9e;border-bottom:1px solid #232330;margin-bottom:4px;"></div>
-        <button onclick="signOut()" style="width:100%;padding:8px 12px;background:none;border:none;color:#ef4444;font-size:13px;text-align:left;cursor:pointer;border-radius:6px;">Sign out</button>
+      <!-- Enhanced User Dropdown Menu -->
+      <div id="user-menu" style="display:none;position:absolute;top:50px;right:0;background:#0f0f14;border:1px solid #232330;border-radius:12px;padding:8px;min-width:200px;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <div id="user-info" style="padding:12px;border-bottom:1px solid #232330;margin-bottom:4px;">
+          <div id="user-name" style="font-size:14px;font-weight:500;color:#fff;margin-bottom:2px;"></div>
+          <div id="user-email" style="font-size:11px;color:#8b8b9e;"></div>
+        </div>
+        <button onclick="openAvatarPicker()" style="width:100%;padding:10px 12px;background:none;border:none;color:#fff;font-size:13px;text-align:left;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;transition:background 0.15s;">
+          <span>🎭</span> Switch Avatar
+        </button>
+        <button onclick="openBrandsPage()" style="width:100%;padding:10px 12px;background:none;border:none;color:#fff;font-size:13px;text-align:left;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;transition:background 0.15s;">
+          <span>🏷️</span> My Brands
+        </button>
+        <div style="border-top:1px solid #232330;margin:4px 0;"></div>
+        <button onclick="signOut()" style="width:100%;padding:10px 12px;background:none;border:none;color:#ef4444;font-size:13px;text-align:left;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;transition:background 0.15s;">
+          <span>🚪</span> Logout
+        </button>
       </div>
     </div>
   </nav>
@@ -4624,10 +4813,29 @@ Return ONLY the JSON, no explanation.`;
       }
 
       // Save values before clearing UI
-      const savedPrompt = rawPrompt;
+      let savedPrompt = rawPrompt;
       const savedReferences = [...references];
       const savedRatio = selectedRatio;
       const savedModel = selectedModel;
+      
+      // ===== PRODUCT MENTION ENHANCEMENT =====
+      // Check if we have a selected product from @ mention
+      const genContext = window.getGenerationContext ? window.getGenerationContext() : {};
+      if (genContext.product) {
+        // Add product image as reference if available
+        if (genContext.product.image) {
+          savedReferences.push(genContext.product.image);
+        }
+        // Enhance prompt with brand DNA context
+        if (genContext.enhancedPrompt) {
+          savedPrompt = `${savedPrompt}, ${genContext.enhancedPrompt}`;
+        }
+        // Clear selected product after use
+        selectedProduct = null;
+        // Remove product chips
+        document.querySelectorAll('.product-chip').forEach(chip => chip.remove());
+      }
+      // ===== END PRODUCT MENTION ENHANCEMENT =====
       
       // Clear input immediately so user can prep next prompt
       promptInput.value = '';
@@ -6795,28 +7003,156 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
 
   <script src="product-easy-wins.js"></script>
 
-  <!-- Auth check + tenant display -->
+  <!-- @ Mention Autocomplete Dropdown -->
+  <div id="mention-dropdown" class="mention-dropdown">
+    <div class="mention-header">Your Brands & Products</div>
+    <div id="mention-list"></div>
+  </div>
+
+  <!-- Avatar Picker Modal -->
+  <div id="avatar-picker-overlay" class="avatar-picker-overlay" onclick="if(event.target===this)closeAvatarPicker()">
+    <div class="avatar-picker-modal">
+      <div class="avatar-picker-title">Choose Your Avatar</div>
+      <div class="avatar-grid" id="avatar-grid"></div>
+      <button class="avatar-picker-close" onclick="closeAvatarPicker()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Auth check + tenant display + Avatar & Brand Mentions -->
   <script>
+    // ===== GLOBAL STATE =====
+    let currentUser = null;
+    let userProfile = null;
+    let userBrands = [];
+    let availableAvatars = [];
+    let selectedProduct = null;
+
+    // ===== INITIALIZATION =====
     (async function initAuth() {
       try {
         const res = await fetch('/api/auth/me', { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
-          const user = data.user;
+          currentUser = data.user;
+
           // Show tenant name in nav
-          document.getElementById('tenant-name').textContent = user.tenant || '';
-          // Show avatar
-          if (user.picture) {
-            document.getElementById('user-pic').src = user.picture;
-            document.getElementById('user-avatar').style.display = 'block';
-          }
-          // Set email in dropdown
-          document.getElementById('user-email').textContent = user.email;
+          document.getElementById('tenant-name').textContent = currentUser.tenant || '';
+          document.getElementById('user-name').textContent = currentUser.name || currentUser.email.split('@')[0];
+          document.getElementById('user-email').textContent = currentUser.email;
+
+          // Load profile (avatar) and brands in parallel
+          await Promise.all([
+            loadUserProfile(),
+            loadUserBrands()
+          ]);
+
+          // Load available avatars
+          loadAvailableAvatars();
         }
       } catch (e) {
         // Not logged in or auth disabled — just continue
+        console.log('[Auth] Not authenticated or auth disabled');
       }
     })();
+
+    // ===== PROFILE & AVATAR =====
+    async function loadUserProfile() {
+      try {
+        const res = await fetch('/api/profile', { credentials: 'include' });
+        if (res.ok) {
+          userProfile = await res.json();
+          updateAvatarDisplay();
+        }
+      } catch (e) {
+        console.error('[Profile] Failed to load:', e);
+      }
+    }
+
+    function updateAvatarDisplay() {
+      const avatarImg = document.getElementById('user-pic');
+      const avatarContainer = document.getElementById('user-avatar');
+
+      if (userProfile?.avatar) {
+        const baseUrl = '/r2/avatars'; // Use R2 proxy
+        avatarImg.src = `${baseUrl}/${userProfile.avatar}`;
+        avatarContainer.style.display = 'block';
+      } else if (currentUser?.picture) {
+        avatarImg.src = currentUser.picture;
+        avatarContainer.style.display = 'block';
+      }
+    }
+
+    async function loadAvailableAvatars() {
+      try {
+        const res = await fetch('/api/profile/avatars');
+        if (res.ok) {
+          const data = await res.json();
+          availableAvatars = data.avatars || [];
+        }
+      } catch (e) {
+        console.error('[Avatars] Failed to load:', e);
+        // Fallback avatars
+        availableAvatars = [
+          { id: 'avatar-pim', filename: 'avatar-pim.png', url: '/r2/avatars/avatar-pim.png' },
+          { id: 'avatar-charlie', filename: 'avatar-charlie.png', url: '/r2/avatars/avatar-charlie.png' },
+          { id: 'avatar-glep', filename: 'avatar-glep.png', url: '/r2/avatars/avatar-glep.png' },
+          { id: 'avatar-allan', filename: 'avatar-allan.png', url: '/r2/avatars/avatar-allan.png' },
+          { id: 'avatar-boss', filename: 'avatar-boss.png', url: '/r2/avatars/avatar-boss.png' },
+          { id: 'avatar-frog', filename: 'avatar-frog.png', url: '/r2/avatars/avatar-frog.png' }
+        ];
+      }
+    }
+
+    function toggleUserMenu() {
+      const menu = document.getElementById('user-menu');
+      menu.classList.toggle('show');
+    }
+
+    function openAvatarPicker() {
+      toggleUserMenu(); // Close the user menu
+      const overlay = document.getElementById('avatar-picker-overlay');
+      const grid = document.getElementById('avatar-grid');
+
+      // Render avatar grid
+      grid.innerHTML = availableAvatars.map(avatar => `
+        <div class="avatar-option ${userProfile?.avatar === avatar.filename ? 'selected' : ''}"
+             onclick="selectAvatar('${avatar.filename}')">
+          <img src="${avatar.url}" alt="${avatar.id}">
+        </div>
+      `).join('');
+
+      overlay.classList.add('show');
+    }
+
+    function closeAvatarPicker() {
+      document.getElementById('avatar-picker-overlay').classList.remove('show');
+    }
+
+    async function selectAvatar(filename) {
+      try {
+        const res = await fetch('/api/profile/avatar', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ avatar: filename })
+        });
+
+        if (res.ok) {
+          userProfile = await res.json().then(r => r.profile);
+          updateAvatarDisplay();
+          closeAvatarPicker();
+        }
+      } catch (e) {
+        console.error('[Avatar] Failed to update:', e);
+        alert('Failed to update avatar');
+      }
+    }
+
+    function openBrandsPage() {
+      toggleUserMenu();
+      // For now, alert - in future this could open a modal or navigate
+      alert('My Brands - Coming soon! This will show your Brand DNA profiles.');
+    }
 
     async function signOut() {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
@@ -6829,10 +7165,239 @@ Example: Premium wellness supplement brand targeting health-conscious millennial
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('user-menu');
       const avatar = document.getElementById('user-avatar');
-      if (menu && !menu.contains(e.target) && !avatar.contains(e.target)) {
+      if (menu && !menu.contains(e.target) && !avatar?.contains(e.target)) {
         menu.classList.remove('show');
       }
     });
+
+    // ===== BRAND MENTIONS (@product) =====
+    async function loadUserBrands() {
+      try {
+        const res = await fetch('/api/brands', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          userBrands = data.brands || [];
+        }
+      } catch (e) {
+        console.error('[Brands] Failed to load:', e);
+      }
+    }
+
+    // Setup @ mention autocomplete
+    (function setupMentionAutocomplete() {
+      const promptInput = document.getElementById('prompt-input');
+      const dropdown = document.getElementById('mention-dropdown');
+      const mentionList = document.getElementById('mention-list');
+
+      if (!promptInput) return;
+
+      let mentionQuery = '';
+      let mentionStart = -1;
+      let selectedIndex = 0;
+
+      promptInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        const cursorPos = e.target.selectionStart;
+
+        // Check if we're in a mention
+        const textBeforeCursor = value.substring(0, cursorPos);
+        const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+        if (lastAtIndex !== -1) {
+          const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+          // Only trigger if no space after @ and at least 0 characters (show all on @)
+          if (!textAfterAt.includes(' ')) {
+            mentionQuery = textAfterAt.toLowerCase();
+            mentionStart = lastAtIndex;
+            showMentionDropdown(mentionQuery);
+            return;
+          }
+        }
+
+        hideMentionDropdown();
+      });
+
+      promptInput.addEventListener('keydown', (e) => {
+        if (!dropdown.classList.contains('show')) return;
+
+        const items = mentionList.querySelectorAll('.mention-item');
+
+        switch(e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % items.length;
+            updateSelection(items);
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+            updateSelection(items);
+            break;
+          case 'Enter':
+          case 'Tab':
+            e.preventDefault();
+            if (items[selectedIndex]) {
+              items[selectedIndex].click();
+            }
+            break;
+          case 'Escape':
+            hideMentionDropdown();
+            break;
+        }
+      });
+
+      function updateSelection(items) {
+        items.forEach((item, i) => {
+          item.classList.toggle('active', i === selectedIndex);
+        });
+      }
+
+      function showMentionDropdown(query) {
+        // Get products from brands
+        const products = [];
+        userBrands.forEach(brand => {
+          // Add the brand itself as a mention option
+          products.push({
+            type: 'brand',
+            id: brand.slug,
+            name: brand.name,
+            brand: brand.name,
+            color: brand.preview?.primaryColor,
+            image: brand.preview?.logo || brand.dna?.logo
+          });
+
+          // Add individual products if available
+          if (brand.dna?.productImages) {
+            brand.dna.productImages.forEach((img, i) => {
+              products.push({
+                type: 'product',
+                id: `${brand.slug}-product-${i}`,
+                name: `${brand.name} Product ${i + 1}`,
+                brand: brand.name,
+                color: brand.preview?.primaryColor,
+                image: img,
+                brandDna: brand.dna
+              });
+            });
+          }
+        });
+
+        // Filter by query
+        const filtered = query
+          ? products.filter(p => p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query))
+          : products;
+
+        if (filtered.length === 0) {
+          hideMentionDropdown();
+          return;
+        }
+
+        // Render dropdown
+        mentionList.innerHTML = filtered.map((p, i) => `
+          <div class="mention-item ${i === 0 ? 'active' : ''}" data-index="${i}" data-id="${p.id}">
+            <img src="${p.image || '/r2/avatars/avatar-charlie.png'}" alt="">
+            <div class="mention-info">
+              <div class="mention-name">${p.name}</div>
+              <div class="mention-brand">${p.brand}</div>
+            </div>
+            ${p.color ? `<div class="mention-color" style="background:${p.color}"></div>` : ''}
+          </div>
+        `).join('');
+
+        // Add click handlers
+        mentionList.querySelectorAll('.mention-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const product = filtered[item.dataset.index];
+            selectMention(product);
+          });
+        });
+
+        // Position dropdown below input
+        const rect = promptInput.getBoundingClientRect();
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = (rect.bottom + 8) + 'px';
+        dropdown.style.width = rect.width + 'px';
+        dropdown.classList.add('show');
+        selectedIndex = 0;
+      }
+
+      function hideMentionDropdown() {
+        dropdown.classList.remove('show');
+        mentionQuery = '';
+        mentionStart = -1;
+      }
+
+      function selectMention(product) {
+        const value = promptInput.value;
+        const beforeMention = value.substring(0, mentionStart);
+        const afterCursor = value.substring(promptInput.selectionStart);
+
+        // Insert the mention text
+        promptInput.value = beforeMention + '@' + product.name.replace(/\s+/g, '') + ' ' + afterCursor;
+
+        // Store the selected product for generation
+        selectedProduct = product;
+
+        // Add visual chip
+        addProductChip(product);
+
+        hideMentionDropdown();
+        promptInput.focus();
+      }
+
+      function addProductChip(product) {
+        const refsContainer = document.getElementById('prompt-references');
+        if (!refsContainer) return;
+
+        const chip = document.createElement('div');
+        chip.className = 'product-chip';
+        chip.innerHTML = `
+          <span>${product.name}</span>
+          <span class="remove" onclick="removeProductChip(this)">×</span>
+        `;
+        chip.dataset.productId = product.id;
+
+        refsContainer.appendChild(chip);
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && e.target !== promptInput) {
+          hideMentionDropdown();
+        }
+      });
+    })();
+
+    // Global function for removing product chip
+    window.removeProductChip = function(el) {
+      const chip = el.closest('.product-chip');
+      if (chip) {
+        chip.remove();
+        selectedProduct = null;
+      }
+    };
+
+    // ===== GENERATION ENHANCEMENT =====
+    // Hook into the existing generate function to include product context
+    const originalGenerate = window.generateImage || function(){};
+
+    // Enhance generate to include product/brand DNA context
+    window.getGenerationContext = function() {
+      const context = {
+        product: selectedProduct,
+        brandDna: selectedProduct?.brandDna
+      };
+
+      if (selectedProduct?.brandDna) {
+        const dna = selectedProduct.brandDna;
+        context.enhancedPrompt = `in the style of ${dna.brand || 'the brand'}, ` +
+          `using brand colors ${dna.colors?.primary || ''} and ${dna.colors?.secondary || ''}, ` +
+          `${dna.mood?.join(', ') || ''} aesthetic, ` +
+          `targeting ${dna.targetDemographic || 'general audience'}`;
+      }
+
+      return context;
+    };
   </script>
 
 </body>
