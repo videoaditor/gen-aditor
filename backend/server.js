@@ -189,6 +189,7 @@ const workflowRoutes = require('./routes/workflows');
 const bookingAutopilotRoutes = require('./routes/booking-autopilot');
 const brandRoutes = require('./routes/brands');
 const profileRoutes = require('./routes/profile');
+const contentOrderRoutes = require('./routes/content-order');
 
 // Import auth & tenant middleware
 const { authenticateToken, optionalAuth: optionalAuthMiddleware, checkUsageLimit, incrementUsage } = require('./middleware/auth');
@@ -241,6 +242,7 @@ app.use('/api/workflows', workflowRoutes);
 app.use('/api/booking-autopilot', bookingAutopilotRoutes);
 app.use('/api/brands', optionalAuth, brandRoutes);
 app.use('/api/profile', optionalAuth, profileRoutes);
+app.use('/api/content-order', optionalAuth, contentOrderRoutes);
 
 // Health check (both paths for convenience)
 app.get('/health', healthHandler);
