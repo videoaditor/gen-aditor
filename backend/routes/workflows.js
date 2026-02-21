@@ -141,8 +141,48 @@ async function callRunComfy(model, payload) {
   return { output: result.output?.video || result.output?.image || result.output };
 }
 
+/**
+ * Evaluate a condition string against the execution context
+ * Supports: !var (not present/falsy), var (present/truthy), var==value, var!=value
+ */
+function evaluateCondition(condition, context) {
+  if (!condition) return true; // No condition = always run
+
+  condition = condition.trim();
+
+  // Handle !var (not present or falsy)
+  if (condition.startsWith('!')) {
+    const varName = condition.slice(1).trim();
+    const value = context[varName];
+    return !value || (typeof value === 'string' && value.trim() === '');
+  }
+
+  // Handle var==value or var!=value
+  const eqMatch = condition.match(/^(.+?)==(.+)$/);
+  if (eqMatch) {
+    const [, varName, expectedValue] = eqMatch;
+    return String(context[varName] || '') === expectedValue.trim();
+  }
+
+  const neqMatch = condition.match(/^(.+?)!=(.+)$/);
+  if (neqMatch) {
+    const [, varName, expectedValue] = neqMatch;
+    return String(context[varName] || '') !== expectedValue.trim();
+  }
+
+  // Handle simple var presence check
+  const value = context[condition];
+  return !!value && (typeof value !== 'string' || value.trim() !== '');
+}
+
 // Execute a single step based on provider
 async function executeStepInternal(step, context, workflow) {
+  // Check if step has a condition that must be met
+  if (step.condition && !evaluateCondition(step.condition, context)) {
+    console.log(`[Workflows] Skipping step "${step.step}" - condition "${step.condition}" not met`);
+    return { skipped: true, reason: `Condition not met: ${step.condition}` };
+  }
+
   const RUNCOMFY_KEY = process.env.RUNCOMFY_API_KEY;
   const RUNCOMFY_BASE = 'https://model-api.runcomfy.net/v1';
 
