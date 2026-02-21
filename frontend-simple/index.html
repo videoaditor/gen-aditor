@@ -2068,44 +2068,6 @@
     .workflow-item .workflow-star:hover { opacity: 1; }
     .workflow-item .workflow-star.active { opacity: 1; color: #fbbf24; }
 
-    /* Legacy shortcut styles (hidden, kept for compatibility) */
-    .shortcuts-grid {
-      display: none;
-    }
-
-    .shortcut-card {
-      display: none;
-    }
-
-    .shortcut-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--accent-glow);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-
-    .shortcut-icon svg {
-      width: 24px;
-      height: 24px;
-      color: var(--accent);
-    }
-
-    .shortcut-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .shortcut-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
     /* ===== VIDEO QUEUE ===== */
     .video-queue-grid {
       display: grid;
@@ -3181,7 +3143,6 @@
             <!-- Populated dynamically from starred workflows -->
             <div class="workflow-loading">Loading workflows...</div>
           </div>
-          <!-- Legacy workflows removed -->
         </div>
 
         <!-- Center - Active Workflow Input -->
@@ -4207,9 +4168,8 @@ Return ONLY the JSON, no explanation.`;
     async function generateVariations(img) {
       generating.classList.add('active');
       document.querySelector('.generating-text').textContent = 'Generating 4 variations...';
-      
+
       try {
-        // TODO: Replace with actual API call
         const response = await fetch('/api/variations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -5897,7 +5857,6 @@ Return ONLY the JSON, no explanation.`;
         } else if (currentWorkflow === 'script-to-video' || currentWorkflow === 'script-explainer') {
           await runScriptToVideoWorkflow();
         } else {
-          // Generic workflow handler (TODO: implement others)
           console.log('Workflow not yet implemented:', currentWorkflow);
         }
       } catch (err) {
@@ -6054,7 +6013,6 @@ Return ONLY the JSON, no explanation.`;
     }
 
     async function pollRunComfyStatus(taskId) {
-      // TODO: implement polling for RunComfy tasks
       console.log('Polling for task:', taskId);
     }
 
@@ -6128,21 +6086,6 @@ Return ONLY the JSON, no explanation.`;
       // Switch to Images tab
       document.querySelector('[data-tab="images"]').click();
     };
-
-    // Legacy shortcut-card handler (for compatibility)
-    document.querySelectorAll('.shortcut-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const workflow = card.dataset.workflow;
-        selectWorkflow(workflow);
-        document.querySelector('[data-tab="shortcuts"]').click();
-      });
-    });
-
-    // Legacy showWorkflowModal - now redirects to workflow studio
-    function showWorkflowModal(workflow) {
-      selectWorkflow(workflow);
-      document.querySelector('[data-tab="shortcuts"]').click();
-    }
 
     // ===== CONTEXT PROFILES (disabled in UI) =====
     const contextSelect = document.getElementById('context-profile');
